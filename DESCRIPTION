@@ -1,13 +1,53 @@
 Package: surf
-Title: What the Package Does (One Line, Title Case)
+Type: Package
+Title: SURF: statistical utilities for RBP (RNA binding protein) functions
 Version: 0.0.0.9000
+Date: 2019-08-30
+Author: Fan Chen <fan.chen@wisc.edu>
+Maintainer: Fan Chen <fan.chen@wisc.edu>
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Fan",
+           family = "Chen",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "fan.chen@wisc.edu",
+           comment = c(ORCID = "0000-0003-4508-6023"))
+Description: 
+    Celebrates the marriage of shRNA-seq and eCLIP-seq and finds data-driven hypothesis for RBP functions.
+URL: https:github.com/fchen365/surf
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 3.5),
+    dplyr,
+    doParallel,
+    rtracklayer,
+    DEXSeq
+Imports:
+    arm,
+    MASS,
+    withr,
+    scales,
+    ggpubr,
+    Matrix,
+    AUCell,
+    methods,
+    stringr,
+    ggplot2,
+    ggrepel,
+    IRanges,
+    reshape2,
+    Rsubread,
+    ensembldb,
+    data.table,
+    RColorBrewer,
+    SummarizedExperiment
+Suggests:
+    knitr (>= 1.10),
+    BiocStyle,
+    rmarkdown,
+    testthat (>= 2.1.0)
+VignetteBuilder: knitr
+biocViews: RNASeq, DNASeq, CLIPSeq, Sequencing, Transcription,
+   Visualization, Coverage, Alignment, DataImport
+RoxygenNote: 7.0.0
