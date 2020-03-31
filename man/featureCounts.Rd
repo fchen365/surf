@@ -2,20 +2,18 @@
 % Please edit documentation in R/utility.R
 \name{featureCounts}
 \alias{featureCounts}
-\title{Customized `Rsubread::featureCounts`}
+\title{Customized \code{featureCounts}}
 \usage{
 featureCounts(..., verbose = F)
 }
 \arguments{
-\item{...}{See [Rsubread::featureCounts()].}
+\item{...}{parameters for \code{Rsubread::featureCounts}.}
 }
 \value{
-See [Rsubread::featureCounts()].
+See \code{Rsubread::featureCounts} documentation.
 }
 \description{
-Wrapper of `Rsubread::featureCounts()` allowing verbose suppression
-}
-\details{
+This is a wrapper of \code{Rsubread::featureCounts} allowing verbose suppression.
 This redirects the output to `/dev/null`, so it assumes a UNIX-like
 system.
 }

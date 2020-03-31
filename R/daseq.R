@@ -1,323 +1,440 @@
 ## SURF Discovery Module 1
 
-
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## ------ accessor ------
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' @name getAUC
-#' @rdname daseqResults-class
-#' @export getAUC
-setGeneric(name="getAUC",
-           def=function(object) standardGeneric("getAUC"))
+## ------ constructor ------
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#' @aliases getAUC,SummarizedExperiment-method
-#' @exportMethod getAUC
-setMethod("getAUC",
-          signature="SummarizedExperiment",
-          definition = function(object) {
-            if("AUC" %in% assayNames(object)) {
-              SummarizedExperiment::assays(object)[["AUC"]]
-            }else{
-              stop("This object does not contain an AUC matrix.")
-            }
-          }
-)
+#' Get target set based on \code{inferredFeature}
+#' @return list of character, sets of target identifiers.
+getTargetSet <- function(event, 
+                         id_column = "transcript_id", 
+                         verbose = F) {
+  targeted <- sapply(event$inferredFeature != "none", any)
+  event_targeted <- event[targeted,]
+  id <- split(event_targeted[[id_column]], 
+              paste0(event_targeted$event_name))
+  lapply(id, unique)
+}
 
-#' @rdname daseqResults-class
-#' @aliases getAUC,daseqResults-method
-#' @exportMethod getAUC
-setMethod(
-  "getAUC",
-  signature = "daseqResults",
-  definition = function(object) {
-    getAUC(object@targetAUC)
-  }
-)
+#' Get control sets 
+#' @return list of character, find a control set for each one of targetSets.
+getControlSet <- function(event, targetSets, 
+                          id_column = "transcript_id", 
+                          verbose = F) {
+  isoPL <- event@genePartsList
+  lapply(targetSets, function(targetSet) {
+    targeted <- sapply(isoPL[[id_column]] %in% targetSet, any)
+    unlist(isoPL[[id_column]][targeted], use.names = F)
+  })
+}
 
-
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## ------ functions ------
-## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Build gene/transcript rankings for each sample
-#'
-#' Builds the "rankings" for each sample: expression-based ranking for all the genes/transcripts in each sample
+#' 
+#' Builds the "rankings" for each sample: expression-based ranking for all the genes/transcripts in each sample 
 #' The genes/transcripts with same expression value are shuffled. Therefore, genes/transcripts with expression '0' are randomly sorted at the end of the ranking.
 #' These "rankings" can be seen as a new representation of the original dataset. Once they are calculated, they can be saved for future analyses.
+#' 
+#' @param exprMat Expression matrix (genes/trnascripts as rows, samples as columns)
+#' The expression matrix can also be provided as one of the Bioconductor classes:
+#' \itemize{
+#' \item \link{RangedSummarizedExperiment} and derived classes:
+#' The matrix will be obtained through assay(exprMatrix),
+#' -which will extract the first assay (usually the counts)-
+#' or the assay name given in 'assayName'
+#' \item \link[Matrix]{dgCMatrix-class}:
+#' Sparse matrix 
+#' \item \code{ExpressionSet}:
+#' The matrix will be obtained through exprs(exprMatrix)
+#' }
+#' @param cores \code{integer}, number of computing workers.
 #' @inheritParams AUCell::AUCell_buildRankings
-#' @param cores integer, number of computing workers.
+#' @return a \code{SummarizedExperiment} object.
 #' @export
-getRankings <- function(exprMat, sampleData,
-                        cores = max(1, detectCores()-2),
-                        plotStats = F, ...) {
-  ## check sample Data
-  if (ncol(exprMat) != nrow(sampleData) ||
-      any(colnames(exprMat) != rownames(sampleData)))
-    stop("colnames(exprMat) and rownames(sampleData) must match.")
-  if (is.null(sampleData$condition))
+getRankings <- function(exprMat, 
+                        plotStats = F,
+                        cores = max(1, detectCores() - 2), 
+                        verbose = F) {
+
+
+  ## rank exprMat
+  rankings <- AUCell::AUCell_buildRankings(
+    as.matrix(exprMat), 
+    plotStats = plotStats, 
+    nCores = cores, 
+    verbose = verbose
+  )
+  names(dimnames(assays(rankings)$ranking)) = 
+    c("genomic feature", "sample")
+  SummarizedExperiment(assays(rankings)) 
+}
+
+#' Calculate AUC
+#' @param cores integer, number of computing cores to use.
+#' @inheritParams AUCell::AUCell_calcAUC
+#' @return a [SummarizedExperiment] object
+calculateAUC <- function(set, rankings, 
+                         cores = 1, 
+                         verbose = F, ...) {
+  if (!is.list(set) || is.null(names(set))) 
+    stop("set must be a named list.")
+  if (!length(set)) 
+    return(SummarizedExperiment())
+  AUC <- AUCell::AUCell_calcAUC(
+    set, 
+    AUCell::aucellResults(rankings),
+    nCores = cores,
+    verbose = verbose, ...
+  )
+  names(dimnames(assays(AUC)$AUC)) = c("set", "sample")
+  SummarizedExperiment(assays(AUC))
+}
+
+#' Aggregate AUC by sample condition
+#' 
+#' @param object a \code{SummarizedExperiment} output from \link{calculateAUC}
+#' @param FUN.aggregate function, used for aggreating AUC within `conditon`, default to \code{mean}.
+#' @return a \code{data.frame} with 4 columns: \code{set}, \code{condition.1}, \code{condition.2}, and \code{diff}.
+aggregateAUCbyCondition <- function(object, sampleData,
+                                    FUN.aggregate = "median") {
+  conditions <- levels(sampleData$condition)
+  getAUC(object) %>%
+    reshape2::melt(value.name = "AUC") %>%
+    dplyr::mutate(set = as.character(set),
+                  sample = as.character(sample)) %>%
+    left_join(data.frame(sampleData), by = "sample") %>%
+    group_by(set, condition) %>%
+    summarise(AUC = match.fun(FUN.aggregate)(AUC)) %>%
+    ungroup() %>%
+    pivot_wider(id_cols = set,
+                names_from = condition,
+                values_from = "AUC") %>%
+    # dplyr::select(set, conditions[1], conditions[2]) %>%
+    dplyr::mutate(diff = .[[2]] - .[[3]])
+  
+  # AUC <- getAUC(object)
+  # set <- rownames(AUC)
+  # condition <- sampleData(object)[set, "condition"]
+  # aggrAUC <- apply(getAUC(auc), 1, function(x) {
+  #   a <- aggregate(x, list(condition = condition), "mean")
+  #   setNames(a$x, a$condition)
+  # })
+  # res <- cbind(set = set, t(aggrAUC))
+  # res$diff = res[[2]] - res[[3]] ## is this necessary?
+  # 
+}
+
+#' Differential activity (via AUC)
+#' 
+#' Detect differential activity using the AUC measure and RNA-seq quantification. 
+#' This unit is a helper of \code{daseq}.
+#' 
+#' @param targetSet \code{character} vector, set of targeted units.
+#' @param controlSet \code{character} vector, control set for contrast. If `NULL` (default), the full set of elements in \code{rankings} will be used.
+#' @param rankings a \code{SummarizedExperiment} object, with row correponding to transcript or gene and column corresponding to samples. Each element is a expression measure (e.g., TPM).
+#' @param n.sample \code{integer}, number of times of controlSet sampling, default to 1000.
+#' @param cores \code{integer}, number of computing cores.
+#' @param verbose \code{logical}, whether to print out progress report.
+#' @inheritParams calculateAUC
+#' @return a \code{data.frame} of DASeq results.
+diffAUC <- function(targetSet, 
+                    controlSet = NULL, 
+                    rankings,
+                    sampleData, 
+                    n.sample = 1000, 
+                    cores = 1, 
+                    verbose = F, ...) {
+  conditions = levels(sampleData$condition)
+  
+  ## calculate targetSet AUC
+  auc <- calculateAUC(list("NONAME" = targetSet), 
+                      rankings, 
+                      cores = 1, 
+                      verbose = F, ...) 
+  auc.obs <- aggregateAUCbyCondition(auc, sampleData)
+
+  ## sample control sets
+  if (is.null(controlSet)) controlSet = rownames(rankings)
+  controlSetSamples = lapply(seq_len(n.sample), sample, 
+                             x = controlSet, 
+                             size = length(targetSet))
+  names(controlSetSamples) = seq_len(n.sample)
+  
+  ## calculate control AUC dist'n
+  auc <- calculateAUC(controlSetSamples,
+                      rankings,
+                      cores = cores,
+                      verbose = F, ...) 
+  auc.null <- aggregateAUCbyCondition(auc, sampleData)
+  
+  
+  res <- data.frame(
+    base = weighted.mean(auc.obs[2:3], table(sampleData$condition)),
+    auc.obs[2:3],
+    # p.cond1 = 2 * min(mean(auc.obs[[2]] > auc.null[[2]]), 
+    #                   mean(auc.obs[[2]] < auc.null[[2]])),
+    # p.cond2 = 2 * min(mean(auc.obs[[3]] > auc.null[[3]]), 
+    #                   mean(auc.obs[[3]] < auc.null[[3]])),
+    background = mean(auc.null$diff),
+    stat = (auc.obs$diff - mean(auc.null$diff)) / sd(auc.null$diff),
+    p.value = mean(abs(auc.null$diff) > abs(auc.obs$diff))
+  )
+  # names(res)[4:5] = paste0("PD.", conditions)
+  return(res)
+}
+
+#' Differential activity analysis (DASeq)
+#' 
+#' Detect differential activity using the AUC measure and RNA-seq quantification. 
+#' For more details about methodology, see Details.
+#' This function can be used as part of SURF or as well a stand-along analysis. 
+#' For the former, input a \code{surf} object to \code{event}. 
+#' For the latter, input \code{targetSets} and optionally \code{controlSets}.
+#' 
+#' @param rankings a \code{SummarizedExperiment} object from \link{getRankings}.
+#' @param sampleData \code{data.frame}, external samples, which contain `condition` column, whose row names must match the column names of \code{rankings}.
+#' @param event a \code{surf} object from \link{faseqInference} or \link{faseq}.
+#' @param target.type \code{character(1)}, either "transcript" or "gene".
+#' @inheritParams diffAUC
+## @example inst/examples/example_AUCell_buildRankings.R
+#' @return a \code{daseqResults} object if \code{targetSets} was given, a \code{surf} object if \code{event} was give.
+#' @references Chen F and Keles S. "SURF: Integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins."
+#' @export
+daseq <- function(rankings, sampleData,
+                  event = NULL, 
+                  target.type = "transcript",
+                  targetSets = NULL, 
+                  controlSets = NULL, 
+                  n.sample = 1000, 
+                  cores = max(1, detectCores() - 2),
+                  verbose = F, ...) {
+  ## check rankings and sampleData
+  if (ncol(rankings) != nrow(sampleData) || 
+      any(colnames(rankings) != rownames(sampleData))) 
+    stop("colnames(rankings) and rownames(sampleData) must match.")
+  if (is.null(sampleData$condition)) 
     stop("sampleData must contain a \"condition\" column indicating two groups to compare; please add.")
   sampleData$condition <- as.factor(sampleData$condition)
   if (nlevels(sampleData$condition) != 2)
     stop("The condition must have two levels.")
+  
+  ## standardize sampleData 
+  externalSampleData = DataFrame(
+    sample = rownames(sampleData), 
+    sampleData[setdiff(names(sampleData), "sample")]
+  )
+  
+  if (is.null(event) && is.null(targetSets)) 
+    stop("Either event or targetSets is required.")
 
-  rankings <- AUCell::AUCell_buildRankings(as.matrix(exprMat),
-                                           plotStats = plotStats,
-                                           nCores = cores, ...)
-  colData(rankings) <- cbind(colData(rankings), sampleData)
-  names(dimnames(assays(rankings)$ranking)) = c("genomic feature", "sample")
-
-  daseqRanking(rankings)
-}
-
-#' Differential activity (via AUC)
-#'
-#' Detect differential activity using the AUC measure and RNA-seq quantification. This is a inference unit/engine of daseq.
-#' This unit uses one worker only; daseq cordinates these units parallelly.
-#' @inheritParams AUCell::AUCell_buildRankings
-#' @inheritParams AUCell::AUCell_calcAUC
-#' @param size # of times of controlSet sampling.
-#' @export
-diffAUC <- function(rankings,
-                    targetSet, controlSet = NULL,
-                    n.sample = 1000,
-                    verbose = F, ...) {
-  conditions = levels(colData(rankings)$condition)
-
-  ## calculate targetSet AUC
-  auc.target <- AUCell::AUCell_calcAUC(targetSet, rankings,
-                               nCores = 1, verbose = verbose, ...)
-  dat.obs = AUCell::getAUC(auc.target) %>% reshape2::melt(data = .) %>%
-    setNames(c("txSet", "sample", "AUC")) %>%
-    mutate(condition = colData(rankings)[sample, "condition"]) %>%
-    summarise(stat = t.test(AUC ~ condition)$statistic,
-              cond1 = median(AUC[condition == conditions[1]]),
-              cond2 = median(AUC[condition == conditions[2]]),
-              diff = cond1 - cond2)
-
-  ## sample control sets
-  if (is.null(controlSet)) controlSet = rownames(rankings)
-  controlSetSamples = lapply(seq_len(n.sample), sample,
-                            x = controlSet, size = length(targetSet))
-  names(controlSetSamples) = seq_len(n.sample)
-
-  ## calculate AUC
-  auc.control <- AUCell::AUCell_calcAUC(controlSetSamples, rankings,
-                                nCores = 1, verbose = verbose, ...)
-  dat.null = AUCell::getAUC(auc.control) %>% data.table::data.table(.) %>%
-    mutate(resampleID = rownames(auc.control)) %>%
-    reshape2::melt(data = ., id.vars = c("resampleID")) %>%
-    setNames(c("resampleID", "sample", "AUC")) %>%
-    mutate(condition = colData(rankings)[sample, "condition"]) %>%
-    group_by(resampleID) %>%
-    summarize(stat = t.test(AUC ~ condition)$statistic,
-              cond1 = median(AUC[condition == conditions[1]]),
-              cond2 = median(AUC[condition == conditions[2]]),
-              diff = cond1 - cond2)
-
-  res <- data.frame(size = length(targetSet),
-                    dat.obs$cond1, dat.obs$cond2,
-                    p.cond1 = min(mean(dat.obs$cond1 > dat.null$cond1),
-                                  mean(dat.obs$cond1 < dat.null$cond1)),
-                    p.cond2 = min(mean(dat.obs$cond2 > dat.null$cond2),
-                                  mean(dat.obs$cond2 < dat.null$cond2)),
-                    stat = dat.obs$stat,
-                    p.value = min(mean(dat.obs$diff > dat.null$diff),
-                                  mean(dat.obs$diff < dat.null$diff)))
-  names(res)[2:5] = c(conditions, paste0("p.", conditions))
-  return(res)
-}
-
-#' Differential activity (via AUC)
-#'
-#' Detect differential activity using the AUC measure and RNA-seq quantification.
-#' @return a daseqResults object, which contains a DataFrame and some testing configurations.
-#' @export
-daseq <- function(rankings,
-                  targetSets, controlSets = NULL,
-                  n.sample = 1000,
-                  cores = max(1, detectCores()-2),
-                  verbose = F, ...) {
-  ## check sample Data
-  if (is.null(colData(rankings)$condition))
-    stop("colData(rankings) must contain a \"condition\" column indicating two groups to compare; please add.")
-  colData(rankings)$condition <- as.factor(colData(rankings)$condition)
-  if (nlevels(colData(rankings)$condition)!=2)
-    stop("The condition must have two levels.")
-
+  ## auto generate target sets
+  if (is.null(targetSets)) {
+    stopifnot(target.type %in% c("transcript", "gene"))
+    if (verbose) cat("Infer target/control", target.type, "sets\n")
+    id_column = paste0(target.type, "_id")
+    targetSets <- getTargetSet(event, 
+                               id_column = id_column, 
+                               verbose = verbose)
+    targetSets <- lapply(targetSets, intersect, rownames(rankings))
+    if (!length(targetSets)) {
+      cat("Halt: there is none SURF-inferred feature.\n")
+      return(event)
+    }
+    controlSets <- getControlSet(event, targetSets, 
+                                 id_column = id_column, 
+                                 verbose = verbose)
+    controlSets <- lapply(controlSets, intersect, rownames(rankings))
+  } 
+  
   ## check targetSets and controlSets
-  if (is.null(names(targetSets)))
+  if (is.null(names(targetSets))) 
     stop("All target sets should be named.")
-  if (is.null(controlSets)) controlSets = lapply(targetSets, as.null)
-  if (length(targetSets) != length(controlSets) ||
-      any(names(targetSets) != names(controlSets)))
+  if (is.null(controlSets)) 
+    controlSets = lapply(targetSets, as.null)
+  if (length(targetSets) != length(controlSets) || 
+      any(names(targetSets) != names(controlSets))) 
     stop("Names of target and control sets must match.")
+  
+  ## @AUC 
+  if (verbose) 
+    cat("Calculating AUC for target sets...\n")
+  AUC <- calculateAUC(targetSets,
+                      rankings,
+                      cores = cores,
+                      verbose = F, ...)
+  # externalSampleData <- cbind(colData(AUC), externalSampleData)
+  colData(AUC) <- externalSampleData
 
-  rankings <- methods::as(rankings, "aucellResults")
-
-  ## construct target AUC slot
-  AUC <- AUCell::AUCell_calcAUC(
-    targetSets, rankings,
-    nCores = cores, verbose = verbose, ...)
-  targetAUC <- SummarizedExperiment(
-    assays(AUC),
-    rowData = DataFrame(
-      size = sapply(targetSets, length),
-      targetSet = List(targetSets)),
-    colData = colData(rankings))
-  names(dimnames(assays(targetAUC)$AUC)) = c("targetSet", "sample")
-
-  registerDoParallel(cores = cores)
-  dar <- foreach(targetSet = targetSets, controlSet = controlSets) %dopar% {
-    diffAUC(rankings = rankings,
-            targetSet = targetSet, controlSet = controlSet,
-            n.sample = n.sample,
-            verbose = verbose, ...)
-  }
-  stopImplicitCluster()
-  names(dar) <- names(targetSets)
-  dar <- list_rbind(dar, save.names = "targetSet")
-  dar$padj <- p.adjust(dar$p.TCGA, method = "fdr")
-  dar <- DataFrame(dar)
-  mcols(dar)$type = "DASeq"
+  ## non-parametric differential activity test
+  if (verbose) 
+    cat("Testing for differential activity...\n")
+  test.res <- mapply(
+    diffAUC, targetSets, controlSets, 
+    MoreArgs = list(rankings = rankings, 
+                    sampleData = externalSampleData,
+                    n.sample = n.sample, 
+                    cores = cores,
+                    verbose = verbose, ...),
+    SIMPLIFY = F
+  ) %>% bind_rows()
+  
+  ## collect results
+  res = DataFrame(id = names(targetSets), 
+                  size = sapply(targetSets, length),
+                  set = List(targetSets), 
+                  control = List(controlSets), 
+                  test.res, 
+                  row.names = names(targetSets))
+  res$padj <- p.adjust(res$p.value, method = "fdr")
+  
+  ## annotate attributes in mcols()
+  mcols(res)$type = "daseq"
   conditions = levels(colData(rankings)$condition)
-  mcols(dar)$description = c(
-    "name of target set",
-    "size of target set",
-    paste0("observed activity (median AUC) in ", conditions[1]),
-    paste0("observed activity (median AUC) in ", conditions[2]),
-    paste("p-value of differential activity (target vs. control) in" , conditions[1]),
-    paste("p-value of differential activity (target vs. control) in" , conditions[2]),
-    "t statistic (for reference only)",
-    paste0("p-value of differential activity (", conditions[1], " vs. ",conditions[2], ") based off the control"),
+  mcols(res)$description = c(
+    "target set identifier",
+    "target set size", 
+    "target set", 
+    "full control set",
+    "base AUC of target set",
+    paste("target set activity (AUC) in", conditions[1]), 
+    paste("target set activity (AUC) in", conditions[2]), 
+    # paste("p-value of distinctive activity (target vs. control) in" , conditions[1]),
+    # paste("p-value of distinctive activity (target vs. control) in" , conditions[2]),
+    "background difference in activity (control set)",
+    "statistic (parametric analogue, reference only)", 
+    paste0("p-value of differential activity (", conditions[1], " vs. ",conditions[2], ") contrasted to background"),
     "adjusted p-values"
   )
-  new("daseqResults", dar,
-      targetAUC = targetAUC,
-      params = list(n.resample = n.sample))
+  metadata(res) = list(target.type = target.type, 
+                       n.resample = n.sample)
+  
+  daseqResults <- new("daseqResults", res, AUC = AUC)
+  
+  if (!is.null(event)) {
+    event@daseqResults <- daseqResults
+    event@sampleData$"External" <- externalSampleData
+    metadata(event) <- c(
+      metadata(event), 
+      target.type = target.type, 
+      n.resample = n.sample
+    )
+    return(event)
+  } else {
+    return(daseqResults)
+  }
 }
 
-#' Heatmap for DASeq results
-#' @param dar a `daseqResults` object.
-#' @param group an optional `factor` vector, group of `targetSet`.
-#' @return a `ggplot` object.
-#' @export
-heatmapAUC <- function(dar, group = NULL) {
-  if (is.null(group)) {
-    group = rep("Target set", nrow(dar)) %>% setNames(dar$targetSet)
-  } else group = setNames(group, dar$targetSet)
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ------ methods ------
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ------ _ getAUC ------
+#' Get AUC
+#' 
+#' Get AUC measure for each target set (row) in every sample (column).
+#' @return a \code{matrix} of AUC, whose rows correspond to target sets and columns correspond to samples.
+setGeneric(
+  name = "getAUC",
+  def = function(object)
+    standardGeneric("getAUC")
+)
 
-  mat <- getAUC(dar)
-  sampleData <- colData(dar@targetAUC)
-  clustered_targetSet = clusterByGroup(mat, group)
-  clustered_sample <- clusterByGroup(t(mat), sampleData[colnames(mat), "condition"])
-  g <- reshape2::melt(mat) %>%
-    mutate(condition = sampleData[sample, "condition"],
-           group = group[targetSet]) %>%
-    ggplot(aes(sample, targetSet, fill = value)) +
-    geom_raster() +
-    scale_x_discrete(breaks = clustered_sample) +
-    scale_y_discrete(breaks = clustered_targetSet) +
-    scale_fill_distiller(name = "AUC", palette = "GnBu", direction = 1) +
-    facet_grid(rows = vars(group), cols = vars(condition),
-               scales = "free", space = "free") +
-    labs(x = "Sample", y = "Target transcript set") +
-    theme_bw() +
-    theme(panel.spacing = unit(.2, "lines"),
-          panel.border = element_blank(),
-          panel.grid = element_blank(),
-          axis.text = element_blank(),
-          axis.line = element_blank(),
-          axis.ticks = element_blank())
-  return(g)
-}
-
-
-
-#' Scatter plot for DASeq results
-#' @param dar a `daseqResults` object.
-#' @param alpha numeric, FDR cut-off, default is 0.05.
-#' @param delta numeric, lower cut-off for abs. diff. of AUC's between two conditions (default to 0.05).
-#' @param min.size numeric, minimum size of the target size to color
-#' @param remove.size numeric, minimum size of the target size to even display.
-#' @inheritParams ggrepel::geom_label_repel
-#' @return a `ggplot` object.
-#' @export
-scatterAUC <- function(dar,
-                       alpha = 0.01, delta = 0.06, min.size = 50,
-                       remove.size = 10, force = 5,
-                       group = NULL, color = NULL) {
-  if (is.null(group)) {
-    group = rep("target set", nrow(dar))
+#' @rdname getAUC
+#' @exportMethod getAUC
+setMethod(
+  "getAUC", "SummarizedExperiment",
+  function(object) {
+    if("AUC" %in% assayNames(object)) {
+      SummarizedExperiment::assays(object)[["AUC"]]
+    }else{
+      stop("Cannot find the 'AUC' assay")
+    }
   }
-  group <- as.factor(group)
-  if (length(group) != nrow(dar))
-    stop("length(group) != nrow(dar).")
-  if (is.null(color)) {
-    if (nlevels(group) == 1)
-      color <- "#E69F00"
-    if (nlevels(group) == 2)
-      color <- c("#56B4E9", "#E69F00")
-    if (nlevels(group) >= 3)
-      color <- RColorBrewer::brewer.pal(nlevels(group), "Set2")
+)
+
+#' @rdname getAUC
+#' @exportMethod getAUC
+setMethod(
+  "getAUC", "daseqResults",
+  function(object) {
+    getAUC(object@AUC)
   }
-  if (nlevels(group) != length(color))
-    stop("length(group) != length(color).")
-  if (is.null(names(color))) names(color) = levels(group)
-  if (!all(levels(group) %in% names(color)))
-    stop("Missing group levels in names(color).")
+)
 
-  ## add "No sig." to group and color
-  color = c(color, "No sig." = "grey80")
-
-  ## filter size
-  nSmallSize <- sum(dar$size < min.size)
-  if (nSmallSize)
-    cat("There are", nSmallSize, "small-size target set(s).\n")
-  nRemove <- sum(dar$size < remove.size)
-  if (nRemove) {
-    cat("Remove", nRemove, "target set(s) smaller than", remove.size,".\n")
-    group <- group[dar$size >= remove.size]
-    dar <- dar[dar$size >= remove.size,]
+#' @rdname getAUC
+#' @exportMethod getAUC
+setMethod(
+  "getAUC", "surf",
+  function(object) {
+    getAUC(object@daseqResults)
   }
+)
 
-  cond = levels(colData(dar@targetAUC)$condition)
-  names(dar)[3:4] <- c("cond1", "cond2")
-  names(dar)[5:6] <- c("p.cond1", "p.cond2")
 
-  dat <- data.frame(dar, group) %>%
-    mutate(logp = -log10(padj),
-           diff = cond1 - cond2,
-           sig = padj < alpha & abs(diff) > delta & size >= min.size,
-           color = ifelse(sig, as.character(group), "No sig.") %>%
-             factor(c(levels(group), "No sig.")),
-           shape = 2 * (p.cond1 < alpha) + (p.cond2 < alpha),
-           shape = c("None", cond[2], cond[1], "Both")[shape + 1],
-           shape = factor(shape, c("Both", cond[1], cond[2], "None")),
-           label = ifelse(sig, as.character(targetSet), ""))
+## ------ _ heatmapAUC ------
+#' Heatmap of AUC score
+#' 
+#' This function produces the heatmap of AUC scores.
+#' 
+#' @param object for \code{surf} object, it should be output from \link{daseq}.
+#' @return a \code{ggplot} object.
+setGeneric(
+  name = "heatmapAUC",
+  def = function(object, ...)
+    standardGeneric("heatmapAUC")
+)
 
-  ## modify if "padj == 0"
-  if (any(is.infinite(dat$logp))) {
-    which <- is.infinite(dat$logp)
-    max <- max(dat$logp[!which])
-    dat$logp[which] <- max + runif(sum(which), max = .2)
+
+#' @description Row blocking is allowed by providing the \code{group} parameter.
+#' @rdname heatmapAUC
+#' @param group an optional \code{factor} vector, group of rows.
+#' @exportMethod heatmapAUC
+setMethod(
+  "heatmapAUC", "SummarizedExperiment",
+  function(object, group = NULL) {
+    
+    mat <- getAUC(object)
+    sampleData <- sampleData(object)
+
+    ## check group input
+    if (is.null(group)) {
+      group = rep("set", nrow(object))
+    } else {
+      stopifnot(length(group) != nrow(object)) 
+    }
+    names(group) <- rownames(mat)
+    
+    ## cluster rows and columns
+    set_cluster = clusterByGroup(mat, group)
+    sample_cluster <- clusterByGroup(t(mat), sampleData[colnames(mat), "condition"])
+    
+    dat <- aggregateAUCbyCondition(object)
+    dat$group = group[dat$set]
+    dat$condition <- sampleData$condition[dat$sample]
+    
+    g <- ggplot(dat, aes(sample, set, fill = AUC)) +
+      geom_raster() + 
+      scale_x_discrete(breaks = sample_cluster) +
+      scale_y_discrete(breaks = set_cluster) +
+      scale_fill_distiller(palette = "GnBu", direction = 1) + 
+      facet_grid(rows = vars(group), cols = vars(condition), 
+                          scales = "free", space = "free") + 
+      labs(x = "Sample", y = "Set", fill = "AUC") +
+      theme_bw() +
+      theme(panel.spacing = unit(.2, "lines"), 
+                     panel.border = element_blank(), 
+                     panel.grid = element_blank(), 
+                     axis.text = element_blank(), 
+                     axis.line = element_blank(),
+                     axis.ticks = element_blank())
+    return(g)
   }
+)
 
-  g <- dat %>%
-    ggplot(aes(cond1, cond2)) +
-    geom_abline(slope = 1, intercept = c(-delta, 0, delta),
-                color = "grey40", linetype = c(2, 1, 2), alpha = .8) +
-    geom_point(aes(color = color, shape = shape, size = size), alpha = .8) +
-    scale_color_manual(name = "Signif.", values = color) +
-    ggrepel::geom_label_repel(aes(label = label), size = 3, force = force,
-                     label.padding = .2, box.padding = 0.4, point.padding = 0.2,
-                     segment.size = 0.3, segment.alpha = .8, segment.color = 'grey50',
-                     show.legend = F) +
-    labs(x = paste0("median AUC (", cond[1], ")"),
-         y = paste0("median AUC (", cond[2], ")"),
-         shape = "DA within") +
-    theme_bw() +
-    theme(legend.spacing = unit(0, "lines"),
-          legend.box = "horizontal",
-          legend.direction = "vertical")
+#' @rdname heatmapAUC
+#' @exportMethod heatmapAUC
+setMethod(
+  "heatmapAUC", "daseqResults",
+  function(object, group = NULL) {
+    heatmapAUC(object@targetAUC, group = group)
+  }
+)
 
-  return(g)
-}

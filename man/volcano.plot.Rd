@@ -2,10 +2,14 @@
 % Please edit documentation in R/drseq.R
 \name{volcano.plot}
 \alias{volcano.plot}
+\alias{volcano.plot,drseqResults-method}
+\alias{volcano.plot,surf-method}
 \title{Volcano plot}
 \usage{
-volcano.plot(
-  drr,
+volcano.plot(object, ...)
+
+\S4method{volcano.plot}{drseqResults}(
+  object,
   lfc.cutoff = c(-1, 1),
   fdr.cutoff = 0.01,
   x.limits = c(-15, 15),
@@ -14,24 +18,26 @@ volcano.plot(
   remove.portion.color = 0,
   colrs = setNames(surf.colors, surf.events)
 )
+
+\S4method{volcano.plot}{surf}(object, ...)
 }
 \arguments{
-\item{drr}{a `drseqResults` object.}
+\item{object}{a \code{drseqResults} object.}
 
-\item{lfc.cutoff}{a numeric vector of length 2, the range of log2 fold change that is consider NOT significant.}
+\item{lfc.cutoff}{\code{numeric(2)}, the range of log2 fold change that is consider NOT significant.}
 
-\item{fdr.cutoff}{numeric, significance level of adjusted p-value.}
+\item{fdr.cutoff}{\code{numeric}, significance level of adjusted p-value.}
 
-\item{x.limits}{a numeric vector of length 2, range of log2 fold change. Any values beyond this range will be projected onto the boundary.}
+\item{x.limits}{\code{numeric(2)}, range of log2 fold change. Any values beyond this range will be projected onto the boundary.}
 
-\item{y.limits}{a numeric vector of length 2, range of -log10(p.value). Any values beyond this range will be projected onto the boundary.}
+\item{y.limits}{\code{numeric(2)}, range of -log10(p.value). Any values beyond this range will be projected onto the boundary.}
 
-\item{remove.portion.grey}{numeric between 0 and 1, the portion of non-significant points to be randomly remove. This is only for speeding up plotting.}
+\item{remove.portion.grey}{\code{numeric}, between 0 and 1, the portion of non-significant points to be randomly remove. This is only for speeding up plotting.}
 
-\item{remove.portion.color}{numeric between 0 and 1, the portion of significant points to be randomly remove. This is only for speeding up plotting.}
+\item{remove.portion.color}{\code{numeric}, between 0 and 1, the portion of significant points to be randomly remove. This is only for speeding up plotting.}
 }
 \value{
-a `ggplot` object.
+a \code{ggplot} object.
 }
 \description{
 Create a volcano plot for the DrSeq results, stratefied by alternative transcriptional regulation (ATR) event types.

@@ -2,19 +2,15 @@
 % Please edit documentation in R/drseq.R
 \name{drseqData}
 \alias{drseqData}
-\title{Create DrSeq dataset}
+\title{DrSeq Data}
 \usage{
 drseqData(
-  anno,
-  anno_event,
+  event,
   sampleData,
   design = ~sample + exon + condition:exon,
   remove.overlap.exon = F,
-  create.annotation = T,
   anno.prefix = "drseq.annotation",
   anno.format = "gff2",
-  export.count = F,
-  count.prefix = "drseq.count",
   minMQS = 10,
   isPairedEnd = T,
   cores = max(1, detectCores() - 2),
@@ -23,35 +19,39 @@ drseqData(
 )
 }
 \arguments{
-\item{anno}{GRanges, genome annotation}
+\item{event}{a `surf` object from [parseEvent].}
 
-\item{anno_event}{GRanges, AS/ATS/APA event annotation}
+\item{sampleData}{data.frame, describes the RNA-seq samples, contains at least two columns -- `bam` and `condition`, the row.names represent sample names.}
 
-\item{sampleData}{data.frame, describes the RNA-seq samples, contains at least two columns -- `bam` and `condition`, the row.names represent sample names}
+\item{design}{
+    A formula which specifies the design of the experiment. It must
+    specify an interaction term between a variable from the sampleData
+    columns with the 'exon' variable. By default, the design 
+    will be '~ sample + exon + condition:exon'. This formula indicates
+    the contrast between 'condition' and exon', i.e. differences in exon 
+    usage due to changes in the 'condition' variable.  See the vignette 
+    for more examples of other designs.
+  }
 
-\item{design}{data.frame, the design of RNA-seq experiment}
+\item{remove.overlap.exon}{logical, remove overlaping exons across genes (default to FALSE).}
 
-\item{remove.overlap.exon}{logical, remove overlaping exons across genes (default to FALSE)}
+\item{anno.prefix}{file names for outputting annotation files.}
 
-\item{create.annotation}{logical, whether (`TRUE`) to create a new annotation file for DrSeq. This option is useful when applying DrSeq to a large number of assays, where annotation can be shared globally once generated.}
+\item{anno.format}{character, e.g. "gtf", as accepted by [rtracklayer::export].}
 
-\item{anno.prefix}{file names for outputting annotation files}
+\item{cores}{integer, number of available workers, sent to `nthreads` of `featureCounts`.}
 
-\item{export.count}{logical, whether the count matrix should be export to a file}
+\item{verbose}{logical, whether (`TRUE`) to echo progess.}
 
-\item{cores}{integer, number of available workers, sent to `nthreads` of `featureCounts`}
+\item{...}{additional parameters for [Rsubread::featureCounts].}
 
-\item{verbose}{logical, whether (`TRUE`) to echo progess}
-
-\item{...}{additional parameters for `Rsubread::featureCounts`.}
-
-\item{minMQS;isPairedEnd}{as defined in `featureCounts`, the default is customized for SURF.}
+\item{minMQS;isPairedEnd}{as defined in [Rsubread::featureCounts]. Note that the default is customized for SURF (see details for more information).}
 }
 \value{
-a `DEXSeqDataSet` object
+a `surf` object, with `drseqData` slot updated.
 }
 \description{
-Create a `DEXSeqDataSet` object for DrSeq, so as to use the `DEXSeq` as the engine of parameter estimation.
+Create the `drseqData` slot needed by DrSeq analysis, which is a `DEXSeqDataSet`.
 It is possible to output event read counts for later usage.
 }
 \details{

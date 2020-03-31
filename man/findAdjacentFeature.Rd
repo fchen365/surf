@@ -23,6 +23,9 @@ findAdjacentFeature(
 
 \item{depth.intron}{extended depth into intron, default 300 nt}
 }
+\value{
+a `GRangesList`
+}
 \description{
 Locate the adjacent bins at the desired direction and extract the genomic bins, given some location features of AS events. This is a helper function to `getFeature()`
 }

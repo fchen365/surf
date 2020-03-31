@@ -5,14 +5,13 @@
 \title{ATR event name}
 \usage{
 getASName(plas)
-
-getASName(plas)
 }
 \arguments{
-\item{plas}{an element of isoPLas object, containing `asName`}
+\item{plas}{a plas object containing `asName`}
+}
+\value{
+a named (by event_id) vector of event type
 }
 \description{
-get a named (by event_id) vector of event type for one gene
-
-Retrieve a named (by event_id) vector of event type for one gene. This is a helper function to `getFeature()`.
+ATR event name
 }

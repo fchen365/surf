@@ -19,29 +19,22 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.5),
-    dplyr,
+    tidyverse,
     doParallel,
-    rtracklayer,
     DEXSeq
 Imports:
     arm,
     MASS,
-    withr,
     scales,
     ggpubr,
     Matrix,
     AUCell,
     methods,
-    stringr,
-    ggplot2,
-    ggrepel,
-    IRanges,
     reshape2,
     Rsubread,
     ensembldb,
     data.table,
-    RColorBrewer,
-    SummarizedExperiment
+    rtracklayer
 Suggests:
     knitr (>= 1.10),
     BiocStyle,
@@ -50,4 +43,4 @@ Suggests:
 VignetteBuilder: knitr
 biocViews: RNASeq, DNASeq, CLIPSeq, Sequencing, Transcription,
    Visualization, Coverage, Alignment, DataImport
-RoxygenNote: 7.0.0
+RoxygenNote: 7.1.0

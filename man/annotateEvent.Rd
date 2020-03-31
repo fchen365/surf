@@ -2,7 +2,7 @@
 % Please edit documentation in R/parse.R
 \name{annotateEvent}
 \alias{annotateEvent}
-\title{annotate AS events (generate feature bins)}
+\title{Annotate AS events (generate feature bins)}
 \usage{
 annotateEvent(
   isoPLas,
@@ -15,17 +15,17 @@ annotateEvent(
 \arguments{
 \item{isoPLas}{isoform parts list with AS events}
 
-\item{cores}{# working cores}
+\item{cores}{\code{integer}, number of computing cores to use.}
 
-\item{min.event.length}{numeric (positive), minimum length of a valid event}
+\item{min.event.length}{\code{numeric} (positive), minimum length of a valid event.}
 
-\item{anno_ss}{GRanges of start/stop codon, UTR, Selenocysteine, etc; used to exclude some interior events (i.e., SE/RI/A3SS/A5SS)}
+\item{anno_ss}{a \code{GRanges} of start/stop codon, UTR, Selenocysteine, etc; used to exclude some interior events (i.e., SE/RI/A3SS/A5SS)}
 
-\item{remove.duplicate}{remove identical event duplicates (keep one randomly)}
+\item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).}
 }
 \value{
-a `surfParsing` object
+a \code{surf} object.
 }
 \description{
-annotate AS events (generate feature bins)
+Annotate AS events (generate feature bins)
 }

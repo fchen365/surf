@@ -4,20 +4,69 @@
 \alias{drseq}
 \title{DrSeq}
 \usage{
-drseq(drd, cores = max(1, detectCores() - 2), verbose = F, ...)
+drseq(
+  event,
+  sampleData,
+  design = ~sample + exon + condition:exon,
+  remove.overlap.exon = F,
+  anno.prefix = "drseq.annotation",
+  anno.format = "gff2",
+  minMQS = 10,
+  isPairedEnd = T,
+  ...,
+  fullModel = design,
+  reducedModel = ~sample + exon,
+  fitExpToVar = "condition",
+  drseq.fdr = 0.05,
+  read.length = 100,
+  min.adjMean = 0.05,
+  filter.overlap.event = T,
+  cores = max(1, detectCores() - 2),
+  verbose = F
+)
 }
 \arguments{
-\item{drd}{a DEXSeqDataSet object created by `drseqData`.}
+\item{event}{a `surf` object from [parseEvent].}
 
-\item{cores}{integer, number of computing workers.}
+\item{sampleData}{data.frame, describes the RNA-seq samples, contains at least two columns -- `bam` and `condition`, the row.names represent sample names.}
+
+\item{design}{
+    A formula which specifies the design of the experiment. It must
+    specify an interaction term between a variable from the sampleData
+    columns with the 'exon' variable. By default, the design 
+    will be '~ sample + exon + condition:exon'. This formula indicates
+    the contrast between 'condition' and exon', i.e. differences in exon 
+    usage due to changes in the 'condition' variable.  See the vignette 
+    for more examples of other designs.
+  }
+
+\item{remove.overlap.exon}{logical, remove overlaping exons across genes (default to FALSE).}
+
+\item{anno.prefix}{file names for outputting annotation files.}
+
+\item{anno.format}{character, e.g. "gtf", as accepted by [rtracklayer::export].}
+
+\item{...}{parameters for [Rsubread::featureCounts].}
+
+\item{drseq.fdr}{FDR (BH procedure) adjusted p-value cut-off.}
+
+\item{read.length}{numeric, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.}
+
+\item{min.adjMean}{numeric, adjusted event base mean threshold.}
+
+\item{filter.overlap.event}{logical, whether (default to `TRUE`) to select one representitive event from overlapping ones and remove the others.}
+
+\item{cores}{integer, number of available workers, sent to `nthreads` of `featureCounts`.}
 
 \item{verbose}{logical, whether (`TRUE`) to echo progess.}
-
-\item{...}{addtional parameters for `DEXSeq`.}
 }
 \value{
-a `drseqResults` object.
+a `surf` object
 }
 \description{
-Fit DrSeq models using the DEXSeq engine.
+Perform the differential REU (DrSeq) test in a single command. 
+This function is a wrapper that calls the necessary functions in order for DrSeq.
+}
+\references{
+Chen F and Keles S. "SURF: Integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins."
 }

@@ -2,23 +2,30 @@
 % Please edit documentation in R/drseq.R
 \name{plotDispFunc}
 \alias{plotDispFunc}
+\alias{plotDispFunc,drseqResults-method}
+\alias{plotDispFunc,surf-method}
 \title{Plot Dispersion Functions}
 \usage{
-plotDispFunc(
-  drr,
-  x.limits = c(0.1, 10000),
-  colrs = setNames(surf.colors, surf.events)
-)
+plotDispFunc(object, ...)
+
+\S4method{plotDispFunc}{drseqResults}(object, x.limits = c(0.1, 10000))
+
+\S4method{plotDispFunc}{surf}(object, ...)
 }
 \arguments{
-\item{drr}{a `drseqResults`` object.}
+\item{object}{a \code{drseqResults} object.}
+
+\item{x.limits}{\code{numeric(2)}, limits for x-axis.}
 }
 \value{
-a `ggplot` object.
+a \code{ggplot} object.
 }
 \description{
-Plot Dispersion Functions
+Plot the fitted mean-dispersion functions of DrSeq models. 
+DrSeq fits up to eight mean-dispersion functions; each corresponds to one ATR event type.
+This allows DrSeq to better account for the nuance in the over-dispersion presented by different ATR event types.
+For more details, please refer to SURF paper.
 }
 \details{
-By default, ATR type are colored with the `Paired` palette (see \url{http://colorbrewer2.org}).
+By SURF default, ATR type are colored with the `Paired` palette (see \url{http://colorbrewer2.org}).
 }

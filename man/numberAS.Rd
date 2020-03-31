@@ -2,10 +2,15 @@
 % Please edit documentation in R/parse.R
 \name{numberAS}
 \alias{numberAS}
-\title{Enumerate AS events}
+\title{Enumerate AS events
+AFE, IAP, and consecutive SE events will be merged.}
 \usage{
-numberAS(as)
+numberAS(as, gm)
+}
+\arguments{
+\item{as}{factor of AS events /isoform}
 }
 \description{
 Enumerate AS events
+AFE, IAP, and consecutive SE events will be merged.
 }

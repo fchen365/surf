@@ -2,30 +2,34 @@
 % Please edit documentation in R/drseq.R
 \name{prepDrseqAnno}
 \alias{prepDrseqAnno}
-\title{Prepare DrSeq Annotation files}
+\title{Prepare DrSeq annotation files}
 \usage{
 prepDrseqAnno(
-  anno,
   anno_event,
   anno.prefix = "annotation.drseq",
   anno.format = "gff2",
   remove.overlap.exon = F,
+  cores = max(1, detectCores() - 2),
   verbose = T
 )
 }
 \arguments{
-\item{anno}{GRanges, genome annotation}
+\item{anno_event}{a `surf` object}
 
-\item{anno.prefix}{prefix of annotation file}
+\item{anno.prefix}{character, prefix of exon/event annotation files for saving. These files are needed by [Rsubread].}
 
-\item{anno.format}{character, e.g. "gtf", as defined by `rtracklayer::export()`}
+\item{anno.format}{character, e.g. "gtf", as accepted by [rtracklayer::export].}
 
-\item{remove.overlap.exon}{- logical, remove overlaping exons across genes (default to FALSE)}
+\item{remove.overlap.exon}{logical, remove overlaping exons across genes (default to `FALSE`).}
 
-\item{verbose}{logical, whether (`TRUE`) to echo progess}
+\item{cores}{integer, number of available workers, sent to `nthreads` of [Rsubread::featureCounts].}
 
-\item{event}{GRanges, AS/ATS/APA event}
+\item{verbose}{logical, whether (`TRUE`) to echo progess.}
+}
+\value{
+NULL, the function is a procedure and only output/export results to file system, except for messages and warnings.
 }
 \description{
-To use the "useMetaFeatures" functionality of `Rsubread`, we need the GTF input. This function is a helper function that produce the GTF files needed.
+To use the `useMetaFeatures` functionality of [Rsubread::featureCounts], we need the GTF input. 
+This function is a helper function that produce the *two* annotation files ("event" and "exon") needed.
 }

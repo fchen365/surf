@@ -2,7 +2,7 @@
 % Please edit documentation in R/parse.R
 \name{getFeature}
 \alias{getFeature}
-\title{Annotate AS events (generate feature bins)}
+\title{Generate location features}
 \usage{
 getFeature(
   isoPLas,
@@ -17,21 +17,21 @@ getFeature(
 \arguments{
 \item{isoPLas}{isoform parts list with AS events}
 
-\item{anno_event}{event annotation w/o features}
+\item{anno_event}{\code{DataFrame}, event annotation w/o features}
 
-\item{depth.exon}{extended depth into exon, default 50 nt}
+\item{depth.exon}{\code{integer}, extended depth into exon, default 50 nt.}
 
-\item{depth.intron}{extended depth into intron, default 300 nt}
+\item{depth.intron}{\code{integer}, extended depth into intron, default 300 nt.}
 
-\item{cores}{# working cores}
+\item{cores}{\code{integer}, number of computing cores to use.}
 
-\item{remove.duplicate}{remove identical event duplicates (keep one)}
+\item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).}
 
-\item{verbose}{logical, whether (`TRUE`) to echo progess}
+\item{verbose}{logical, whether (default to \code{TRUE}) to echo progess}
 }
 \value{
-a `surfParsing` object containing the `feature` attribute.
+a \code{surf} object with one added column called \code{feature}, which caontains a \code{GRangesList} of extracted location features.
 }
 \description{
-Annotated RBP features of AS event in `GRangesList` called `feature`
+Generate location features for each ATR event.
 }

@@ -13,6 +13,10 @@ findBodyFeature(plas, type = c("lead", "lag"), depth.exon = 100)
 
 \item{depth.exon}{depth extended into exon, default is 100 nt}
 }
+\value{
+a `GRangesList`
+}
 \description{
-Locate the body feature of AS events and extract the genomic bins. This is a helper function to `getFeature()`
+Locate the body feature of AS events and extract the genomic bins. 
+This is a helper function to `getFeature()`
 }

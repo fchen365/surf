@@ -2,7 +2,7 @@
 % Please edit documentation in R/utility.R
 \name{tximport2}
 \alias{tximport2}
-\title{Customized tximport from `DESeq2`}
+\title{Import transcriptome quantification results}
 \usage{
 tximport2(
   files,
@@ -30,5 +30,5 @@ tximport2(
 a list of length four, named as `abundance`, `counts`, `length`, and `countsFromAbundance`
 }
 \description{
-Customized tximport from `DESeq2`
+Customized tximport from \code{DESeq2} and `RSEM` transcriptome quantification results.
 }

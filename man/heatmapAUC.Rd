@@ -2,18 +2,26 @@
 % Please edit documentation in R/daseq.R
 \name{heatmapAUC}
 \alias{heatmapAUC}
-\title{Heatmap for DASeq results}
+\alias{heatmapAUC,SummarizedExperiment-method}
+\alias{heatmapAUC,daseqResults-method}
+\title{Heatmap of AUC score}
 \usage{
-heatmapAUC(dar, group = NULL)
+heatmapAUC(object, ...)
+
+\S4method{heatmapAUC}{SummarizedExperiment}(object, group = NULL)
+
+\S4method{heatmapAUC}{daseqResults}(object, group = NULL)
 }
 \arguments{
-\item{dar}{a `daseqResults` object.}
+\item{object}{for \code{surf} object, it should be output from \link{daseq}.}
 
-\item{group}{an optional `factor` vector, group of `targetSet`.}
+\item{group}{an optional \code{factor} vector, group of rows.}
 }
 \value{
-a `ggplot` object.
+a \code{ggplot} object.
 }
 \description{
-Heatmap for DASeq results
+This function produces the heatmap of AUC scores.
+
+Row blocking is allowed by providing the \code{group} parameter.
 }

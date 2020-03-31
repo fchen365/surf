@@ -2,15 +2,14 @@
 % Please edit documentation in R/parse.R
 \name{parseEvent}
 \alias{parseEvent}
-\title{Parse AS/ATS/APA events from genome annotation}
+\title{Parse ATR events from genome annotation}
 \usage{
 parseEvent(
-  annotation.file,
-  annotation.format = "gtf",
+  anno.file,
+  anno.format = tools::file_ext(anno.file),
   cores = max(1, detectCores() - 2),
-  save.rds = F,
-  rds.prefix = "",
   min.event.length = 6,
+  location.feature = T,
   depth.exon = 100,
   depth.intron = 300,
   remove.duplicate = T,
@@ -18,27 +17,32 @@ parseEvent(
 )
 }
 \arguments{
-\item{annotation.file}{diretory to the genome annotation.}
+\item{anno.file}{\code{character(1)}, directory to genome annotation file.}
 
-\item{annotation.format}{format of annotation file, default is GTF.}
+\item{anno.format}{\code{character(1)}, the format of the annotation file. The format can be inferred from \code{anno.file} automatically, unless it is not implicit by the extension.}
 
-\item{cores}{integer, number of workers available.}
+\item{cores}{\code{integer}, number of computing cores to use.}
 
-\item{save.rds}{logical, whether (`TRUE`) to save intermediate result to .rds file. This is useful when running SURF in batch or large scale essay.}
+\item{min.event.length}{\code{numeric} (positive), minimum length of a valid event.}
 
-\item{rds.prefix}{output prefix, default is empty and will output hidden files.}
+\item{location.feature}{\code{logical}, whether (default to \code{TRUE}) to add location features for each event. This usually takes the longest time in annotation parsing procedure.}
 
-\item{min.event.length}{numeric (positive), minimum length of a valid event.}
+\item{depth.exon}{\code{integer}, extended depth into exon, default 50 nt.}
 
-\item{depth.exon}{extended depth into exon, default 50 nt.}
+\item{depth.intron}{\code{integer}, extended depth into gene's flanks, default 300 nt.}
 
-\item{depth.intron}{extended depth into intron, default 300 nt.}
+\item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).}
 
-\item{remove.duplicate}{logical, whether (`TRUE`) to remove identical event duplicates (and keep one).}
-
-\item{verbose}{logical, whether (`TRUE`) to print out progress.}
+\item{verbose}{\code{logical}, whether (default to \code{TRUE}) to print out progress.}
+}
+\value{
+a \code{surf} object with ATR event annotation and updated \code{genePartsList} slot.
 }
 \description{
-This function parses AS/ATS/APA events from genome annotation.
-The task could be computationally demanding for unfiltered (raw) genome annotation.
+This function parses ATR events (including AS, ATI, and APA) from genome annotation. 
+It also identifies location features for each event.
+The latter task could be computationally demanding for unfiltered (raw) genome annotation.
+}
+\references{
+Chen F and Keles S. "SURF: Integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins."
 }

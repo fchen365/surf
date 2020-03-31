@@ -9,10 +9,10 @@ If the genome annotation lacks "gene" and "transcript" entries, add to it.}
 addGeneTx(anno)
 }
 \arguments{
-\item{anno}{a `GRanges` object of genome annotation, from `import`.}
+\item{anno}{a \code{GRanges} object of genome annotation, from \link{import}.}
 }
 \value{
-a `GRanges` object with added `gene_id` and `transcript_id` columns.
+a \code{GRanges} object with added `gene_id` and `transcript_id` columns.
 }
 \description{
 Add identifiers of genes and transcripts

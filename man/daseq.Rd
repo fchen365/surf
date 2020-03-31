@@ -2,11 +2,14 @@
 % Please edit documentation in R/daseq.R
 \name{daseq}
 \alias{daseq}
-\title{Differential activity (via AUC)}
+\title{Differential activity analysis (DASeq)}
 \usage{
 daseq(
   rankings,
-  targetSets,
+  sampleData,
+  event = NULL,
+  target.type = "transcript",
+  targetSets = NULL,
   controlSets = NULL,
   n.sample = 1000,
   cores = max(1, detectCores() - 2),
@@ -14,9 +17,31 @@ daseq(
   ...
 )
 }
+\arguments{
+\item{rankings}{a \code{SummarizedExperiment} object from \link{getRankings}.}
+
+\item{sampleData}{\code{data.frame}, external samples, which contain `condition` column, whose row names must match the column names of \code{rankings}.}
+
+\item{event}{a \code{surf} object from \link{faseqInference} or \link{faseq}.}
+
+\item{target.type}{\code{character(1)}, either "transcript" or "gene".}
+
+\item{n.sample}{\code{integer}, number of times of controlSet sampling, default to 1000.}
+
+\item{cores}{\code{integer}, number of computing cores.}
+
+\item{verbose}{\code{logical}, whether to print out progress report.}
+}
 \value{
-a daseqResults object, which contains a DataFrame and some testing configurations.
+a \code{daseqResults} object if \code{targetSets} was given, a \code{surf} object if \code{event} was give.
 }
 \description{
-Detect differential activity using the AUC measure and RNA-seq quantification.
+Detect differential activity using the AUC measure and RNA-seq quantification. 
+For more details about methodology, see Details.
+This function can be used as part of SURF or as well a stand-along analysis. 
+For the former, input a \code{surf} object to \code{event}. 
+For the latter, input \code{targetSets} and optionally \code{controlSets}.
+}
+\references{
+Chen F and Keles S. "SURF: Integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins."
 }

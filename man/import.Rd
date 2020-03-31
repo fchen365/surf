@@ -2,16 +2,17 @@
 % Please edit documentation in R/utility.R
 \name{import}
 \alias{import}
-\title{Perform `rtracklayer::import()`, followed by `addGeneTx()`}
+\title{Import annotation files}
 \usage{
 import(...)
 }
 \arguments{
-\item{...}{whatever input to `rtracklayer::import`}
+\item{...}{whatever input to \link{rtracklayer::import}.}
 }
 \value{
-a GRanges object as a result of `addGeneTx(rtracklayer::import(...))`
+a \code{GRanges} object.
 }
 \description{
-Perform `rtracklayer::import()`, followed by `addGeneTx()`
+This is a wrapper of \link{rtracklayer::import} with specialty in genome annotation.
+Specifically, it checks whether "gene" or "transcript" exist in the annotation and fill them in if possible.
 }

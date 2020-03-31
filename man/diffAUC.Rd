@@ -5,25 +5,33 @@
 \title{Differential activity (via AUC)}
 \usage{
 diffAUC(
-  rankings,
   targetSet,
   controlSet = NULL,
+  rankings,
+  sampleData,
   n.sample = 1000,
+  cores = 1,
   verbose = F,
   ...
 )
 }
 \arguments{
-\item{rankings}{'Rankings' created for this dataset with
-\code{\link[AUCell]{AUCell_buildRankings}}.}
+\item{targetSet}{\code{character} vector, set of targeted units.}
 
-\item{verbose}{Should the function show progress messages? (TRUE / FALSE)}
+\item{controlSet}{\code{character} vector, control set for contrast. If `NULL` (default), the full set of elements in \code{rankings} will be used.}
 
-\item{...}{Other arguments}
+\item{rankings}{a \code{SummarizedExperiment} object, with row correponding to transcript or gene and column corresponding to samples. Each element is a expression measure (e.g., TPM).}
 
-\item{size}{# of times of controlSet sampling.}
+\item{n.sample}{\code{integer}, number of times of controlSet sampling, default to 1000.}
+
+\item{cores}{\code{integer}, number of computing cores.}
+
+\item{verbose}{\code{logical}, whether to print out progress report.}
+}
+\value{
+a \code{data.frame} of DASeq results.
 }
 \description{
-Detect differential activity using the AUC measure and RNA-seq quantification. This is a inference unit/engine of daseq.
-This unit uses one worker only; daseq cordinates these units parallelly.
+Detect differential activity using the AUC measure and RNA-seq quantification. 
+This unit is a helper of \code{daseq}.
 }

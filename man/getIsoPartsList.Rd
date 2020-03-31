@@ -12,16 +12,16 @@ getIsoPartsList(
 )
 }
 \arguments{
-\item{anno}{GRanges, annotation .}
+\item{anno}{a \code{GRanges} object of genome annotation, return by \link{import}.}
 
-\item{gene_id}{character, gene_id"s to analyze, default to all multi-transcript genes.}
+\item{gene_id}{\code{character}, gene_id"s to analyze, default to all multi-transcript genes.}
 
-\item{depth.intron}{integer, depth into gene"s flanks, default 300 nt.}
+\item{depth.intron}{\code{integer}, extended depth into gene's flanks, default 300 nt.}
 
-\item{cores}{integer, number of parallel worker.}
+\item{cores}{\code{integer}, number of computing cores to use.}
 }
 \value{
-a list named by gene_id, which contains:
+a \code{list} named by gene_id, each of which contains:
 \item{segment}{GRanges, genomic data of parts list.}
 \item{label}{integer vector, gene model (0 for intron) and exon numbers (coded as integer 1,2,...).}
 \item{layout}{lgCMatrix, transcript structure.}

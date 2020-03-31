@@ -23,6 +23,9 @@ findNeighborFeature(
 
 \item{constitutive}{logical, whether to use consecutive or adjacent neighbor exon. The default is `TRUE`.}
 }
+\value{
+a `GRangesList`
+}
 \description{
 Locate the feature on the (upstream or downstream) constitutive exons and extract the genomic bins, given some body features of AS events. This is a helper function to `getFeature()`
 }
