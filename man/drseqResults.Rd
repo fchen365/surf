@@ -2,7 +2,7 @@
 % Please edit documentation in R/utility.R
 \name{drseqResults}
 \alias{drseqResults}
-\title{Gene Parts List}
+\title{DrSeq Results}
 \usage{
 drseqResults(object)
 }
@@ -13,5 +13,5 @@ drseqResults(object)
 a \code{drseqResults} object
 }
 \description{
-Gene Parts List
+DrSeq Results
 }

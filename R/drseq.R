@@ -5,16 +5,16 @@
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' Prepare DrSeq annotation files
 #' 
-#' To use the `useMetaFeatures` functionality of [Rsubread::featureCounts], we need the GTF input. 
-#' This function is a helper function that produce the *two* annotation files ("event" and "exon") needed.
+#' To use the \code{useMetaFeatures} functionality of \link{Rsubread::featureCounts}, we need the GTF input. 
+#' This function helps to produce the *two* annotation files ("event" and "exon") needed by \link{drseqCount}.
 #' 
-#' @param anno_event a `surf` object
-#' @param anno.prefix character, prefix of exon/event annotation files for saving. These files are needed by [Rsubread].
-#' @param anno.format character, e.g. "gtf", as accepted by [rtracklayer::export].
-#' @param remove.overlap.exon logical, remove overlaping exons across genes (default to `FALSE`).
-#' @param cores integer, number of available workers, sent to `nthreads` of [Rsubread::featureCounts].
-#' @param verbose logical, whether (`TRUE`) to echo progess.
-#' @return NULL, the function is a procedure and only output/export results to file system, except for messages and warnings.
+#' @param anno_event a \code{surf} object
+#' @param anno.prefix \code{character}, prefix of exon/event annotation files for saving. These files are needed by \code{Rsubread::featureCounts}.
+#' @param anno.format \code{character}, e.g. "gtf", as accepted by \code{rtracklayer::export}.
+#' @param remove.overlap.exon \code{logical}, remove overlaping exons across genes (default to \code{FALSE}).
+#' @param cores \code{integer}, number of available workers, sent to \code{nthreads} of \code{Rsubread::featureCounts}.
+#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progess.
+#' @return \code{NULL}, the function is a procedure and only output/export results to file system, except for messages and warnings.
 #' @export
 prepDrseqAnno = function(anno_event, 
                          anno.prefix = "annotation.drseq", 
@@ -113,25 +113,27 @@ prepDrseqAnno = function(anno_event,
 }
 
 
-#' DrSeq Data 
+#' Construct DrSeq Data 
 #' 
-#' Create the `drseqData` slot needed by DrSeq analysis, which is a `DEXSeqDataSet`.
-#' It is possible to output event read counts for later usage.
+#' This function creates the \code{drseqData} slot needed by DrSeq analysis, which is a \link{DEXSeqDataSet}.
+#' This function requires two DrSeq annotation files created by \link{prepDrseqAnno}. Two files share the same prefix and end with ".exon.<file type>" and ".event.<file.type>" respective. 
+#' If annotation files are missing, this function can create them freshly, which might take some time. 
+#' This function counts the RNA-seq reads on ATR events and genes using \code{featureCounts}.
 #' 
-#' @param event a `surf` object from [parseEvent].
-#' @param sampleData data.frame, describes the RNA-seq samples, contains at least two columns -- `bam` and `condition`, the row.names represent sample names.
-#' @inheritParams DEXSeq::DEXSeqDataSet ## the `design` parameter.
-#' @param remove.overlap.exon logical, remove overlaping exons across genes (default to FALSE).
-#' @param anno.prefix file names for outputting annotation files.
-#' @param anno.format character, e.g. "gtf", as accepted by [rtracklayer::export].
-#' @param minMQS;isPairedEnd as defined in [Rsubread::featureCounts]. Note that the default is customized for SURF (see details for more information). 
-#' @param cores integer, number of available workers, sent to `nthreads` of `featureCounts`.
-#' @param verbose logical, whether (`TRUE`) to echo progess.
-#' @param ... additional parameters for [Rsubread::featureCounts]. 
-#' @details If you used Illumina HiSeq 2000, set `strandSpecific = 2` (reversed strand).
-#' @return a `surf` object, with `drseqData` slot updated.
+#' @param event a \code{surf} object from \link{parseEvent}.
+#' @param sampleData \code{data.frame}, describes the RNA-seq samples, contains at least two columns -- `bam` and `condition`, the row.names represent sample names.
+#' @inheritParams DEXSeq::DEXSeqDataSet ## the \code{design} parameter.
+#' @param remove.overlap.exon \code{logical}, remove overlaping exons across genes (default to \code{FALSE}).
+#' @param anno.prefix \code{character}, file names for outputting annotation files.
+#' @param anno.format \code{character}, e.g. "gtf", as accepted by \link{rtracklayer::export}.
+#' @param minMQS;isPairedEnd as defined in \link{Rsubread::featureCounts}. Note that the default is customized for SURF (see details for more information). 
+#' @param cores \code{integer}, number of available workers, sent to \code{nthreads} of \code{featureCounts}.
+#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progess.
+#' @param ... additional parameters for \code{Rsubread::featureCounts}. 
+#' @details If you used Illumina HiSeq 2000, set \code{strandSpecific = 2} (reversed strand).
+#' @return a \code{surf} object, with \code{drseqData} slot updated.
 #' @export
-drseqData = function(event, sampleData, 
+drseqCount = function(event, sampleData, 
                      design = ~ sample + exon + condition:exon,
                      remove.overlap.exon = F, 
                      anno.prefix = "drseq.annotation", 
@@ -250,14 +252,14 @@ drseqData = function(event, sampleData,
 #' DrSeq Fit
 #' 
 #' Fit DrSeq models using the DEXSeq as the estimation engine.
-#' @param drd a [surf] object from `drseqData`.
-#' @param cores integer, number of computing workers.
-#' @param verbose logical, whether (`TRUE`) to echo progess.
-#' @return a [surf] object with (1) `drseqResults` and `sampleData` slot updated and (2) three added columns:
+#' @param drd a \code{surf} object from \link{drseqCount}.
+#' @param cores \code{integer}, number of computing workers.
+#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progess.
+#' @return a \code{surf} object with (1) \code{drseqResults} and \code{sampleData} slot updated and (2) three added columns:
 #' \item{eventBaseMean}{base read coverage of the event from RNA-seq data.}
 #' \item{padj}{adjusted p-value for differential REU.}
 #' \item{logFoldChange}{estimated log2 fold change of REU: log2(condition of the 1st sample / another condition)}
-#' @details the drseqResults slot contains extensive DrSeq results. To access the object, use [deseqResults()] function.
+#' @details the \code{drseqResults} slot contains extensive DrSeq results. To access the object, use \link{deseqResults} function.
 #' @export
 drseqFit <- function(drd, 
                      fullModel = design(object),
@@ -313,16 +315,16 @@ drseqFit <- function(drd,
   res <- new(
     "surf", 
     cbind(drd, drr[c("eventBaseMean", "padj", "logFoldChange")]), 
-    genePartsList = event@genePartsList, 
-    drseqData = event@drseqData, 
+    genePartsList = drd@genePartsList, 
+    drseqData = drd@drseqData, 
     drseqResults = drr, ## newly added
-    faseqData = event@faseqData, 
-    faseqResults = event@faseqResults, 
-    daseqResults = event@daseqResults,
-    sampleData = event@sampleData
+    faseqData = drd@faseqData, 
+    faseqResults = drd@faseqResults, 
+    daseqResults = drd@daseqResults,
+    sampleData = drd@sampleData
   )
   res@sampleData$"RNA-seq" <- sampleData
-  metadata(res) <- metadata(event)
+  metadata(res) <- metadata(drd)
   return(res)
 }
 
@@ -330,14 +332,14 @@ drseqFit <- function(drd,
 #' 
 #' Filter DrSeq results for the analysis module 2 of SURF (DASeq).
 #' 
-#' @param event a [surf] object output by [drseqFit].
-#' @param drseq.fdr FDR (BH procedure) adjusted p-value cut-off.
-#' @param read.length numeric, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.
-#' @param min.adjMean numeric, adjusted event base mean threshold.
-#' @param filter.overlap.event logical, whether (default to `TRUE`) to select one representitive event from overlapping ones and remove the others.
-#' @param verbose logical, whether (default to `FALSE`) to print out basic summary statistics.
+#' @param event a \code{surf} object output by \link{drseqFit}.
+#' @param drseq.fdr \code{numeric}, FDR (BH procedure) adjusted p-value cut-off.
+#' @param read.length \code{numeric}, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.
+#' @param min.adjMean \code{numeric}, adjusted event base mean threshold.
+#' @param filter.overlap.event \code{logical}, whether (default to \code{TRUE}) to select one representitive event from overlapping ones and remove the others.
+#' @param verbose \code{logical}, whether (default to \code{FALSE}) to print out basic summary statistics.
 #' 
-#' @return a `surf` object, with three columns added: 
+#' @return a \code{surf} object, with three columns added: 
 #' \item{adjMean}{adjusted base mean of the event from RNA-seq data.}
 #' \item{group}{group labels of ATR events, `increase` for increased REU upon RBP knock-down, and `decrease` for decreased, and `no change` for no-changed.}
 #' \item{included}{logical, indicating whether the event is included into SURF ananlysis module 2.}
@@ -440,11 +442,11 @@ drseqFilter = function(event,
 #' 
 #' Perform the differential REU (DrSeq) test in a single command. 
 #' This function is a wrapper that calls the necessary functions in order for DrSeq.
-#' @inheritParams drseqData
-#' @param ... parameters for [Rsubread::featureCounts].
+#' @inheritParams drseqCount
+#' @param ... parameters for \link{Rsubread::featureCounts}.
 #' @inheritParams drseqFit
 #' @inheritParams drseqFilter
-#' @return a `surf` object
+#' @return a \code{surf} object
 #' @references Chen F and Keles S. "SURF: Integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins."
 #' @export
 drseq <- function(event, 
@@ -474,31 +476,36 @@ drseq <- function(event,
                   verbose = F) {
   if (verbose) 
     cat("Preparing DrSeq count dataset...\n")
-  event <- drseqData(
-    event, sampleData,
-    design = design, 
-    remove.overlap.exon = remove.overlap.exon, 
-    anno.prefix = anno.prefix, 
-    anno.format = anno.format, 
-    minMQS = minMQS, 
-    isPairedEnd = isPairedEnd, 
-    cores = cores, 
-    verbose = verbose, ...
-  )
+  timer <- system.time({
+    event <- drseqCount(
+      event, sampleData,
+      design = design, 
+      remove.overlap.exon = remove.overlap.exon, 
+      anno.prefix = anno.prefix, 
+      anno.format = anno.format, 
+      minMQS = minMQS, 
+      isPairedEnd = isPairedEnd, 
+      cores = cores, 
+      verbose = verbose, ...
+    )
+  })
+  if (verbose) cat("Run time (RNA-seq read counting):", timer[3], "sec.\n")
+  
+  # if (verbose) cat("Fitting DrSeq models...\n")
+  timer <- system.time({
+    event <- drseqFit(
+      event, 
+      fullModel = fullModel,
+      reducedModel = reducedModel,
+      fitExpToVar = fitExpToVar,
+      cores = cores, 
+      verbose = verbose
+    )
+  })
+  if (verbose) cat("Run time (model fitting):", timer[3], "sec.\n")
   
   if (verbose) 
-    cat("Fitting DrSeq models...\n")
-  event <- drseqFit(
-    event, 
-    fullModel = fullModel,
-    reducedModel = reducedModel,
-    fitExpToVar = fitExpToVar,
-    cores = cores, 
-    verbose = verbose
-  )
-  
-  if (verbose) 
-    cat("Annotating/filtering DrSeq results...\n")
+    cat("Annotating/referencing DrSeq results...\n")
   event <- drseqFilter(
     event,
     drseq.fdr = drseq.fdr,
@@ -582,7 +589,7 @@ setGeneric(
 
 #' @rdname volcano.plot
 #' @param lfc.cutoff \code{numeric(2)}, the range of log2 fold change that is consider NOT significant.
-#' @param fdr.cutoff \code{numeric}, significance level of adjusted p-value.
+#' @param fdr.cutoff \code{numeric(1)}, significance level of adjusted p-value.
 #' @param x.limits \code{numeric(2)}, range of log2 fold change. Any values beyond this range will be projected onto the boundary.
 #' @param y.limits \code{numeric(2)}, range of -log10(p.value). Any values beyond this range will be projected onto the boundary.
 #' @param remove.portion.grey \code{numeric}, between 0 and 1, the portion of non-significant points to be randomly remove. This is only for speeding up plotting.

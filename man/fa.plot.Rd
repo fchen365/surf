@@ -12,7 +12,7 @@ fa.plot(
 )
 }
 \arguments{
-\item{object}{a \code{surf} object from \link{faseq} or \link{faseqFit}.}
+\item{object}{a \code{surf} object from \link{faseq} or \link{faseqFit} or \link{faseqInfer}.}
 
 \item{plot.event}{\code{character} vector, event type wanted. In particular, "all" means all event types.}
 

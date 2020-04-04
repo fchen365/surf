@@ -15,7 +15,7 @@ calculateAUC(set, rankings, cores = 1, verbose = F, ...)
 \item{verbose}{Should the function show progress messages? (TRUE / FALSE)}
 }
 \value{
-a [SummarizedExperiment] object
+a \code{SummarizedExperiment} object
 }
 \description{
 Calculate AUC

@@ -71,7 +71,7 @@ getRankings <- function(exprMat,
 #' Calculate AUC
 #' @param cores integer, number of computing cores to use.
 #' @inheritParams AUCell::AUCell_calcAUC
-#' @return a [SummarizedExperiment] object
+#' @return a \code{SummarizedExperiment} object
 calculateAUC <- function(set, rankings, 
                          cores = 1, 
                          verbose = F, ...) {

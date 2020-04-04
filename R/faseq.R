@@ -22,7 +22,7 @@
 #' @keywords feature signal, CLIP-seq
 #' @references \url{https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/}
 #' @export
-faseqData <- function(event, sampleData, 
+faseqCount <- function(event, sampleData, 
                       signal.type = "FPKM", 
                       FUN.aggregate = "mean",
                       minMQS = 10, 
@@ -224,7 +224,7 @@ fat = function(data, min.size = 60, trim = 0.025) {
 #' This function performs functiona association test (FAT). 
 #' The null hypothesis of FAT is that there is no association between feature signals and differential ATR. 
 #' 
-#' @param event a \code{faseqData} obejcet.
+#' @param event a \code{surf} obejcet output by \link{faseqCount}.
 #' @inheritParams fat
 #' @param verbose \code{logical}, whether to print out progress information.
 #' @return a \code{surf} object with \code{faseqResults} slot updated.
@@ -301,7 +301,7 @@ faseqFit <- function(event,
 #' @param signal.cutoff \code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if dont wnat to filter those location with low eCLIP signals of the RBP.
 #' @return a \code{surf} object, with one added \code{inferredFeature} column (inclusion/exclusion/none).
 #' @export
-faseqInference = function(event, 
+faseqInfer = function(event, 
                           fdr.cutoff = 0.05, 
                           signal.cutoff = 20) {
   
@@ -363,10 +363,10 @@ faseqInference = function(event,
 #' Perform the functional association analysis (DASeq) in a single command. 
 #' This function is a wrapper that calls the necessary functions in order for DASeq.
 #' 
-#' @inheritParams faseqData
+#' @inheritParams faseqCount
 #' @param ... parameters for \link{Rsubread::featureCounts}.
 #' @inheritParams faseqFit
-#' @inheritParams faseqInference
+#' @inheritParams faseqInfer
 #' @return a \code{surf} object DASeq results updated.
 #' @references Chen F and Keles S. "SURF: Integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins."
 #' @export
@@ -392,8 +392,8 @@ faseq <- function(event,
                   verbose = F) {
   
   if (verbose) 
-    cat("Constructing FASeq data...\n")
-  event <- faseqData(
+    cat("Counting CLIP-seq reads (FASeq data)...\n")
+  event <- faseqCount(
     event, sampleData, 
     signal.type = signal.type, 
     FUN.aggregate = FUN.aggregate,
@@ -415,7 +415,7 @@ faseq <- function(event,
   
   if (verbose) 
     cat("Inferencing functional association...\n")
-  event <- faseqInference(
+  event <- faseqInfer(
     event, 
     fdr.cutoff = 0.05, 
     signal.cutoff = 20
@@ -433,7 +433,7 @@ faseq <- function(event,
 #' 
 #' This function provides a ggplot implementation for functional association (FA) plot.
 #' 
-#' @param object a \code{surf} object from \link{faseq} or \link{faseqFit}.
+#' @param object a \code{surf} object from \link{faseq} or \link{faseqFit} or \link{faseqInfer}.
 #' @param plot.event \code{character} vector, event type wanted. In particular, "all" means all event types.
 #' @param fdr.cutoff \code{numeric}, theshold for adjusted p-value in functional association test.
 #' @return a \code{ggplot} object.
@@ -516,7 +516,7 @@ fa.plot <- function(object,
 
 #' Extract SURF-inferred location features
 #'  
-#' @param object a \code{surf} object from \link{faseq} or \link{faseqInference}.
+#' @param object a \code{surf} object from \link{faseq} or \link{faseqInfer}.
 #' @return a \code{GRanges} object of all SURF-inferred location features.
 #' @export
 inferredFeature = function(object) {

@@ -7,7 +7,7 @@
 faseqFit(event, min.size = 60, trim = 0.025, verbose = F)
 }
 \arguments{
-\item{event}{a \code{faseqData} obejcet.}
+\item{event}{a \code{surf} obejcet output by \link{faseqCount}.}
 
 \item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to `60`.}
 

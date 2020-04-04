@@ -147,9 +147,10 @@ setMethod(
   }
 )
 
+
 ## ------ _ **seqResults ------
 
-#' Gene Parts List
+#' DrSeq Results
 #' @param object a \code{surf} object output by \link{drseq} or \link{drseqFit} or \link{drseqFilter}.
 #' @return a \code{drseqResults} object
 setGeneric(
@@ -163,16 +164,7 @@ setGeneric(
 setMethod(
   "drseqResults", "surf",
   function(object) {
-    event <- object[c("event_id", "event_name", 
-                      "gene_id", "transcript_id", 
-                      "genomicData", "feature")]
-    drr <- object@drseqResults
-    res <- new(
-      "drseqResults", cbind(event, drr), 
-      modelFrameBM = DataFrameList(modelFrameBM), 
-      dispersionFunction = List(dispersionFunction
-      ))
-    metadata(res) <- metadata(object)
+    object@drseqResults[object$event_id, ]
   }
 )
 

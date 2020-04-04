@@ -7,7 +7,7 @@
 inferredFeature(object)
 }
 \arguments{
-\item{object}{a \code{surf} object from \link{faseq} or \link{faseqInference}.}
+\item{object}{a \code{surf} object from \link{faseq} or \link{faseqInfer}.}
 }
 \value{
 a \code{GRanges} object of all SURF-inferred location features.

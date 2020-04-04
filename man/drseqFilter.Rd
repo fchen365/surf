@@ -14,20 +14,20 @@ drseqFilter(
 )
 }
 \arguments{
-\item{event}{a [surf] object output by [drseqFit].}
+\item{event}{a \code{surf} object output by \link{drseqFit}.}
 
-\item{drseq.fdr}{FDR (BH procedure) adjusted p-value cut-off.}
+\item{drseq.fdr}{\code{numeric}, FDR (BH procedure) adjusted p-value cut-off.}
 
-\item{read.length}{numeric, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.}
+\item{read.length}{\code{numeric}, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.}
 
-\item{min.adjMean}{numeric, adjusted event base mean threshold.}
+\item{min.adjMean}{\code{numeric}, adjusted event base mean threshold.}
 
-\item{filter.overlap.event}{logical, whether (default to `TRUE`) to select one representitive event from overlapping ones and remove the others.}
+\item{filter.overlap.event}{\code{logical}, whether (default to \code{TRUE}) to select one representitive event from overlapping ones and remove the others.}
 
-\item{verbose}{logical, whether (default to `FALSE`) to print out basic summary statistics.}
+\item{verbose}{\code{logical}, whether (default to \code{FALSE}) to print out basic summary statistics.}
 }
 \value{
-a `surf` object, with three columns added: 
+a \code{surf} object, with three columns added: 
 \item{adjMean}{adjusted base mean of the event from RNA-seq data.}
 \item{group}{group labels of ATR events, `increase` for increased REU upon RBP knock-down, and `decrease` for decreased, and `no change` for no-changed.}
 \item{included}{logical, indicating whether the event is included into SURF ananlysis module 2.}

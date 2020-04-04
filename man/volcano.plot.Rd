@@ -26,7 +26,7 @@ volcano.plot(object, ...)
 
 \item{lfc.cutoff}{\code{numeric(2)}, the range of log2 fold change that is consider NOT significant.}
 
-\item{fdr.cutoff}{\code{numeric}, significance level of adjusted p-value.}
+\item{fdr.cutoff}{\code{numeric(1)}, significance level of adjusted p-value.}
 
 \item{x.limits}{\code{numeric(2)}, range of log2 fold change. Any values beyond this range will be projected onto the boundary.}
 
