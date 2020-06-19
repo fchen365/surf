@@ -63,15 +63,15 @@ with a single function:
 ``` r
 library(surf)
 
-event <- parseEvent(anno_file)                  # task 1
-drr <- drseq(event, rna_seq_sample)             # task 2
-far <- faseq(drr, clip_seq_sample)              # task 3
-dar <- daseq(far, exprMat, external_sample)     # task 4
+event <- parseEvent(anno_file)                              # task 1
+drr <- drseq(event, rna_seq_sample)                         # task 2
+far <- faseq(drr, clip_seq_sample)                          # task 3
+dar <- daseq(far, getRankings(exprMat), ext_sample)         # task 4
 ```
 
-Here, `anno_file`, `rna_seq_sample`, `clip_seq_sample`, and
-`external_sample` are data description, and `exprMat` is a table of
-extra transcriptome quantification (e.g., TCGA, GTEx, …).
+Here, `anno_file`, `rna_seq_sample`, `clip_seq_sample`, and `ext_sample`
+are data description, and `exprMat` is a table of extra transcriptome
+quantification (e.g., TCGA, GTEx, …).
 
 ### — Tell `surf` about your data
 
@@ -116,7 +116,7 @@ samples. You can use any your favorite measure (e.g. TPM, RPKM, …).
 Then, let `surf` know of the sample group (`condition`):
 
 ``` r
-external_sample <- data.frame(
+ext_sample <- data.frame(
   row.names = colnames(exprMat),
   condition = rep(c('TCGA', 'GTEx'), c(173, 337))
 )
@@ -124,6 +124,7 @@ external_sample <- data.frame(
 
 ## Reference
 
-Chen F and Keles S. “SURF: Integrative analysis of a compendium of
-RNA-seq and CLIP-seq datasets highlights complex governing of
-alternative transcriptional regulation by RNA-binding proteins.”
+Chen, F., & Keleş, S. (2020). SURF: integrative analysis of a compendium
+of RNA-seq and CLIP-seq datasets highlights complex governing of
+alternative transcriptional regulation by RNA-binding proteins. *Genome
+Biology*, 21(1), 1-23.

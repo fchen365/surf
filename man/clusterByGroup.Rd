@@ -12,8 +12,8 @@ clusterByGroup(x, group)
 \item{group}{group label of rows, disregard names, will be coerce to factor}
 }
 \value{
-character vector of length \code{nrow(x)}, row names. 
-If `x` doesn't have row.names, this function names it sequantially (from 1).
+character vector of length \code{nrow(x)}, row names.
+If \code{x} doesn't have row.names, this function names it sequantially (from 1).
 }
 \description{
 Hierarchical clustering of rows by groups

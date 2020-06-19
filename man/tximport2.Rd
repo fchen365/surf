@@ -27,8 +27,8 @@ tximport2(
 \item{files}{character, files to transcriptome quantification results}
 }
 \value{
-a list of length four, named as `abundance`, `counts`, `length`, and `countsFromAbundance`
+a list of length four, named as \code{abundance}, \code{counts}, \code{length}, and \code{countsFromAbundance}
 }
 \description{
-Customized tximport from \code{DESeq2} and `RSEM` transcriptome quantification results.
+Customized tximport from \code{DESeq2} and \code{RSEM} transcriptome quantification results.
 }

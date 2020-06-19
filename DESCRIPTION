@@ -1,6 +1,6 @@
 Package: surf
 Type: Package
-Title: SURF: statistical utilities for RBP (RNA binding protein) functions
+Title: SURF: Statistical Utility for RBP (RNA binding protein) Functions
 Version: 0.0.0.9000
 Date: 2019-08-30
 Author: Fan Chen <fan.chen@wisc.edu>
@@ -40,6 +40,8 @@ Suggests:
     BiocStyle,
     rmarkdown,
     testthat (>= 2.1.0)
+Roxygen: 
+    list(markdown = TRUE)
 VignetteBuilder: knitr
 biocViews: RNASeq, DNASeq, CLIPSeq, Sequencing, Transcription,
    Visualization, Coverage, Alignment, DataImport

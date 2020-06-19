@@ -24,15 +24,15 @@
 \item{type}{\code{character}, any subset of "RNA-seq", "CLIP-seq", and "External".}
 }
 \description{
-The \code{surf} class is an all-in-one analytic object used in SURF framework. 
+The \code{surf} class is an all-in-one analytic object used in SURF framework.
 A \code{surf} object contains results of DrSeq (analysis module 1), FASeq (analysis module 2), and DASeq (discovery module 1).
-In addition, it also contain gene (isoform) parts list, parsing from genome annotation. 
-The gene parts list is essential for ATR event construction. 
-If the any analysis module or discovery module is performed, the sample metadata will also be recorded. 
+In addition, it also contain gene (isoform) parts list, parsing from genome annotation.
+The gene parts list is essential for ATR event construction.
+If the any analysis module or discovery module is performed, the sample metadata will also be recorded.
 Each of the components mentioned above can be accessed through a function listed below.
 }
 \references{
-Chen F and Keles S. "SURF: Integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins."
+Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. \emph{Genome Biology}, 21(1), 1-23.
 }
 \seealso{
 \link{genePartsList}, \link{drseqResults}, \link{faseqResults}, \link{daseqResults}, \link{sampleData}.

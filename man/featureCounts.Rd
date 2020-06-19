@@ -14,6 +14,6 @@ See \code{Rsubread::featureCounts} documentation.
 }
 \description{
 This is a wrapper of \code{Rsubread::featureCounts} allowing verbose suppression.
-This redirects the output to `/dev/null`, so it assumes a UNIX-like
+This redirects the output to \verb{/dev/null}, so it assumes a UNIX-like
 system.
 }

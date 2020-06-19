@@ -86,7 +86,7 @@ setValidity("daseqResults", function(object) {
 #' Each of the components mentioned above can be accessed through a function listed below.
 #' 
 #' @seealso \link{genePartsList}, \link{drseqResults}, \link{faseqResults}, \link{daseqResults}, \link{sampleData}.
-#' @references Chen F and Keles S. "SURF: Integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins."
+#' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
 setClass(
   "surf",
   contains = "DataFrame",
@@ -254,6 +254,429 @@ setMethod(
     } 
   }
 )
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ------ methods ------
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## ------ _ subsetByOverlaps ------
+setMethod(
+  "subsetByOverlaps", 
+  signature(x = "surf",
+            ranges = "GenomicRanges"),
+  function(x, 
+           ranges,
+           maxgap = 0L,
+           minoverlap = 1L,
+           type = c("any", "start", "end", "within", "equal"),
+           ignore.strand = FALSE) {
+    genomicData <- x$genomicData
+    overlaps <- findOverlaps(
+      query = genomicData,
+      subject = ranges,
+      maxgap = maxgap,
+      minoverlap = minoverlap,
+      type = type,
+      ignore.strand = ignore.strand
+    )
+    query[queryHits(overlaps),]
+  }
+)
+
+## ------ _ findOverlaps ------
+setMethod(
+  "findOverlaps", 
+  signature(query = "surf", 
+            subject = "GenomicRanges"),
+  function(query,
+           subject,
+           maxgap = 0L,
+           minoverlap = 1L,
+           type = c("any", "start", "end", "within", "equal"),
+           ignore.strand = FALSE){
+    genomicData <- query$genomicData
+    overlaps <- findOverlaps(
+      query = genomicData,
+      subject = subject,
+      maxgap = maxgap,
+      minoverlap = minoverlap,
+      type = type,
+      ignore.strand = ignore.strand
+    )
+    overlaps
+  }
+)
+
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ------ methods (drseq) ------
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## ------ _ plotDispFunc ------
+#' Plot Dispersion Functions
+#' 
+#' Plot the fitted mean-dispersion functions of DrSeq models. 
+#' DrSeq fits up to eight mean-dispersion functions; each corresponds to one ATR event type.
+#' This allows DrSeq to better account for the nuance in the over-dispersion presented by different ATR event types.
+#' For more details, please refer to SURF paper.
+#' 
+#' @param object a \code{drseqResults} object.
+#' @return a \code{ggplot} object.
+#' @details By SURF default, ATR type are colored with the `Paired` palette (see \url{http://colorbrewer2.org}).
+setGeneric(
+  name = "plotDispFunc",
+  def = function(object, ...)
+    standardGeneric("plotDispFunc")
+)
+
+#' @rdname plotDispFunc
+#' @param x.limits \code{numeric(2)}, limits for x-axis.
+#' @exportMethod plotDispFunc
+setMethod(
+  "plotDispFunc",
+  "drseqResults",
+  function(object, x.limits = c(1e-1, 1e4)) {
+    colrs = setNames(surf.colors, surf.events) ## surf colors
+    func <- object@dispersionFunction
+    g <- ggplot(data.frame(x = 0), aes(x = x))
+    for (event in names(func)) {
+      g <- g +
+        stat_function(fun = func[[event]], color = colrs[event])
+    }
+    g <- g +
+      scale_x_continuous(limits = x.limits, trans = "log10") +
+      scale_y_continuous(trans = "log10") +
+      scale_color_manual(values = colrs) +
+      labs(x = "normalized mean", y = "estimated dispersion",
+           color = 'event') +
+      theme_bw()
+    return(g)
+  }
+)
+
+#' @rdname plotDispFunc
+#' @exportMethod plotDispFunc
+setMethod("plotDispFunc", "surf",
+          function(object,...) {
+            plotDispFunc(drseqResults(object))
+          })
+
+
+## ------ _ Volcano plot ------
+#' Volcano plot
+#' 
+#' Create a volcano plot for the DrSeq results, stratefied by alternative transcriptional regulation (ATR) event types.
+#' A volcano plot is a scatter plot of tested units, where log2 fold change is in x-axis, and -log10(p.value) is in y-axis.
+#' 
+#' @param object a \code{drseqResults} object.
+#' @return a \code{ggplot} object.
+#' @details By default, ATR type are colored with the `Paired` palette (see \url{http://colorbrewer2.org}).
+setGeneric(
+  name = "volcano.plot",
+  def = function(object, ...)
+    standardGeneric("volcano.plot")
+)
+
+#' @rdname volcano.plot
+#' @param lfc.cutoff \code{numeric(2)}, the range of log2 fold change that is consider NOT significant.
+#' @param fdr.cutoff \code{numeric(1)}, significance level of adjusted p-value.
+#' @param x.limits \code{numeric(2)}, range of log2 fold change. Any values beyond this range will be projected onto the boundary.
+#' @param y.limits \code{numeric(2)}, range of -log10(p.value). Any values beyond this range will be projected onto the boundary.
+#' @param remove.portion.grey \code{numeric}, between 0 and 1, the portion of non-significant points to be randomly remove. This is only for speeding up plotting.
+#' @param remove.portion.color \code{numeric}, between 0 and 1, the portion of significant points to be randomly remove. This is only for speeding up plotting.
+#' @exportMethod volcano.plot
+setMethod(
+  "volcano.plot",
+  "drseqResults",
+  function(object, 
+           lfc.cutoff = c(-1, 1), 
+           fdr.cutoff = 0.01, 
+           x.limits = c(-15, 15), 
+           y.limits = c(0, 50), 
+           remove.portion.grey = 0,
+           remove.portion.color = 0,
+           colrs = setNames(surf.colors, surf.events)) {
+    stopifnot(length(lfc.cutoff) == 2 && lfc.cutoff[1] <= lfc.cutoff[2])
+    stopifnot(fdr.cutoff > 0 && fdr.cutoff < 1)
+    stopifnot(length(x.limits) == 2 && x.limits[1] <= x.limits[2])
+    stopifnot(length(y.limits) == 2 && y.limits[1] <= y.limits[2])
+    fdr.cutoff = -log10(fdr.cutoff)
+    dat <- data.frame(x = object$logFoldChange, 
+                      y = -log10(object$padj), 
+                      group = object$event_name) %>%
+      dplyr::filter(!is.na(x), !is.na(y)) %>%
+      mutate(x = pmax(x, x.limits[1]),
+             x = pmin(x, x.limits[2]),
+             y = pmin(y, y.limits[2]),
+             color = ifelse(x > lfc.cutoff[1] & x < lfc.cutoff[2] | 
+                              y < fdr.cutoff, "No Sig.", as.character(group)), 
+             color = factor(color, c(surf.events, "No Sig.")),
+             size = ifelse(color == "No Sig.", 1, 2))
+    ## remove some "No Sig." to reduce plot size
+    if (remove.portion.grey < 1 && remove.portion.grey > 0) {
+      index <- which(dat$color == "No Sig.")
+      remove.index = sample(index, round(length(index) * remove.portion.grey))
+      dat <- dat[-remove.index,]
+    }
+    if (remove.portion.color < 1 && remove.portion.color > 0) {
+      index <- which(dat$color != "No Sig.")
+      remove.index = sample(index, round(length(index) * remove.portion.color))
+      dat <- dat[-remove.index,]
+    }
+    g <- ggplot(dat, aes(x, y, color = color, size = size)) + 
+      geom_vline(xintercept = c(lfc.cutoff[1], lfc.cutoff[2]), 
+                 color = "grey40", linetype = 2, alpha = .9) + 
+      geom_hline(yintercept = fdr.cutoff, color = "grey40", linetype = 2, alpha = .9) +
+      geom_point(alpha = .7) +
+      scale_color_manual(values = c(colrs, "No Sig." = "grey60")) + 
+      scale_size(range = c(.1, .7)) + 
+      labs(x = "log"[2]~"(fold change), knock-down vs. wild-type", 
+           y = "-log"[10]~"(adjusted p value)") +
+      guides(size = "none") + 
+      scale_x_continuous(limits = x.limits) + 
+      scale_y_continuous(limits = y.limits) + 
+      facet_wrap(~ group, nrow = 2) +
+      theme_bw()
+    return(g)
+  }
+)
+
+#' @rdname volcano.plot
+#' @exportMethod volcano.plot
+setMethod("volcano.plot", "surf",
+          function(object,...) {
+            volcano.plot(drseqResults(object))
+          })
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ------ methods (faseq) ------
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#' Functional association plot
+#' 
+#' This function provides a ggplot implementation for functional association (FA) plot.
+#' 
+#' @param object a \code{surf} object from \link{faseq} or \link{faseqFit} or \link{faseqInfer}.
+#' @param plot.event \code{character} vector, event type wanted. In particular, "all" means all event types.
+#' @param fdr.cutoff \code{numeric}, theshold for adjusted p-value in functional association test.
+#' @return a \code{ggplot} object.
+#' @export
+fa.plot <- function(object, 
+                    plot.event = "all", 
+                    trim = metadata(object)$trim,
+                    fdr.cutoff = 0.05){
+  stopifnot(is(object, "surf"))
+  if (any(plot.event == "all")) plot.event = levels(object$event)
+  levels <- outer(surf.events, surf.features, paste) %>% t %>% as.vector
+  
+  ## box plot: feature signals
+  trainData <- object[object$included, ]
+  groupSize <- table(trainData$event_name, trainData$group) %>% 
+    apply(1, paste, collapse = ", ")
+  trainData <- trainData[trainData$event_name %in% plot.event,]
+  featureSignal <- trainData$featureSignal
+  dat1 = data.frame(
+    event = rep(trainData$event_name, elementNROWS(featureSignal)),
+    feature = unlist(lapply(featureSignal, names), use.names = F),
+    group = rep(trainData$group, elementNROWS(featureSignal)),
+    signal = unlist(featureSignal, use.names = F)) %>% 
+    group_by(event, feature) %>%
+    mutate(lower = quantile(signal, trim * 2), 
+           upper = quantile(signal, 1 - trim * 2),
+           x = factor(feature, surf.features)) %>% 
+    dplyr::filter(signal > lower, signal < upper) %>% 
+    ungroup %>% 
+    mutate(strip = paste0(event, " (", groupSize[event], ")") %>% 
+             factor(paste0(names(groupSize), " (", groupSize, ")")))
+  g1 <- ggplot(dat1, aes(x, signal, fill = group)) +
+    geom_boxplot(color = "grey30", alpha = .9, 
+                 outlier.shape = ".", outlier.color = "grey80") + 
+    labs(y = "feature signal") + 
+    scale_fill_manual(values = c("increase" = "#4d9221", "no change" = "grey50","decrease" = "#c51b7d")) + 
+    scale_x_discrete(breaks = surf.features, labels = greek.features) +
+    facet_grid(cols = vars(strip), scales = "free_x", space = "free_x") + 
+    theme_bw() + 
+    theme(axis.title.x = element_blank(), 
+          axis.text.x = element_blank(), 
+          axis.ticks.x = element_blank())
+  
+  ## dot-line plot: adjusted p-values
+  suppressWarnings({
+    dat2 <- dat1 %>% 
+      group_by(event, feature) %>% 
+      summarise(n = n()) %>%
+      left_join(as.data.frame(object), by = c("event", "feature")) %>% 
+      ungroup() %>%
+      mutate(
+        event = factor(event, surf.events),
+        logp = - log10(padj), 
+        x = factor(feature, surf.features), 
+        functional = ifelse(is.na(logp), "not tested", 
+                            as.character(functional)) %>%
+          factor(c("exclusion", "inclusion", "not tested")), 
+        logp = ifelse(is.na(logp), 0, logp)
+      ) 
+  })
+  g2 <- ggplot(dat2, aes(x, logp, color = functional)) +
+    geom_hline(yintercept = -log10(fdr.cutoff), color = "grey40", alpha = .9, linetype = 2, show.legend = T) + 
+    geom_point(alpha = .9) +
+    stat_summary(aes(group = functional), fun.y = sum, geom = "line", alpha = .8) +
+    labs(x = "location feature", y = "-log"[10]~"(adjusted p value)", color = "association") +
+    scale_color_manual(values = c(exclusion = "#4d9221", inclusion = "#c51b7d", "not tested" = "grey40")) + 
+    scale_x_discrete(breaks = surf.features, labels = greek.features) +
+    facet_grid(cols = vars(event), scales = "free_x", space = "free_x") + 
+    theme_bw() + 
+    theme(strip.background = element_blank(), 
+          strip.text = element_blank())
+  
+  g <- ggpubr::ggarrange(g1, g2, ncol = 1, align = "v")
+  # ggsave("fa.plot.pdf", g, width = 8, height = 5)
+  return(g)
+}
+
+# setMethod("fa.plot", signature(object = "surf"), fa.plot)
+
+
+#' Extract SURF-inferred location features
+#'  
+#' @param object a \code{surf} object from \link{faseq} or \link{faseqInfer}.
+#' @return a \code{GRanges} object of all SURF-inferred location features.
+#' @export
+inferredFeature = function(object) {
+  stopifnot(is(object, "surf"))
+  ## check
+  stopifnot(all(c("feature", "inferredFeature") %in% colnames(object)))
+  
+  feature <- c_granges(object$feature, sep = "-")
+  n_feature <- elementNROWS(object$feature)
+  feature$event_id <- rep(object$event_id, n_feature)
+  feature$event_name <- rep(object$event_name, n_feature)
+  feature$gene_id <- rep(object$gene_id, n_feature)
+  feature$transcript_id <- rep(object$transcript_id, n_feature)
+  feature$feature_name <- factor(names(unlist(object$feature, use.names = F)), surf.features)
+  feature$functional <- unlist(object$inferredFeature, use.names = F)
+  feature <- feature[feature$functional != "none"]
+  return(feature)
+}
+
+# setMethod("inferredFeature", signature(object = "surf"), inferredFeature)
+
+
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ------ methods (daseq) ------
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## ------ _ getAUC ------
+#' Get AUC
+#' 
+#' Get AUC measure for each target set (row) in every sample (column).
+#' @return a \code{matrix} of AUC, whose rows correspond to target sets and columns correspond to samples.
+setGeneric(
+  name = "getAUC",
+  def = function(object)
+    standardGeneric("getAUC")
+)
+
+#' @rdname getAUC
+#' @exportMethod getAUC
+setMethod(
+  "getAUC", "SummarizedExperiment",
+  function(object) {
+    if("AUC" %in% assayNames(object)) {
+      SummarizedExperiment::assays(object)[["AUC"]]
+    }else{
+      stop("Cannot find the 'AUC' assay")
+    }
+  }
+)
+
+#' @rdname getAUC
+#' @exportMethod getAUC
+setMethod(
+  "getAUC", "daseqResults",
+  function(object) {
+    getAUC(object@AUC)
+  }
+)
+
+#' @rdname getAUC
+#' @exportMethod getAUC
+setMethod(
+  "getAUC", "surf",
+  function(object) {
+    getAUC(object@daseqResults)
+  }
+)
+
+
+## ------ _ heatmapAUC ------
+#' Heatmap of AUC score
+#' 
+#' This function produces the heatmap of AUC scores.
+#' 
+#' @param object for \code{surf} object, it should be output from \link{daseq}.
+#' @return a \code{ggplot} object.
+setGeneric(
+  name = "heatmapAUC",
+  def = function(object, ...)
+    standardGeneric("heatmapAUC")
+)
+
+
+#' @description Row blocking is allowed by providing the \code{group} parameter.
+#' @rdname heatmapAUC
+#' @param group an optional \code{factor} vector, group of rows.
+#' @exportMethod heatmapAUC
+setMethod(
+  "heatmapAUC", "SummarizedExperiment",
+  function(object, group = NULL) {
+    
+    mat <- getAUC(object)
+    sampleData <- sampleData(object)
+    
+    ## check group input
+    if (is.null(group)) {
+      group = rep("set", nrow(object))
+    } else {
+      stopifnot(length(group) != nrow(object)) 
+    }
+    names(group) <- rownames(mat)
+    
+    ## cluster rows and columns
+    set_cluster = clusterByGroup(mat, group)
+    sample_cluster <- clusterByGroup(t(mat), sampleData[colnames(mat), "condition"])
+    
+    dat <- aggregateAUCbyCondition(object)
+    dat$group = group[dat$set]
+    dat$condition <- sampleData$condition[dat$sample]
+    
+    g <- ggplot(dat, aes(sample, set, fill = AUC)) +
+      geom_raster() + 
+      scale_x_discrete(breaks = sample_cluster) +
+      scale_y_discrete(breaks = set_cluster) +
+      scale_fill_distiller(palette = "GnBu", direction = 1) + 
+      facet_grid(rows = vars(group), cols = vars(condition), 
+                 scales = "free", space = "free") + 
+      labs(x = "Sample", y = "Set", fill = "AUC") +
+      theme_bw() +
+      theme(panel.spacing = unit(.2, "lines"), 
+            panel.border = element_blank(), 
+            panel.grid = element_blank(), 
+            axis.text = element_blank(), 
+            axis.line = element_blank(),
+            axis.ticks = element_blank())
+    return(g)
+  }
+)
+
+#' @rdname heatmapAUC
+#' @exportMethod heatmapAUC
+setMethod(
+  "heatmapAUC", "daseqResults",
+  function(object, group = NULL) {
+    heatmapAUC(object@targetAUC, group = group)
+  }
+)
+
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## ------ general helper ------ 

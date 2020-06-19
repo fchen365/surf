@@ -9,5 +9,5 @@
 \S4method{sampleData}{daseqResults}(object)
 }
 \description{
-`daseqResults` is a stand-alone object of DASeq (the discovery module of SURF) results.
+\code{daseqResults} is a stand-alone object of DASeq (the discovery module of SURF) results.
 }
