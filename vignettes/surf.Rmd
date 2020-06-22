@@ -1,0 +1,161 @@
+---
+title: "Intergrative analysis of CLIP-seq and RNA-seq with `surf`"
+author: "Fan Chen (fan.chen@wisc.edu)"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Intergrative analysis of CLIP-seq and RNA-seq with `surf`}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      tidy = TRUE, 
+                      tidy.opts = list(comment = FALSE))
+library(surf)
+```
+
+```{r prepare mm annotation, include=F, eval=F}
+library(rtracklayer)
+library(usethis)
+## parse events from genome annotation (GTF)
+## /path/to/genome/annotation/file
+anno_file <- "~/Downloads/gencode.vM23.primary_assembly.annotation.gtf"
+anno_mm <- import(anno_file)
+gene_id <- anno_mm[seqnames(anno_mm) == "chr14" &
+                     anno_mm$gene_type == "protein_coding" &
+                     anno_mm$type == "gene"]$gene_id
+gene_id_sampled <- sample(unique(gene_id), 50)
+anno_mm_select <- anno_mm[anno_mm$gene_id %in% gene_id_sampled]
+
+## Mus musculus
+export(anno_mm_select, "~/Downloads/gencode.vM23.primary.example.gtf")
+```
+
+```{r prepare hs annotation, include=F, eval=F}
+library(rtracklayer)
+library(usethis)
+## parse events from genome annotation (GTF)
+## /path/to/genome/annotation/file
+anno_file <- "~/Downloads/gencode.v32.primary_assembly.annotation.gtf"
+anno_hs <- import(anno_file)
+gene_id <- anno_hs[seqnames(anno_hs) == "chr16" &
+                     anno_hs$gene_type == "protein_coding" &
+                     anno_hs$type == "gene"]$gene_id
+gene_id_sampled <- sample(unique(gene_id), 24)
+anno_hs_select <- anno_hs[anno_hs$gene_id %in% gene_id_sampled]
+
+## Homo sapiens
+export(anno_hs_select, "~/Downloads/gencode.v32.primary.example.gtf")
+
+## export gene ranges 
+genes <- reduce(anno_hs_select)
+strand(genes) <- "*"
+genes <- resize(genes, width(genes) + 300, fix = "center")
+export(genes, "~/Downloads/gencode.v32.primary.region.bed")
+```
+
+This document provides an example of using `surf` to ananlyze CLIP-seq and RNA-seq for predicting RNA-binding protein functions. `surf` is currently available from [GitHub](https://github.com/fchen365/surf.git). The analysis consists of four steps, which we describe in order. 
+
+## Step 1: parse ATR events from genome annotation.
+
+The first step is to part genome annotation for alternative transcriptional regulation (ATR) events. For this, `surf` provides a `parseEvent` function which takes as input various types of genome annotation files, e.g., GTF or GFF. 
+```{r parse}
+## parse events from genome annotation (GTF)
+event <- parseEvent("~/Downloads/gencode.v32.primary.example.gtf")
+```
+The function allows multiple options. 
+
+* `cores` specifies the number of computing processors. 
+* `min.event.length` allows you to filter out ATR event by a lower limit of lenght (in bp).
+* `location.feature` determines whether location features should also be extracted. This is useful if you are interested in perform differential regulation of ATR event using RNA-seq (DrSeq). The location features will be used to quantify CLIP-seq signals (and will not be used by the second step, DrSeq). 
+* `depth.exon` and `depth.intron` is relavent only if `location.feature=TRUE`. The configure the the sizes of location features. 
+* `remove.duplicate` defines wehther identical event should be removed. 
+* `verbose` controls whether or not the progress should be print out. 
+
+This step outputs a `surf` object. The `surf` object contains a `DataFrame`. 
+```{r}
+event
+```
+
+With `mcols()` function, we can inspect the description of each column.
+```{r}
+mcols(event)
+```
+
+The output `surf` object also comes with a `genePartsList` slot, for gene parts list. `genePartsList` is a `DataFrame` of 5 columns. Use `mcols()` to inspect the descriptions of columns.
+```{r}
+pl <- genePartsList(event)
+pl
+```
+```{r}
+mcols(pl)
+```
+
+For `surf` object, the useful genomic function, `findOverlaps`, are implemented. 
+```{r}
+gr0 <- GRanges(Rle(c("chr16", "chr16")), IRanges(c(567000, 31133000), width=10000))
+gr0
+findOverlaps(event, subject = gr0)
+```
+Subsetting by overlaps is also implemented (`subsetByOverlaps`).
+```{r}
+subsetByOverlaps(event, ranges = gr0)
+```
+
+
+## Step 2: detect differential regulation (DR) of ATR events
+
+```{bash prepare RNA-seq bam files, include=F, eval=F}
+## shRNA-seq, target: CPSF6
+DIR=rna-seq/bam
+KD1=$DIR/ENCSR384BDV/ENCFF291ERF
+KD2=$DIR/ENCSR384BDV/ENCFF956SFY
+WT1=$DIR/ENCSR424QCW/ENCFF529TIM
+WT2=$DIR/ENCSR424QCW/ENCFF361KUQ
+# REGION=~/Downloads/gencode.v32.primary.region.bed
+module load python/miniconda
+conda activate /workspace/fanchen/conda2
+samtools view -b $KD1.sorted.bam chr16 -h chr16 > $KD1.chr16.bam
+samtools view -b $KD2.sorted.bam chr16 -h chr16 > $KD2.chr16.bam
+samtools view -b $WT1.sorted.bam chr16 -h chr16 > $WT1.chr16.bam
+samtools view -b $WT2.sorted.bam chr16 -h chr16 > $WT2.chr16.bam
+conda deactivate
+```
+
+```{r drseq}
+rna_seq_sample <- data.frame(
+  row.names = c('sample1', 'sample2', 'sample3', 'sample4'),
+  bam = paste0("~/Downloads/",c("KD1", "KD2", "WT1", "WT2"),".bam"),
+  condition = c('knockdown', 'knockdown', 'wildtype', 'wildtype'),
+  stringsAsFactors = F
+) 
+drr <- drseq(event, rna_seq_sample, verbose = TRUE)
+```
+
+The output of `drseq` (still a `surf` object) contains 6 additional columns (the 7-12th) to the existing output from Step 1. 
+```{r}
+drr[,7:12]
+```
+Again, you can use mcols() to check the description of each columns.
+```{r}
+mcols(drr)[7:12,]
+```
+
+In addition to the main output, the output also contains a `drseqResults` slot, which can be simply accessed by the `drseqResults()` function. 
+```{r}
+drr_detail <- drseqResults(drr)
+drr_detail
+```
+The descriptions of columns can be found by the `mcols()` function:
+```{r}
+mcols(drr_detail)
+```
+
+For both `surf` and `drseqResults`, two visualization methods are available: (1) `plotDispFunc()` which plots the fitted dispersion functions for each ATR event type, and (2) `volcano.plot()` which plots the volcano plot for each ATR events stratified by different event types. 
+
+
+## Step 3: test the functional association between RBP binding and DR events. 
+
+

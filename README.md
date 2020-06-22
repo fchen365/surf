@@ -14,12 +14,14 @@ The **S**tatistical **U**tility for **R**BP **F**unctions (SURF) is an
 integrative analysis framework to identify alternative splicing (AS),
 alternative transcription initiation (ATI), and alternative
 polyadenylation (APA) events regulated by individual RBPs and elucidate
-protein-RNA interactions governing these events.
-
-We used SURF to analyzed 104 RBP data (K562 cells, available from
+protein-RNA interactions governing these events. We used SURF to
+analyzed 104 RBP data (K562 cells, available from
 [ENCODE](https://www.encodeproject.org)). Check out the results from
-this [shiny](http://www.statlab.wisc.edu/shiny/surf/)
-app\!
+this [shiny](http://www.statlab.wisc.edu/shiny/surf/) app\!
+
+*A detailed vignette is in preparation, which we expect to put out by
+**Fall
+2020**\!*
 
 ## Installation
 

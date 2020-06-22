@@ -6,7 +6,7 @@
 \usage{
 drseqFit(
   drd,
-  fullModel = design(object),
+  fullModel = design(drd@drseqData),
   reducedModel = ~sample + exon,
   fitExpToVar = "condition",
   cores = max(1, detectCores() - 2),

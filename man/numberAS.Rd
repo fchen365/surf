@@ -2,8 +2,7 @@
 % Please edit documentation in R/prepare.R
 \name{numberAS}
 \alias{numberAS}
-\title{Enumerate AS events
-AFE, IAP, and consecutive SE events will be merged.}
+\title{Enumerate AS events}
 \usage{
 numberAS(as, gm)
 }
@@ -12,5 +11,7 @@ numberAS(as, gm)
 }
 \description{
 Enumerate AS events
+}
+\details{
 AFE, IAP, and consecutive SE events will be merged.
 }

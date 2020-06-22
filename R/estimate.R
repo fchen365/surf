@@ -29,10 +29,10 @@ prepDrseqAnno = function(anno_event,
   if (verbose) cat("Recognizing", nrow(isoPL), "gene parts list...\n")
   registerDoParallel(cores)
   anno <- foreach (segment = isoPL$segment, label = isoPL$label) %dopar% {
-    gene <- GenomicRanges::range(segment[!!label])
+    gene <- range(segment[!!label])
     gene$type = "gene"
     ## range() and reduce() should be equivalent here
-    mergedSegment <- c_granges(GenomicRanges::range(S4Vectors::split(segment, label)),
+    mergedSegment <- c_granges(range(S4Vectors::split(segment, label)),
                                use.names = F,
                                save.names = "exon_label")
     exon <- mergedSegment[mergedSegment$exon_label != "0"]
@@ -101,7 +101,7 @@ prepDrseqAnno = function(anno_event,
   # event$exonic_part_id = paste(event$gene_id, event$exonic_part_number, sep = ":")
   
   # ## aggregate_gene
-  # gene = unlist(GenomicRanges::range(anno_event$genomicData))
+  # gene = unlist(range(anno_event$genomicData))
   # gene$source = factor('drseq')
   # gene$type = factor('aggregate_gene')
   # gene$gene_id = names(gene)
@@ -225,6 +225,7 @@ drseqCount = function(event, sampleData,
     featureID = event$event_id,
     groupID = event$gene_id
   )
+  cat(fill = TRUE)
   
   ## replace with gene reads count (still a DEXSeqDataSet)
   cnt.other = count.exon$counts[rowData(drd)$groupID,] - counts(drd)[,seq_along(bam.files)]
@@ -263,7 +264,7 @@ drseqCount = function(event, sampleData,
 #' @details the \code{drseqResults} slot contains extensive DrSeq results. To access the object, use \link{deseqResults} function.
 #' @export
 drseqFit <- function(drd,
-                     fullModel = design(object),
+                     fullModel = design(drd@drseqData),
                      reducedModel = ~ sample + exon,
                      fitExpToVar = "condition",
                      cores = max(1, detectCores()-2),
@@ -291,8 +292,8 @@ drseqFit <- function(drd,
   if (any(is.na(index))) {
     stop("Event ID's do not match between DrSeq and annotation.")
   }
-  dxr_sub <- dxr[index, c(3:10, 12)]
-  dxr_sub$padj = p.adjust(dxr_sub$pvalue, method = "fdr") ## re-control FDR across all event types
+  dxr_sub <- as(dxr[index, c(3:10, 12)], "DataFrame")
+  dxr_sub$padj <- p.adjust(dxr_sub$pvalue, method = "fdr") ## re-control FDR across all event types
   names(dxr_sub)[1] <- "eventBaseMean"
   names(dxr_sub)[8] <- "logFoldChange" ## log2(condition of the 1st sample / another condition)
   mcols(dxr_sub)$type <- "drseq"
@@ -308,14 +309,16 @@ drseqFit <- function(drd,
   
   ## take a subset of drd's column
   
-  drr <- new("drseqResults", cbind(drd, dxr_sub),
+  drr <- new("drseqResults", 
+             cbind(as(drd, "DataFrame"), as(dxr_sub, "DataFrame")),
              modelFrameBM = DataFrameList(modelFrameBM),
              dispersionFunction = List(dispersionFunction))
   drr@metadata <- c(drd@metadata, metadata)
   
   res <- new(
     "surf",
-    cbind(drd, drr[c("eventBaseMean", "padj", "logFoldChange")]),
+    cbind(as(drd, "DataFrame"), 
+          as(drr[c("eventBaseMean", "padj", "logFoldChange")], "DataFrame")),
     genePartsList = drd@genePartsList,
     drseqData = drd@drseqData,
     drseqResults = drr, ## newly added
@@ -413,7 +416,8 @@ drseqFilter = function(event,
   
   ## wrap into faseqData object
   res <- new(
-    "surf", cbind(event, ds),
+    "surf", 
+    cbind(as(event, "DataFrame"), ds),
     genePartsList = event@genePartsList,
     drseqData = event@drseqData,
     drseqResults = event@drseqResults,
@@ -505,8 +509,7 @@ drseq <- function(event,
   })
   if (verbose) cat("Run time (model fitting):", timer[3], "sec.\n")
   
-  if (verbose)
-    cat("Annotating/referencing DrSeq results...\n")
+  if (verbose) cat("Annotating/referencing DrSeq results...\n")
   event <- drseqFilter(
     event,
     drseq.fdr = drseq.fdr,
@@ -673,7 +676,8 @@ faseqCount <- function(event, sampleData,
   mcols(CLIPseqSampleData)["sizeFactor", "description"] = "\"per million\" scaling factor"
   
   res <- new(
-    "surf", cbind(event, ds),
+    "surf", 
+    cbind(as(event, "DataFrame"), ds),
     genePartsList = event@genePartsList,
     drseqData = event@drseqData,
     drseqResults = event@drseqResults,
@@ -862,7 +866,8 @@ faseqInfer = function(event,
   mcols(ds)$description <- "inferred functionality of location features"
   
   res <- new(
-    "surf", cbind(event, ds),
+    "surf", 
+    cbind(as(event, "DataFrame"), ds),
     genePartsList = event@genePartsList,
     drseqData = event@drseqData,
     drseqResults = event@drseqResults,

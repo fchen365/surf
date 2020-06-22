@@ -150,7 +150,6 @@ getIsoPartsList = function(anno,
     colnames(layout) = tx$transcript_id
     layout[as.matrix(seg_tx)] = T
     
-    cat("c")
     ## reverse everything, if "-" strand gene
     if (strand == "-") {
       segment = rev(segment)
@@ -230,11 +229,12 @@ getIsoAS = function(li, gm) {
   bRI = bVar & !bASS & !bAES & !bSE & !bA5SS & !bA3SS
   isoAS[bVar & bRI] = "RI"
   
-  factor(isoAS, c(".", surf.events))
+  factor(isoAS, c(".", surf.events)) ## this will be ignored if called by `apply()`
 }
 
 #' Enumerate AS events
-#' AFE, IAP, and consecutive SE events will be merged.
+#' 
+#' @details AFE, IAP, and consecutive SE events will be merged.
 #' @param as factor of AS events /isoform
 numberAS = function(as, gm) {
   as.tmp = as.character(as[!!gm])
@@ -276,7 +276,7 @@ getEvent = function(isoPL, cores = max(1, detectCores()-2)) {
     layout = pl$layout
     
     ## extract AS events, compress
-    asEvent = data.frame(apply(layout, 2, getIsoAS, gm = label))
+    asEvent = data.frame(apply(layout, 2, getIsoAS, gm = label)) ## apply coerce factor columns to character
     asNum = data.frame(sapply(asEvent, numberAS, gm = label))
     asName = mapply(split, asEvent, asNum, SIMPLIFY = F)
     asName = lapply(asName, function(x) sapply(x, unique))
@@ -307,6 +307,7 @@ getASName <- function(plas) {
   asName = plas$asName
   tx_id <- rep(names(asName), sapply(asName, length))
   event_name <- unlist(unname(asName), use.names = T)
+  event_name <- factor(event_name, c(".", surf.events))
   names(event_name) <- paste(tx_id, names(event_name), sep = "@")
   event_name <- na.omit(droplevels(event_name, exclude = "."))
   return(event_name)
@@ -327,66 +328,67 @@ annotateEvent <- function(isoPLas,
                           anno_ss = NULL,
                           remove.duplicate = F) {
   registerDoParallel(cores)
-  event.list = foreach (plas = isoPLas,
-                        g = names(isoPLas),
-                        .combine = "c") %dopar% {
-                          segment = plas$segment
-                          asNum = plas$asNum
-                          strand <- as.vector(strand(segment[1]))
-                          
-                          ## input check 1: existence of variable bins
-                          if (any(!sapply(asNum, max))) {
-                            warning(paste(colnames(asNum)[!sapply(asNum, max)], collapse = ", "), ": no (0) variable bin.")
-                          }
-                          
-                          ## collect event name
-                          event_name <- getASName(plas)
-                          event_name <- factor(event_name, surf.events)
-                          
-                          ## merge variable bins by events
-                          body = lapply(asNum, function(x) {
-                            ## remove 0 segments, merge segments by event
-                            ## note: reduce() will re-order segments by genomic coordinates.
-                            asSeg <- unlist(GenomicRanges::reduce(S4Vectors::split(segment, replace(x, x == 0, NA))))
-                            if (strand == "-" && length(asSeg)) {
-                              i <- unlist(aggregate(seq_along(asSeg), by = list(names(asSeg)), FUN = rev)$x)
-                            } else i <- seq_along(asSeg)
-                            asSeg <- asSeg[i]
-                            asSeg$event_part_number = unlist(lapply(rle(names(asSeg))$lengths, seq_len))
-                            return(asSeg)
-                          })
-                          
-                          ## construct GRangesList of events
-                          event <- c_granges(body, sep = "@")
-                          event <- S4Vectors::split(unname(event), names(event))
-                          mcols(event)$event_id = event_id = names(event)
-                          mcols(event)$event_name = event_name[event_id]
-                          mcols(event)$gene_id = rep(g, length(event_id))
-                          mcols(event)$transcript_id = sapply(strsplit(event_id, "@"), head, 1)
-                          
-                          ## ---- clean up
-                          ## (1) event body length (an amino acid spans 3 bps)
-                          event = event[sapply(width(event), sum) >= min.event.length]
-                          
-                          ## (2) when A3SS/A5SS/RI/SE overlap with AFE/ALE, keep the latter
-                          if (!is.null(anno_ss)) {
-                            cnt = suppressWarnings(countOverlaps(event, anno_ss[anno_ss$gene_id == g]))
-                            event = event[!mcols(event)$event_name %in% c("A3SS","A5SS","RI","SE") | !cnt]
-                          }
-                          
-                          ## (3) remove duplicated event:
-                          ##    with the same (i) `exonic part` and (ii) `event_name`
-                          if (remove.duplicate) {
-                            hit <- findOverlaps(event, event)
-                            hit <- hit[from(hit) < to(hit)]
-                            hit <- hit[mcols(event)$event_name[from(hit)] == mcols(event)$event_name[to(hit)]] ## (ii)
-                            hit <- hit[as.logical(sapply(event[from(hit)] == event[to(hit)], all))] ## (i)
-                            if (length(hit)) event <- event[to(hit)] else event = event[integer(0)]
-                          }
-                          
-                          ## this is the event annotation (w/o features) for one gene
-                          event
-                        }
+  event.list = foreach (
+    plas = isoPLas,
+    g = names(isoPLas),
+    .combine = "c") %dopar% {
+      segment = plas$segment
+      asNum = plas$asNum
+      strand <- as.vector(strand(segment[1]))
+      
+      ## input check 1: existence of variable bins
+      if (any(!sapply(asNum, max))) {
+        warning(paste(colnames(asNum)[!sapply(asNum, max)], collapse = ", "), ": no (0) variable bin.")
+      }
+      
+      ## collect event name
+      event_name <- getASName(plas)
+      event_name <- factor(event_name, surf.events)
+      
+      ## merge variable bins by events
+      body = lapply(asNum, function(x) {
+        ## remove 0 segments, merge segments by event
+        ## note: reduce() will re-order segments by genomic coordinates.
+        asSeg <- unlist(GenomicRanges::reduce(S4Vectors::split(segment, replace(x, x == 0, NA))))
+        if (strand == "-" && length(asSeg)) {
+          i <- unlist(aggregate(seq_along(asSeg), by = list(names(asSeg)), FUN = rev)$x)
+        } else i <- seq_along(asSeg)
+        asSeg <- asSeg[i]
+        asSeg$event_part_number = unlist(lapply(rle(names(asSeg))$lengths, seq_len))
+        return(asSeg)
+      })
+      
+      ## construct GRangesList of events
+      event <- c_granges(body, sep = "@")
+      event <- GRangesList(S4Vectors::split(unname(event), names(event)))
+      mcols(event)$event_id = event_id = names(event)
+      mcols(event)$event_name = event_name[event_id]
+      mcols(event)$gene_id = rep(g, length(event_id))
+      mcols(event)$transcript_id = sapply(strsplit(event_id, "@"), head, 1)
+      
+      ## ---- clean up
+      ## (1) event body length (an amino acid spans 3 bps)
+      event = event[sapply(width(event), sum) >= min.event.length]
+      
+      ## (2) when A3SS/A5SS/RI/SE overlap with AFE/ALE, keep the latter
+      if (!is.null(anno_ss)) {
+        cnt = suppressWarnings(countOverlaps(event, anno_ss[anno_ss$gene_id == g]))
+        event = event[!mcols(event)$event_name %in% c("A3SS","A5SS","RI","SE") | !cnt]
+      }
+      
+      ## (3) remove duplicated event:
+      ##    with the same (i) `exonic part` and (ii) `event_name`
+      if (remove.duplicate) {
+        hit <- findOverlaps(event, event)
+        hit <- hit[from(hit) < to(hit)]
+        hit <- hit[mcols(event)$event_name[from(hit)] == mcols(event)$event_name[to(hit)]] ## (ii)
+        hit <- hit[as.logical(sapply(event[from(hit)] == event[to(hit)], all))] ## (i)
+        if (length(hit)) event <- event[to(hit)] else event = event[integer(0)]
+      }
+      
+      ## this is the event annotation (w/o features) for one gene
+      event
+    }
   stopImplicitCluster()
   
   anno_event <- mcols(event.list)
@@ -687,13 +689,12 @@ getFeature = function(isoPLas, anno_event,
   }
   stopImplicitCluster()
   
-  ## output
+  ## report # of events after dedup
   event_id_feature <- intersect(event_ids, names(feature))
   if (verbose) {
     cat("Add features to", length(event_id_feature), "events.\n")
     print(table("AS/ATI/APA Event distribution:" = anno_event$event_name))
   }
-  anno_event <- anno_event[event_id_feature,]
   
   ## add mcols()
   mcols(feature) = NULL
@@ -701,8 +702,10 @@ getFeature = function(isoPLas, anno_event,
   mcols(addCols)$type <- "annotation"
   mcols(addCols)$description <- "genomic ranges of the event features"
   
+  ## construct new object 
+  df <- as(anno_event[event_id_feature,], "DataFrame")
   res <- new(
-    "surf", cbind(anno_event, addCols),
+    "surf", cbind(df, addCols),
     genePartsList = anno_event@genePartsList,
     drseqData = anno_event@drseqData,
     drseqResults = anno_event@drseqResults,

@@ -279,7 +279,7 @@ setMethod(
       type = type,
       ignore.strand = ignore.strand
     )
-    query[queryHits(overlaps),]
+    x[queryHits(overlaps),]
   }
 )
 
