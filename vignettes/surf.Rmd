@@ -95,8 +95,8 @@ mcols(pl)
 
 For `surf` object, the useful genomic function, `findOverlaps`, are implemented. 
 ```{r}
-gr0 <- GRanges(Rle(c("chr16", "chr16")), IRanges(c(567000, 31133000), width=10000))
-gr0
+gr0 <- GRanges(seqnames = Rle("chr16"), 
+               IRanges(89710000, width = 10000))
 findOverlaps(event, subject = gr0)
 ```
 Subsetting by overlaps is also implemented (`subsetByOverlaps`).
@@ -124,33 +124,34 @@ samtools view -b $WT2.sorted.bam chr16 -h chr16 > $WT2.chr16.bam
 conda deactivate
 ```
 
+To detect the differnetial regulation of ATR events, use `drseq()` function. The function requires a `sampleData` table that specifies the sample information of RNA-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned RNA-seq reads. 
 ```{r drseq}
 rna_seq_sample <- data.frame(
   row.names = c('sample1', 'sample2', 'sample3', 'sample4'),
   bam = paste0("~/Downloads/",c("KD1", "KD2", "WT1", "WT2"),".bam"),
   condition = c('knockdown', 'knockdown', 'wildtype', 'wildtype'),
-  stringsAsFactors = F
+  stringsAsFactors = FALSE
 ) 
-drr <- drseq(event, rna_seq_sample, verbose = TRUE)
+event <- drseq(event, rna_seq_sample, verbose = TRUE)
 ```
 
 The output of `drseq` (still a `surf` object) contains 6 additional columns (the 7-12th) to the existing output from Step 1. 
 ```{r}
-drr[,7:12]
+event[,7:12]
 ```
 Again, you can use mcols() to check the description of each columns.
 ```{r}
-mcols(drr)[7:12,]
+mcols(event)[7:12,]
 ```
 
 In addition to the main output, the output also contains a `drseqResults` slot, which can be simply accessed by the `drseqResults()` function. 
 ```{r}
-drr_detail <- drseqResults(drr)
-drr_detail
+drr <- drseqResults(event)
+drr
 ```
 The descriptions of columns can be found by the `mcols()` function:
 ```{r}
-mcols(drr_detail)
+mcols(drr)
 ```
 
 For both `surf` and `drseqResults`, two visualization methods are available: (1) `plotDispFunc()` which plots the fitted dispersion functions for each ATR event type, and (2) `volcano.plot()` which plots the volcano plot for each ATR events stratified by different event types. 
@@ -158,4 +159,61 @@ For both `surf` and `drseqResults`, two visualization methods are available: (1)
 
 ## Step 3: test the functional association between RBP binding and DR events. 
 
+```{bash prepare CLIP-seq bam files, include=F, eval=F}
+## eCLIP-seq, target: CPSF6
+DIR=clip-seq/bam
+IP1=$DIR/ENCSR532VUB/ENCFF751GZQ
+IP2=$DIR/ENCSR532VUB/ENCFF550ZSZ
+SMI=$DIR/ENCSR249WNK/ENCFF842FFD
+# REGION=~/Downloads/gencode.v32.primary.region.bed
+module load python/miniconda
+conda activate /workspace/fanchen/conda2
+samtools sort $IP1.bam -o $IP1.sort.bam
+samtools index $IP1.sort.bam
+samtools view -b $IP1.sort.bam chr16 -h chr16 > $IP1.chr16.bam
+samtools sort $IP2.bam -o $IP2.sort.bam
+samtools index $IP2.sort.bam
+samtools view -b $IP2.sort.bam chr16 -h chr16 > $IP2.chr16.bam
+samtools sort $SMI.bam -o $SMI.sort.bam
+samtools index $SMI.sort.bam
+samtools view -b $SMI.sort.bam chr16 -h chr16 > $SMI.chr16.bam
+conda deactivate
+```
+
+To detect the differnetial regulation of ATR events, use `faseq()` function. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis.
+```{r}
+clip_seq_sample = data.frame(
+  row.names = c('sample5', 'sample6', 'sample7'),
+  bam = paste0("~/Downloads/",c("IP1", "IP2", "SMI"),".bam"),
+  condition = c('IP', 'IP', 'SMI'),
+  stringsAsFactors = FALSE
+)
+event <- faseq(event, clip_seq_sample, 
+               min.size = 3, verbose = TRUE)
+```
+
+The output of `faseq` (still a `surf` object) contains two additional columns (the 13th and 14th) to the existing output from Step 2. 
+```{r}
+event[,13:14]
+```
+Again, you can use mcols() to check the description of each columns.
+```{r}
+mcols(event)[13:14,]
+```
+
+In addition to the main output, the output also contains a `faseqResults` slot, which can be simply accessed by the `faseqResults()` function. 
+```{r}
+far <- faseqResults(event)
+far
+```
+The descriptions of columns can be found by the `mcols()` function:
+```{r}
+mcols(far)
+```
+
+Two visualization methods are available: (1) `fa.plot()` which plots the fitted dispersion functions for each ATR event type, and (2) `inferredFeature()` which plots the volcano plot for each ATR events stratified by different event types. 
+
+```{r}
+fa.plot(event)
+```
 

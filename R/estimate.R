@@ -437,7 +437,7 @@ drseqFilter = function(event,
   if (verbose) {
     cat(length(id_evt), "events included for SURF analysis.\n",
         "The distribution of AS/ATI/APA events identified:\n")
-    print(table(res[res$included,c("event_name", "group")]))
+    print(table(data.frame(res[res$included, c("event_name", "group")])))
   }
   
   return(res)

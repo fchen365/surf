@@ -126,7 +126,8 @@ ext_sample <- data.frame(
 
 ## Reference
 
-Chen, F., & Keleş, S. (2020). SURF: integrative analysis of a compendium
-of RNA-seq and CLIP-seq datasets highlights complex governing of
+Chen, F., Keleş, S. SURF: integrative analysis of a compendium of
+RNA-seq and CLIP-seq datasets highlights complex governing of
 alternative transcriptional regulation by RNA-binding proteins. *Genome
-Biology*, 21(1), 1-23.
+Biol* **21**, 139 (2020).
+[doi:10.1186/s13059-020-02039-7](https://doi.org/10.1186/s13059-020-02039-7)

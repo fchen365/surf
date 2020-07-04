@@ -466,7 +466,7 @@ fa.plot <- function(object,
                     trim = metadata(object)$trim,
                     fdr.cutoff = 0.05){
   stopifnot(is(object, "surf"))
-  if (any(plot.event == "all")) plot.event = levels(object$event)
+  if (any(plot.event == "all")) plot.event = levels(object$event_name)
   levels <- outer(surf.events, surf.features, paste) %>% t %>% as.vector
   
   ## box plot: feature signals
@@ -505,8 +505,8 @@ fa.plot <- function(object,
     dat2 <- dat1 %>% 
       group_by(event, feature) %>% 
       summarise(n = n()) %>%
-      left_join(as.data.frame(object), by = c("event", "feature")) %>% 
       ungroup() %>%
+      left_join(data.frame(faseqResults(object)), by = c("event", "feature")) %>% 
       mutate(
         event = factor(event, surf.events),
         logp = - log10(padj), 
@@ -520,7 +520,7 @@ fa.plot <- function(object,
   g2 <- ggplot(dat2, aes(x, logp, color = functional)) +
     geom_hline(yintercept = -log10(fdr.cutoff), color = "grey40", alpha = .9, linetype = 2, show.legend = T) + 
     geom_point(alpha = .9) +
-    stat_summary(aes(group = functional), fun.y = sum, geom = "line", alpha = .8) +
+    stat_summary(aes(group = functional), fun = sum, geom = "line", alpha = .8) +
     labs(x = "location feature", y = "-log"[10]~"(adjusted p value)", color = "association") +
     scale_color_manual(values = c(exclusion = "#4d9221", inclusion = "#c51b7d", "not tested" = "grey40")) + 
     scale_x_discrete(breaks = surf.features, labels = greek.features) +
@@ -697,12 +697,12 @@ list_rbind = function(x, save.names = F) {
   if (!is.null(dim(x[[1]]))) 
     x = lapply(x, as.data.frame, stringsAsFactors = F)
   res = suppressWarnings(dplyr::bind_rows(x)) 
-  if (is.null(dim(x[[1]])) || length(dim(x[[1]])) == 1) {
-    res = t(res)
-    colnames(res) = names(x[[1]])
-    res = as.data.frame(res)
-    ## rownames are automatically inherited
-  } 
+  # if (is.null(dim(x[[1]])) || length(dim(x[[1]])) == 1) {
+  #   res = t(res)
+  #   colnames(res) = names(x[[1]])
+  #   res = as.data.frame(res)
+  #   ## rownames are automatically inherited
+  # } 
   
   if (save.names != FALSE) {
     if (is.null(names(x))) 
