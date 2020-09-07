@@ -11,7 +11,7 @@ getFeature(
   depth.intron = 300,
   cores = max(1, detectCores() - 2),
   remove.duplicate = T,
-  verbose = T
+  verbose = FALSE
 )
 }
 \arguments{

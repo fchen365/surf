@@ -28,7 +28,7 @@ parseEvent <- function(anno.file,
                        depth.exon = 100,
                        depth.intron = 300,
                        remove.duplicate = T,
-                       verbose = T) {
+                       verbose = FALSE) {
   ## import annotation
   if (anno.format != tools::file_ext(anno.file))
     warning("Annotation format is not implicit from file extension.")
@@ -617,7 +617,7 @@ getFeature = function(isoPLas, anno_event,
                       depth.intron = 300,
                       cores = max(1, detectCores()-2),
                       remove.duplicate = T,
-                      verbose = T) {
+                      verbose = FALSE) {
   ## input check
   if (depth.intron < 1 || depth.exon < 1)
     stop("\"depth.intron\" and \"depth.exon\" must be greater than 0.")

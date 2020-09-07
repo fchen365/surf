@@ -61,10 +61,15 @@ This document provides an example of using `surf` to ananlyze CLIP-seq and RNA-s
 ## Step 1: parse ATR events from genome annotation.
 
 The first step is to part genome annotation for alternative transcriptional regulation (ATR) events. For this, `surf` provides a `parseEvent` function which takes as input various types of genome annotation files, e.g., GTF or GFF. 
-```{r parse}
+```{r parse, eval=F}
 ## parse events from genome annotation (GTF)
 event <- parseEvent("~/Downloads/gencode.v32.primary.example.gtf")
 ```
+```{r, echo=F}
+# saveRDS(event, "~/Downloads/intermediate1.rds")
+event <- readRDS("~/Downloads/intermediate1.rds")
+```
+
 The function allows multiple options. 
 
 * `cores` specifies the number of computing processors. 
@@ -125,14 +130,18 @@ conda deactivate
 ```
 
 To detect the differnetial regulation of ATR events, use `drseq()` function. The function requires a `sampleData` table that specifies the sample information of RNA-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned RNA-seq reads. 
-```{r drseq}
+```{r drseq, eval=F}
 rna_seq_sample <- data.frame(
   row.names = c('sample1', 'sample2', 'sample3', 'sample4'),
   bam = paste0("~/Downloads/",c("KD1", "KD2", "WT1", "WT2"),".bam"),
   condition = c('knockdown', 'knockdown', 'wildtype', 'wildtype'),
   stringsAsFactors = FALSE
 ) 
-event <- drseq(event, rna_seq_sample, verbose = TRUE)
+event <- drseq(event, rna_seq_sample)
+```
+```{r, echo=F}
+# saveRDS(event, "~/Downloads/intermediate2.rds")
+event <- readRDS("~/Downloads/intermediate2.rds")
 ```
 
 The output of `drseq` (still a `surf` object) contains 6 additional columns (the 7-12th) to the existing output from Step 1. 
@@ -180,8 +189,8 @@ samtools view -b $SMI.sort.bam chr16 -h chr16 > $SMI.chr16.bam
 conda deactivate
 ```
 
-To detect the differnetial regulation of ATR events, use `faseq()` function. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis.
-```{r}
+To detect the differnetial regulation of ATR events, use `faseq()` function. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis. `fdr.cutoff` is the cutoff of FDR (BH adjusted p-values) in functional association testings. The default is 0.05 (here we set this to 0.3 for illustration purpose). `signal.cutoff` is the cut-off threshold for the eCLIP signals, default to 20, and is set to 2 for illustration purpose. 
+```{r, eval=F}
 clip_seq_sample = data.frame(
   row.names = c('sample5', 'sample6', 'sample7'),
   bam = paste0("~/Downloads/",c("IP1", "IP2", "SMI"),".bam"),
@@ -189,10 +198,14 @@ clip_seq_sample = data.frame(
   stringsAsFactors = FALSE
 )
 event <- faseq(event, clip_seq_sample, 
-               min.size = 3, verbose = TRUE)
+               min.size = 3, fdr.cutoff = 0.3, signal.cutoff = 2)
+```
+```{r, echo=F}
+# saveRDS(event, "~/Downloads/intermediate3.rds")
+event <- readRDS("~/Downloads/intermediate3.rds")
 ```
 
-The output of `faseq` (still a `surf` object) contains two additional columns (the 13th and 14th) to the existing output from Step 2. 
+The output of `faseq` (still a `surf` object) adds two additional columns (the 13th and 14th) to the existing output from Step 2. 
 ```{r}
 event[,13:14]
 ```
@@ -213,7 +226,40 @@ mcols(far)
 
 Two visualization methods are available: (1) `fa.plot()` which plots the fitted dispersion functions for each ATR event type, and (2) `inferredFeature()` which plots the volcano plot for each ATR events stratified by different event types. 
 
-```{r}
+```{r, fig.width=8}
 fa.plot(event)
 ```
+```{r}
+inferredFeature(event)
+```
 
+
+## Step 4: RBP-related discovery using external transcriptome data
+
+`daseq()` function performs RBP-related discovery. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis.
+```{r, eval=F}
+## rank transcripts (TPM)
+exprMat <- readRDS('~/Downloads/TcgaTargetGtex_rsem_isoform_tpm_laml_blood_10each.rds')
+## sample data
+ext_sample <- data.frame(
+  condition = rep(c('TCGA', 'GTEx'), each = 10),
+  row.names = colnames(exprMat)
+)
+
+## differential activity (transcript)
+event <- daseq(event, getRankings(exprMat), cores = 1, ext_sample)
+```
+```{r, echo=F}
+# saveRDS(event, "~/Downloads/intermediate4.rds")
+event <- readRDS("~/Downloads/intermediate4.rds")
+```
+
+The output also contains a `daseqResults` slot, which can be simply accessed by the `daseqResults()` function. 
+```{r}
+dar <- daseqResults(event)
+dar
+```
+The descriptions of columns can be found by the `mcols()` function:
+```{r}
+mcols(dar)
+```

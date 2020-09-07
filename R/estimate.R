@@ -242,10 +242,8 @@ drseqCount = function(event, sampleData,
     sample = rownames(sampleData),
     sampleData[setdiff(names(sampleData), "sample")]
   )
-  metadata(event) = c(
-    metadata(event),
-    remove.overlap.exon = remove.overlap.exon
-  )
+  metadata(event) = metadata(event)
+  metadata(event)$remove.overlap.exon = remove.overlap.exon
   
   return(event)
 }
@@ -426,13 +424,11 @@ drseqFilter = function(event,
     daseqResults = event@daseqResults,
     sampleData = event@sampleData
   )
-  metadata(res) = c(
-    metadata(event),
-    drseq.fdr = drseq.fdr,
-    RNAseq.read.length = read.length,
-    min.adjMean = min.adjMean,
-    filter.overlap.event = filter.overlap.event
-  )
+  metadata(res) = metadata(event)
+  metadata(res)$drseq.fdr = drseq.fdr
+  metadata(res)$RNAseq.read.length = read.length
+  metadata(res)$min.adjMean = min.adjMean
+  metadata(res)$filter.overlap.event = filter.overlap.event
   
   if (verbose) {
     cat(length(id_evt), "events included for SURF analysis.\n",
@@ -687,11 +683,9 @@ faseqCount <- function(event, sampleData,
     sampleData = event@sampleData
   )
   res@sampleData$"CLIP-seq" <- CLIPseqSampleData
-  metadata(res) = c(
-    metadata(event),
-    signal.type = signal.type,
-    FUN.aggregate = FUN.aggregate
-  )
+  metadata(res) = metadata(event)
+  metadata(res)$signal.type = signal.type
+  metadata(res)$FUN.aggregate = FUN.aggregate
   return(res)
 }
 
@@ -805,9 +799,8 @@ faseqFit <- function(event,
   faseqResults <- new("faseqResults", res)
   
   event@faseqResults <- faseqResults
-  metadata(event) <- c(metadata(event),
-                       min.size = min.size,
-                       trim = trim)
+  metadata(event)$min.size = min.size
+  metadata(event)$trim = trim
   
   return(event)
 }
@@ -829,6 +822,9 @@ faseqFit <- function(event,
 faseqInfer = function(event,
                       fdr.cutoff = 0.05,
                       signal.cutoff = 20) {
+  if (any("inferredFeature" %in% colnames(event))) {
+    event$inferredFeature = NULL
+  }
   
   far <- event@faseqResults
   signal <- unlist(event$featureSignal, use.names = F)
@@ -876,11 +872,9 @@ faseqInfer = function(event,
     daseqResults = event@daseqResults,
     sampleData = event@sampleData
   )
-  metadata(res) = c(
-    metadata(event),
-    faseq.fdr = fdr.cutoff,
-    signal.cutoff = signal.cutoff
-  )
+  metadata(res) = metadata(event)
+  metadata(res)$faseq.fdr = fdr.cutoff
+  metadata(res)$signal.cutoff = signal.cutoff
   return(res)
 }
 
@@ -943,8 +937,8 @@ faseq <- function(event,
     cat("Inferencing functional association...\n")
   event <- faseqInfer(
     event,
-    fdr.cutoff = 0.05,
-    signal.cutoff = 20
+    fdr.cutoff = fdr.cutoff,
+    signal.cutoff = signal.cutoff
   )
   
   return(event)
@@ -975,8 +969,9 @@ getControlSet <- function(event, targetSets,
                           verbose = F) {
   isoPL <- event@genePartsList
   lapply(targetSets, function(targetSet) {
-    targeted <- sapply(isoPL[[id_column]] %in% targetSet, any)
-    unlist(isoPL[[id_column]][targeted], use.names = F)
+    targeted <- selectMethod("%in%", "Vector")(isoPL[[id_column]], targetSet)
+    any_targeted <- sapply(targeted, any)
+    unlist(isoPL[[id_column]][any_targeted], use.names = F)
   })
 }
 
@@ -1015,12 +1010,13 @@ getRankings <- function(exprMat,
     nCores = cores,
     verbose = verbose
   )
-  names(dimnames(assays(rankings)$ranking)) =
+  names(dimnames(assays(rankings, withDimnames=FALSE)$ranking)) =
     c("genomic feature", "sample")
   SummarizedExperiment(assays(rankings))
 }
 
 #' Calculate AUC
+#' @param set a `list` of sets (or signatures) to test. The sets should be provided as `GeneSet`, `GeneSetCollection` or `character` list.
 #' @param cores integer, number of computing cores to use.
 #' @inheritParams AUCell::AUCell_calcAUC
 #' @return a \code{SummarizedExperiment} object
@@ -1037,7 +1033,7 @@ calculateAUC <- function(set, rankings,
     nCores = cores,
     verbose = verbose, ...
   )
-  names(dimnames(assays(AUC)$AUC)) = c("set", "sample")
+  names(dimnames(assays(AUC, withDimnames=FALSE)$AUC)) = c("set", "sample")
   SummarizedExperiment(assays(AUC))
 }
 
@@ -1161,13 +1157,16 @@ daseq <- function(event = NULL,
                   verbose = F, ...) {
   ## check rankings and sampleData
   if (ncol(rankings) != nrow(sampleData) ||
-      any(colnames(rankings) != rownames(sampleData)))
+      any(colnames(rankings) != rownames(sampleData))) {
     stop("colnames(rankings) and rownames(sampleData) must match.")
-  if (is.null(sampleData$condition))
+  }
+  if (is.null(sampleData$condition)){
     stop("sampleData must contain a \"condition\" column indicating two groups to compare; please add.")
+  }
   sampleData$condition <- as.factor(sampleData$condition)
-  if (nlevels(sampleData$condition) != 2)
+  if (nlevels(sampleData$condition) != 2) {
     stop("The condition must have two levels.")
+  }
   
   ## standardize sampleData
   externalSampleData = DataFrame(
@@ -1175,8 +1174,9 @@ daseq <- function(event = NULL,
     sampleData[setdiff(names(sampleData), "sample")]
   )
   
-  if (is.null(event) && is.null(targetSets))
+  if (is.null(event) && is.null(targetSets)) {
     stop("Either event or targetSets is required.")
+  }
   
   ## auto generate target sets
   if (is.null(targetSets)) {
@@ -1198,17 +1198,19 @@ daseq <- function(event = NULL,
   }
   
   ## check targetSets and controlSets
-  if (is.null(names(targetSets)))
+  if (is.null(names(targetSets))) {
     stop("All target sets should be named.")
-  if (is.null(controlSets))
+  }
+  if (is.null(controlSets)) {
     controlSets = lapply(targetSets, as.null)
+  }
   if (length(targetSets) != length(controlSets) ||
-      any(names(targetSets) != names(controlSets)))
+      any(names(targetSets) != names(controlSets))) {
     stop("Names of target and control sets must match.")
+  }
   
   ## @AUC
-  if (verbose)
-    cat("Calculating AUC for target sets...\n")
+  if (verbose) cat("Calculating AUC for target sets...\n")
   AUC <- calculateAUC(targetSets,
                       rankings,
                       cores = cores,
@@ -1217,8 +1219,7 @@ daseq <- function(event = NULL,
   colData(AUC) <- externalSampleData
   
   ## non-parametric differential activity test
-  if (verbose)
-    cat("Testing for differential activity...\n")
+  if (verbose) cat("Testing for differential activity...\n")
   test.res <- mapply(
     diffAUC, targetSets, controlSets,
     MoreArgs = list(rankings = rankings,
@@ -1264,11 +1265,9 @@ daseq <- function(event = NULL,
   if (!is.null(event)) {
     event@daseqResults <- daseqResults
     event@sampleData$"External" <- externalSampleData
-    metadata(event) <- c(
-      metadata(event),
-      target.type = target.type,
-      n.resample = n.sample
-    )
+    metadata(event) <- metadata(event)
+    metadata(event)$target.type = target.type
+    metadata(event)$n.resample = n.sample
     return(event)
   } else {
     return(daseqResults)

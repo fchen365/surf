@@ -22,7 +22,9 @@ Depends:
     DEXSeq
 Imports:
     arm,
+    doMC,
     MASS,
+    doRNG,
     scales,
     ggpubr,
     Matrix,
@@ -34,8 +36,8 @@ Imports:
     data.table,
     rtracklayer
 Suggests:
-    knitr (>= 1.10),
-    testthat (>= 2.1.0),
+    knitr,
+    testthat,
     markdown,
     BiocStyle,
     rmarkdown,

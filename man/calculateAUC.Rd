@@ -7,6 +7,8 @@
 calculateAUC(set, rankings, cores = 1, verbose = F, ...)
 }
 \arguments{
+\item{set}{a \code{list} of sets (or signatures) to test. The sets should be provided as \code{GeneSet}, \code{GeneSetCollection} or \code{character} list.}
+
 \item{rankings}{'Rankings' created for this dataset with
 \code{\link[AUCell]{AUCell_buildRankings}}.}
 

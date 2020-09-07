@@ -13,7 +13,7 @@ parseEvent(
   depth.exon = 100,
   depth.intron = 300,
   remove.duplicate = T,
-  verbose = T
+  verbose = FALSE
 )
 }
 \arguments{
