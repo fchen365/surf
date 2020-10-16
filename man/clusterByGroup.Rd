@@ -13,7 +13,7 @@ clusterByGroup(x, group)
 }
 \value{
 character vector of length \code{nrow(x)}, row names.
-If \code{x} doesn't have row.names, this function names it sequantially (from 1).
+If \code{x} doesn't have row.names, this function names it sequentially (from 1).
 }
 \description{
 Hierarchical clustering of rows by groups

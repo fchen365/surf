@@ -12,9 +12,9 @@
 #' @param anno_event a \code{surf} object
 #' @param anno.prefix \code{character}, prefix of exon/event annotation files for saving. These files are needed by \code{Rsubread::featureCounts}.
 #' @param anno.format \code{character}, e.g. "gtf", as accepted by \code{rtracklayer::export}.
-#' @param remove.overlap.exon \code{logical}, remove overlaping exons across genes (default to \code{FALSE}).
+#' @param remove.overlap.exon \code{logical}, remove overlapping exons across genes (default to \code{FALSE}).
 #' @param cores \code{integer}, number of available workers, sent to \code{nthreads} of \code{Rsubread::featureCounts}.
-#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progess.
+#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progress.
 #' @return \code{NULL}, the function is a procedure and only output/export results to file system, except for messages and warnings.
 #' @export
 prepDrseqAnno = function(anno_event,
@@ -51,7 +51,7 @@ prepDrseqAnno = function(anno_event,
   exon = anno[anno$type == 'exon']
   exon = GRangesList(S4Vectors::split(exon, exon$gene_id))
   exon = unlist(GenomicRanges::reduce(exon))
-  ## remove overlaping exons across genes (optional)
+  ## remove overlapping exons across genes (optional)
   if (remove.overlap.exon) {
     exon = exon[countOverlaps(exon, exon) < 2]
   }
@@ -124,12 +124,12 @@ prepDrseqAnno = function(anno_event,
 #' @param event a \code{surf} object from \link{parseEvent}.
 #' @param sampleData \code{data.frame}, describes the RNA-seq samples, contains at least two columns -- `bam` and `condition`, the row.names represent sample names.
 #' @inheritParams DEXSeq::DEXSeqDataSet ## the \code{design} parameter.
-#' @param remove.overlap.exon \code{logical}, remove overlaping exons across genes (default to \code{FALSE}).
+#' @param remove.overlap.exon \code{logical}, remove overlapping exons across genes (default to \code{FALSE}).
 #' @param anno.prefix \code{character}, file names for outputting annotation files.
 #' @param anno.format \code{character}, e.g. "gtf", as accepted by \link{rtracklayer::export}.
 #' @param minMQS;isPairedEnd as defined in \link{Rsubread::featureCounts}. Note that the default is customized for SURF (see details for more information).
 #' @param cores \code{integer}, number of available workers, sent to \code{nthreads} of \code{featureCounts}.
-#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progess.
+#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progress.
 #' @param ... additional parameters for \code{Rsubread::featureCounts}.
 #' @details If you used Illumina HiSeq 2000, set \code{strandSpecific = 2} (reversed strand).
 #' @return a \code{surf} object, with \code{drseqData} slot updated.
@@ -254,7 +254,7 @@ drseqCount = function(event, sampleData,
 #' Fit DrSeq models using the DEXSeq as the estimation engine.
 #' @param drd a \code{surf} object from \link{drseqCount}.
 #' @param cores \code{integer}, number of computing workers.
-#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progess.
+#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progress.
 #' @return a \code{surf} object with (1) \code{drseqResults} and \code{sampleData} slot updated and (2) three added columns:
 #' \item{eventBaseMean}{base read coverage of the event from RNA-seq data.}
 #' \item{padj}{adjusted p-value for differential REU.}
@@ -344,7 +344,7 @@ drseqFit <- function(drd,
 #' @return a \code{surf} object, with three columns added:
 #' \item{adjMean}{adjusted base mean of the event from RNA-seq data.}
 #' \item{group}{group labels of ATR events, `increase` for increased REU upon RBP knock-down, and `decrease` for decreased, and `no change` for no-changed.}
-#' \item{included}{logical, indicating whether the event is included into SURF ananlysis module 2.}
+#' \item{included}{logical, indicating whether the event is included into SURF analysis module 2.}
 #' @export
 drseqFilter = function(event,
                        drseq.fdr = .05,
@@ -526,16 +526,16 @@ drseq <- function(event,
 
 #' Construct FASeq Data Set
 #'
-#' This function uantifies feature signals for location features using CLIP-seq data.
+#' This function quantifies feature signals for location features using CLIP-seq data.
 #' You align CLIP-seq reads to the genome and provide FASeq with the resulting bam files.
 #' We will take care of the rest.
 #'
 #' @param event a \code{surf} object.
 #' @param sampleData \code{data.frame}, must contain two columns -- "bam" and "condition" (for "IP" and "input", where "IP" should come first), whose \code{row.names} represent the sample names. "bam" is the file name of CLIP-seq bam. "condition" will be coerced to factor, whose first level will be treated as IP, and the second level as input.
 #' @param signal.type \code{character}, indicate the type of feature signal wanted, support "TPM" for Transcripts Per Kilobase Million, "FPKM" for Fragments Per Kilobase Million (for paired-end reads) and Reads Per Kilobase Million (for single-end reads), and "raw.count" for raw.count read counts
-#' @param FUN.aggregate \code{function}, used for aggreating signals within \code{conditon}, default to mean.
+#' @param FUN.aggregate \code{function}, used for aggregating signals within \code{condition}, default to mean.
 #' @param cores \code{integer}, number of available workers, sent to \code{nthreads} of \link{featureCounts}
-#' @param verbose \code{logical}, whether (default to \code{TRUE}) to echo progess
+#' @param verbose \code{logical}, whether (default to \code{TRUE}) to echo progress
 #' @param minMQS;minOverlap;isPairedEnd;... parameters for \link{featureCounts}. \code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25% of the typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.
 #' @return a \code{surf} object, with (i) one column \code{featureSignal} added, (2) \code{faseqData} slot updated, and (3) \code{sampleData} slot updated.
 #' @details If your sequencing platform is Illumina HiSeq 2000, set \code{strandSpecific = 2}.
@@ -740,10 +740,10 @@ fat = function(data, min.size = 60, trim = 0.025) {
 
 #' Functional Association using Sequencing data
 #'
-#' This function performs functiona association test (FAT).
+#' This function performs functional association test (FAT).
 #' The null hypothesis of FAT is that there is no association between feature signals and differential ATR.
 #'
-#' @param event a \code{surf} obejcet output by \link{faseqCount}.
+#' @param event a \code{surf} object output by \link{faseqCount}.
 #' @inheritParams fat
 #' @param verbose \code{logical}, whether to print out progress information.
 #' @return a \code{surf} object with \code{faseqResults} slot updated.
@@ -807,7 +807,7 @@ faseqFit <- function(event,
 
 #' Functional association inference
 #'
-#' Inference the functionality of individual locaiton features,
+#' Inference the functionality of individual location features,
 #' where the RBP is likely to interact and regulate the corresponding ATR event.
 #' A location feature is inferred as function associated if
 #' (i) it is included in FAT, and
@@ -816,7 +816,7 @@ faseqFit <- function(event,
 #'
 #' @param event a \code{surf} object from \link{faseq} or \link{faseqFit}.
 #' @param fdr.cutoff \code{numeric}, significance cutoff for the adjusted p-values of FAT.
-#' @param signal.cutoff \code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if dont wnat to filter those location with low eCLIP signals of the RBP.
+#' @param signal.cutoff \code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if don't want to filter those location with low eCLIP signals of the RBP.
 #' @return a \code{surf} object, with one added \code{inferredFeature} column (inclusion/exclusion/none).
 #' @export
 faseqInfer = function(event,
@@ -981,7 +981,7 @@ getControlSet <- function(event, targetSets,
 #' The genes/transcripts with same expression value are shuffled. Therefore, genes/transcripts with expression '0' are randomly sorted at the end of the ranking.
 #' These "rankings" can be seen as a new representation of the original dataset. Once they are calculated, they can be saved for future analyses.
 #'
-#' @param exprMat Expression matrix (genes/trnascripts as rows, samples as columns)
+#' @param exprMat Expression matrix (genes/transcripts as rows, samples as columns)
 #' The expression matrix can also be provided as one of the Bioconductor classes:
 #' \itemize{
 #' \item \link{RangedSummarizedExperiment} and derived classes:
@@ -1040,7 +1040,7 @@ calculateAUC <- function(set, rankings,
 #' Aggregate AUC by sample condition
 #'
 #' @param object a \code{SummarizedExperiment} output from \link{calculateAUC}
-#' @param FUN.aggregate function, used for aggreating AUC within `conditon`, default to \code{mean}.
+#' @param FUN.aggregate function, used for aggregating AUC within `condition`, default to \code{mean}.
 #' @return a \code{data.frame} with 4 columns: \code{set}, \code{condition.1}, \code{condition.2}, and \code{diff}.
 aggregateAUCbyCondition <- function(object, sampleData,
                                     FUN.aggregate = "median") {

@@ -40,7 +40,7 @@ volcano.plot(object, ...)
 a \code{ggplot} object.
 }
 \description{
-Create a volcano plot for the DrSeq results, stratefied by alternative transcriptional regulation (ATR) event types.
+Create a volcano plot for the DrSeq results, stratified by alternative transcriptional regulation (ATR) event types.
 A volcano plot is a scatter plot of tested units, where log2 fold change is in x-axis, and -log10(p.value) is in y-axis.
 }
 \details{

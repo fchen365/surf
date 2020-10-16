@@ -1,7 +1,7 @@
 ---
-title: "Intergrative analysis of CLIP-seq and RNA-seq with `surf`"
+title: "Integrative analysis of CLIP-seq and RNA-seq with `surf`"
 author: "Fan Chen (fan.chen@wisc.edu)"
-date: "2020-09-07"
+date: "2020-09-11"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::knitr}
@@ -15,7 +15,7 @@ vignette: >
 
 
 
-This document provides an example of using `surf` to ananlyze CLIP-seq and RNA-seq for predicting RNA-binding protein functions. `surf` is currently available from [GitHub](https://github.com/fchen365/surf.git). The analysis consists of four steps, which we describe in order. 
+This document provides an example of using `surf` to analyze CLIP-seq and RNA-seq for predicting RNA-binding protein functions. `surf` is currently available from [GitHub](https://github.com/fchen365/surf.git). The analysis consists of four steps, which we describe in order. 
 
 ## Step 1: parse ATR events from genome annotation.
 
@@ -31,8 +31,8 @@ The function allows multiple options.
 * `cores` specifies the number of computing processors. 
 * `min.event.length` allows you to filter out ATR event by a lower limit of lenght (in bp).
 * `location.feature` determines whether location features should also be extracted. This is useful if you are interested in perform differential regulation of ATR event using RNA-seq (DrSeq). The location features will be used to quantify CLIP-seq signals (and will not be used by the second step, DrSeq). 
-* `depth.exon` and `depth.intron` is relavent only if `location.feature=TRUE`. The configure the the sizes of location features. 
-* `remove.duplicate` defines wehther identical event should be removed. 
+* `depth.exon` and `depth.intron` is relevant only if `location.feature=TRUE`. The configure the the sizes of location features. 
+* `remove.duplicate` defines whether identical event should be removed. 
 * `verbose` controls whether or not the progress should be print out. 
 
 This step outputs a `surf` object. The `surf` object contains a `DataFrame`. 
@@ -105,14 +105,14 @@ mcols(event)
 
 ```
 ## DataFrame with 6 rows and 2 columns
-##                      type                          description
-##               <character>                          <character>
-## event_id       annotation                     event identifier
-## event_name     annotation                     event type/class
-## gene_id        annotation                gene/group identifier
-## transcript_id  annotation     harbouring transcript identifier
-## genomicData    annotation      genomic ranges of the ATR event
-## feature        annotation genomic ranges of the event features
+##                      type            description
+##               <character>            <character>
+## event_id       annotation       event identifier
+## event_name     annotation       event type/class
+## gene_id        annotation  gene/group identifier
+## transcript_id  annotation harbouring transcrip..
+## genomicData    annotation genomic ranges of th..
+## feature        annotation genomic ranges of th..
 ```
 
 The output `surf` object also comes with a `genePartsList` slot, for gene parts list. `genePartsList` is a `DataFrame` of 5 columns. Use `mcols()` to inspect the descriptions of columns.
@@ -197,13 +197,13 @@ mcols(pl)
 
 ```
 ## DataFrame with 5 rows and 1 column
-##                                          description
-##                                          <character>
-## gene_id                              gene identifier
-## transcript_id                 transcript identifiers
-## segment                genomic segments (parts list)
-## label                   exonic label (0 as intronic)
-## layout        transcript (isoform) layout indicators
+##                          description
+##                          <character>
+## gene_id              gene identifier
+## transcript_id transcript identifiers
+## segment       genomic segments (pa..
+## label         exonic label (0 as i..
+## layout        transcript (isoform)..
 ```
 
 For `surf` object, the useful genomic function, `findOverlaps`, are implemented. 
@@ -293,12 +293,11 @@ subsetByOverlaps(event, ranges = gr0)
 ## ENST00000568691.5@4 chr16:89710933-89711010:-,chr16:89710833-89710932:-,chr16:89710586-89710685:-,...
 ```
 
-
 ## Step 2: detect differential regulation (DR) of ATR events
 
 
 
-To detect the differnetial regulation of ATR events, use `drseq()` function. The function requires a `sampleData` table that specifies the sample information of RNA-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned RNA-seq reads. 
+To detect the differential regulation of ATR events, use `drseq()` function. The function requires a `sampleData` table that specifies the sample information of RNA-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned RNA-seq reads. 
 
 ```r
 rna_seq_sample <- data.frame(row.names = c("sample1", "sample2", "sample3", "sample4"), 
@@ -351,22 +350,14 @@ mcols(event)[7:12, ]
 
 ```
 ## DataFrame with 6 rows and 2 columns
-##                      type
-##               <character>
-## eventBaseMean       drseq
-## padj                drseq
-## logFoldChange       drseq
-## adjMean           RNA-seq
-## group               faseq
-## included            faseq
-##                                                          description
-##                                                          <character>
-## eventBaseMean        mean of the counts across samples in each event
-## padj                                            BH adjusted p-values
-## logFoldChange                        relative exon usage fold change
-## adjMean                             adjusted base mean of each event
-## group         direction of differential regulation (upon knock-down)
-## included                                   indicator of usable event
+##                      type            description
+##               <character>            <character>
+## eventBaseMean       drseq mean of the counts a..
+## padj                drseq   BH adjusted p-values
+## logFoldChange       drseq relative exon usage ..
+## adjMean           RNA-seq adjusted base mean o..
+## group               faseq direction of differe..
+## included            faseq indicator of usable ..
 ```
 
 In addition to the main output, the output also contains a `drseqResults` slot, which can be simply accessed by the `drseqResults()` function. 
@@ -465,32 +456,19 @@ mcols(drr)
 
 ```
 ## DataFrame with 15 rows and 2 columns
-##                      type
-##               <character>
-## event_id       annotation
-## event_name     annotation
-## gene_id        annotation
-## transcript_id  annotation
-## genomicData    annotation
-## ...                   ...
-## padj                drseq
-## knockdown           drseq
-## wildtype            drseq
-## logFoldChange       drseq
-## countData         RNA-seq
-##                                                                description
-##                                                                <character>
-## event_id                                                  event identifier
-## event_name                                                event type/class
-## gene_id                                              gene/group identifier
-## transcript_id                             harbouring transcript identifier
-## genomicData                                genomic ranges of the ATR event
-## ...                                                                    ...
-## padj                                                  BH adjusted p-values
-## knockdown                                           exon usage coefficient
-## wildtype                                            exon usage coefficient
-## logFoldChange                              relative exon usage fold change
-## countData     matrix of integer counts, of each column containing a sample
+##                      type            description
+##               <character>            <character>
+## event_id       annotation       event identifier
+## event_name     annotation       event type/class
+## gene_id        annotation  gene/group identifier
+## transcript_id  annotation harbouring transcrip..
+## genomicData    annotation genomic ranges of th..
+## ...                   ...                    ...
+## padj                drseq   BH adjusted p-values
+## knockdown           drseq exon usage coefficient
+## wildtype            drseq exon usage coefficient
+## logFoldChange       drseq relative exon usage ..
+## countData         RNA-seq matrix of integer co..
 ```
 
 For both `surf` and `drseqResults`, two visualization methods are available: (1) `plotDispFunc()` which plots the fitted dispersion functions for each ATR event type, and (2) `volcano.plot()` which plots the volcano plot for each ATR events stratified by different event types. 
@@ -500,7 +478,7 @@ For both `surf` and `drseqResults`, two visualization methods are available: (1)
 
 
 
-To detect the differnetial regulation of ATR events, use `faseq()` function. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis. `fdr.cutoff` is the cutoff of FDR (BH adjusted p-values) in functional association testings. The default is 0.05 (here we set this to 0.3 for illustration purpose). `signal.cutoff` is the cut-off threshold for the eCLIP signals, default to 20, and is set to 2 for illustration purpose. 
+To detect the differential regulation of ATR events, use `faseq()` function. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis. `fdr.cutoff` is the cutoff of FDR (BH adjusted p-values) in functional association testings. The default is 0.05 (here we set this to 0.3 for illustration purpose). `signal.cutoff` is the cut-off threshold for the eCLIP signals, default to 20, and is set to 2 for illustration purpose. 
 
 ```r
 clip_seq_sample = data.frame(row.names = c("sample5", "sample6", "sample7"), bam = paste0("~/Downloads/", 
@@ -539,10 +517,10 @@ mcols(event)[13:14, ]
 
 ```
 ## DataFrame with 2 rows and 2 columns
-##                        type                                      description
-##                 <character>                                      <character>
-## featureSignal      CLIP-seq normalized CLIP-seq feature signals (contrasted)
-## inferredFeature       faseq      inferred functionality of location features
+##                        type            description
+##                 <character>            <character>
+## featureSignal      CLIP-seq normalized CLIP-seq ..
+## inferredFeature       faseq inferred functionali..
 ```
 
 In addition to the main output, the output also contains a `faseqResults` slot, which can be simply accessed by the `faseqResults()` function. 
@@ -575,17 +553,17 @@ mcols(far)
 
 ```
 ## DataFrame with 9 rows and 2 columns
-##                   type                               description
-##            <character>                               <character>
-## event            faseq                       event type/category
-## feature          faseq                        positional feature
-## size             faseq number of events (sample size in FA test)
-## Estimate         faseq             estimated feature main effect
-## Std..Error       faseq          estiamted feature standard error
-## z.value          faseq           standardized Z value (Gaussian)
-## p.value          faseq                                   p value
-## functional       faseq              inferred regulating function
-## padj             faseq                     adjusted p value (BH)
+##                   type            description
+##            <character>            <character>
+## event            faseq    event type/category
+## feature          faseq     positional feature
+## size             faseq number of events (sa..
+## Estimate         faseq estimated feature ma..
+## Std..Error       faseq estiamted feature st..
+## z.value          faseq standardized Z value..
+## p.value          faseq                p value
+## functional       faseq inferred regulating ..
+## padj             faseq  adjusted p value (BH)
 ```
 
 Two visualization methods are available: (1) `fa.plot()` which plots the fitted dispersion functions for each ATR event type, and (2) `inferredFeature()` which plots the volcano plot for each ATR events stratified by different event types. 
@@ -661,30 +639,17 @@ mcols(dar)
 
 ```
 ## DataFrame with 11 rows and 2 columns
-##                   type
-##            <character>
-## id               daseq
-## size             daseq
-## set              daseq
-## control          daseq
-## base             daseq
-## GTEx             daseq
-## TCGA             daseq
-## background       daseq
-## stat             daseq
-## p.value          daseq
-## padj             daseq
-##                                                                  description
-##                                                                  <character>
-## id                                                     target set identifier
-## size                                                         target set size
-## set                                                               target set
-## control                                                     full control set
-## base                                                  base AUC of target set
-## GTEx                                           target set activity (AUC) in 
-## TCGA                                           target set activity (AUC) in 
-## background                   background difference in activity (control set)
-## stat                         statistic (parametric analogue, reference only)
-## p.value    p-value of differential activity ( vs. ) contrasted to background
-## padj                                                       adjusted p-values
+##                   type            description
+##            <character>            <character>
+## id               daseq  target set identifier
+## size             daseq        target set size
+## set              daseq             target set
+## control          daseq       full control set
+## base             daseq base AUC of target set
+## GTEx             daseq target set activity ..
+## TCGA             daseq target set activity ..
+## background       daseq background differenc..
+## stat             daseq statistic (parametri..
+## p.value          daseq p-value of different..
+## padj             daseq      adjusted p-values
 ```

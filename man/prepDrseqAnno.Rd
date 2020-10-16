@@ -20,11 +20,11 @@ prepDrseqAnno(
 
 \item{anno.format}{\code{character}, e.g. "gtf", as accepted by \code{rtracklayer::export}.}
 
-\item{remove.overlap.exon}{\code{logical}, remove overlaping exons across genes (default to \code{FALSE}).}
+\item{remove.overlap.exon}{\code{logical}, remove overlapping exons across genes (default to \code{FALSE}).}
 
 \item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \code{Rsubread::featureCounts}.}
 
-\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progess.}
+\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
 \value{
 \code{NULL}, the function is a procedure and only output/export results to file system, except for messages and warnings.

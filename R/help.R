@@ -9,14 +9,36 @@ suppressPackageStartupMessages({
   library(DEXSeq)
 })
 
+#' @importClassesFrom SummarizedExperiment SummarizedExperiment
+#' @importMethodsFrom SummarizedExperiment assay assays rowData colData dimnames
+#' @importFrom stats setNames
+#' @importFrom methods is as new
+# @importFrom doParallel registerDoParallel foreach %dopar% stopImplicitCluster
+#' @importFrom magrittr %>%
+#' @importFrom dplyr mutate select filter summarise summarize arrange 
+#' @importFrom dplyr group_by ungroup left_join bind_rows 
+#' @importFrom tidyr pivot_wider pivot_longer
+#' @importFrom ggplot2 ggplot aes vars facet_wrap facet_grid
+#' @importFrom ggplot2 stat_function stat_summary
+#' @importFrom ggplot2 geom_point geom_boxplot geom_raster geom_vline geom_hline  
+#' @importFrom ggplot2 scale_color_manual scale_color_distiller 
+#' @importFrom ggplot2 scale_fill_manual scale_fill_distiller 
+#' @importFrom ggplot2 scale_size
+#' @importFrom ggplot2 scale_x_discrete scale_y_discrete  
+#' @importFrom ggplot2 scale_x_continuous scale_y_continuous  
+#' @importFrom ggplot2 labs guides element_blank theme theme_bw 
+#' @importFrom rlang .data
+
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## ------ global variable ------
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## SURF pre-defined 
 surf.events <- c("SE", "RI", "A3SS", "A5SS", "AFE", "A5U", "IAP", "TAP")
-surf.colors <- c('#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#b2df8a','#33a02c','#a6cee3','#1f78b4')
+surf.colors <- c('#fb9a99','#e31a1c','#fdbf6f','#ff7f00',
+                 '#b2df8a','#33a02c','#a6cee3','#1f78b4')
 surf.features <- c("up3", "up2", "up1", "bd1", "bd2", "dn1", "dn2", "dn3")
-greek.features <- c(bquote(alpha), bquote(beta), bquote(gamma), bquote(delta), bquote(epsilon), bquote(zeta), bquote(eta), bquote(theta))
+greek.features <- c(bquote(alpha), bquote(beta), bquote(gamma), bquote(delta), 
+                    bquote(epsilon), bquote(zeta), bquote(eta), bquote(theta))
 
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -365,7 +387,7 @@ setMethod("plotDispFunc", "surf",
 ## ------ _ Volcano plot ------
 #' Volcano plot
 #' 
-#' Create a volcano plot for the DrSeq results, stratefied by alternative transcriptional regulation (ATR) event types.
+#' Create a volcano plot for the DrSeq results, stratified by alternative transcriptional regulation (ATR) event types.
 #' A volcano plot is a scatter plot of tested units, where log2 fold change is in x-axis, and -log10(p.value) is in y-axis.
 #' 
 #' @param object a \code{drseqResults} object.
@@ -426,7 +448,8 @@ setMethod(
     g <- ggplot(dat, aes(x, y, color = color, size = size)) + 
       geom_vline(xintercept = c(lfc.cutoff[1], lfc.cutoff[2]), 
                  color = "grey40", linetype = 2, alpha = .9) + 
-      geom_hline(yintercept = fdr.cutoff, color = "grey40", linetype = 2, alpha = .9) +
+      geom_hline(yintercept = fdr.cutoff, color = "grey40", 
+                 linetype = 2, alpha = .9) +
       geom_point(alpha = .7) +
       scale_color_manual(values = c(colrs, "No Sig." = "grey60")) + 
       scale_size(range = c(.1, .7)) + 
@@ -458,7 +481,7 @@ setMethod("volcano.plot", "surf",
 #' 
 #' @param object a \code{surf} object from \link{faseq} or \link{faseqFit} or \link{faseqInfer}.
 #' @param plot.event \code{character} vector, event type wanted. In particular, "all" means all event types.
-#' @param fdr.cutoff \code{numeric}, theshold for adjusted p-value in functional association test.
+#' @param fdr.cutoff \code{numeric}, threshold for adjusted p-value in functional association test.
 #' @return a \code{ggplot} object.
 #' @export
 fa.plot <- function(object, 
@@ -492,7 +515,9 @@ fa.plot <- function(object,
     geom_boxplot(color = "grey30", alpha = .9, 
                  outlier.shape = ".", outlier.color = "grey80") + 
     labs(y = "feature signal") + 
-    scale_fill_manual(values = c("increase" = "#4d9221", "no change" = "grey50","decrease" = "#c51b7d")) + 
+    scale_fill_manual(values = c("increase" = "#4d9221", 
+                                 "no change" = "grey50",
+                                 "decrease" = "#c51b7d")) + 
     scale_x_discrete(breaks = surf.features, labels = greek.features) +
     facet_grid(cols = vars(strip), scales = "free_x", space = "free_x") + 
     theme_bw() + 
@@ -506,7 +531,8 @@ fa.plot <- function(object,
       group_by(event, feature) %>% 
       summarise(n = n()) %>%
       ungroup() %>%
-      left_join(data.frame(faseqResults(object)), by = c("event", "feature")) %>% 
+      left_join(data.frame(faseqResults(object)), 
+                by = c("event", "feature")) %>% 
       mutate(
         event = factor(event, surf.events),
         logp = - log10(padj), 
@@ -518,11 +544,16 @@ fa.plot <- function(object,
       ) 
   })
   g2 <- ggplot(dat2, aes(x, logp, color = functional)) +
-    geom_hline(yintercept = -log10(fdr.cutoff), color = "grey40", alpha = .9, linetype = 2, show.legend = T) + 
+    geom_hline(yintercept = -log10(fdr.cutoff), color = "grey40", 
+               alpha = .9, linetype = 2, show.legend = T) + 
     geom_point(alpha = .9) +
-    stat_summary(aes(group = functional), fun = sum, geom = "line", alpha = .8) +
-    labs(x = "location feature", y = "-log"[10]~"(adjusted p value)", color = "association") +
-    scale_color_manual(values = c(exclusion = "#4d9221", inclusion = "#c51b7d", "not tested" = "grey40")) + 
+    stat_summary(aes(group = functional), alpha = .8, 
+                 fun = sum, geom = "line") +
+    labs(x = "location feature", y = "-log"[10]~"(adjusted p value)", 
+         color = "association") +
+    scale_color_manual(values = c(exclusion = "#4d9221", 
+                                  inclusion = "#c51b7d", 
+                                  "not tested" = "grey40")) + 
     scale_x_discrete(breaks = surf.features, labels = greek.features) +
     facet_grid(cols = vars(event), scales = "free_x", space = "free_x") + 
     theme_bw() + 
@@ -726,7 +757,7 @@ abs.max = function(x, ...) {
 #' @param x matrix
 #' @param group group label of rows, disregard names, will be coerce to factor
 #' @return character vector of length \code{nrow(x)}, row names. 
-#' If `x` doesn't have row.names, this function names it sequantially (from 1).
+#' If `x` doesn't have row.names, this function names it sequentially (from 1).
 clusterByGroup = function(x, group) {
   ## check
   if (nrow(x) < 2 || is.null(dim(x))) {
@@ -762,7 +793,7 @@ clusterByGroup = function(x, group) {
 #' 
 #' @param grl a list of [GRanges].
 #' @param use.names logical, whether (`TRUE`) to inherit list names.
-#' @param sep character, seperator between list names and GRanges names.
+#' @param sep character, separator between list names and GRanges names.
 #' @param save.names logical or character, if not FALSE, save list names as an attribute (i.e., [mcols()]).s
 #' @return a [GRanges] object
 c_granges <- function(grl, 
@@ -942,8 +973,8 @@ tximport2 = function (files,
 {
   type <- match.arg(type, c("none", "kallisto", "salmon", "sailfish", 
                             "rsem"))
-  countsFromAbundance <- match.arg(countsFromAbundance, c("no", 
-                                                          "scaledTPM", "lengthScaledTPM"))
+  countsFromAbundance <- match.arg(
+    countsFromAbundance, c("no", "scaledTPM", "lengthScaledTPM"))
   stopifnot(all(file.exists(files)))
   if (!txIn & txOut) 
     stop("txOut only an option when transcript-level data is read in (txIn=TRUE)")
@@ -1005,13 +1036,16 @@ tximport2 = function (files,
           }
           raw <- try(as.data.frame(importer(files[i])))
           if (inherits(raw, "try-error")) 
-            stop("tried but couldn't use reader() without error\n  user will need to define the importer() as well")
+            stop("tried but couldn't use reader() without error\n", 
+                 "user will need to define the importer() as well")
         }
       }
       if (is.null(tx2gene) & !txOut) {
         if (!geneIdCol %in% names(raw)) {
           if (!quiet) message()
-          stop("\n\n  tximport failed at summarizing to the gene-level.\n  Please see 'Solutions' in the Details section of the man page: ?tximport\n\n")
+          stop("\n\n  tximport failed at summarizing to the gene-level.\n", 
+               "Please see 'Solutions' in the Details section of the man page:", 
+               "?tximport\n\n")
         }
         stopifnot(all(c(lengthCol, abundanceCol) %in% 
                         names(raw)))

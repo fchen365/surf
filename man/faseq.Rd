@@ -28,7 +28,7 @@ faseq(
 
 \item{signal.type}{\code{character}, indicate the type of feature signal wanted, support "TPM" for Transcripts Per Kilobase Million, "FPKM" for Fragments Per Kilobase Million (for paired-end reads) and Reads Per Kilobase Million (for single-end reads), and "raw.count" for raw.count read counts}
 
-\item{FUN.aggregate}{\code{function}, used for aggreating signals within \code{conditon}, default to mean.}
+\item{FUN.aggregate}{\code{function}, used for aggregating signals within \code{condition}, default to mean.}
 
 \item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \link{featureCounts}}
 
@@ -40,9 +40,9 @@ faseq(
 
 \item{fdr.cutoff}{\code{numeric}, significance cutoff for the adjusted p-values of FAT.}
 
-\item{signal.cutoff}{\code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if dont wnat to filter those location with low eCLIP signals of the RBP.}
+\item{signal.cutoff}{\code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if don't want to filter those location with low eCLIP signals of the RBP.}
 
-\item{verbose}{\code{logical}, whether (default to \code{TRUE}) to echo progess}
+\item{verbose}{\code{logical}, whether (default to \code{TRUE}) to echo progress}
 }
 \value{
 a \code{surf} object DASeq results updated.

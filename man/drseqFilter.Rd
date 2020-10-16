@@ -30,7 +30,7 @@ drseqFilter(
 a \code{surf} object, with three columns added:
 \item{adjMean}{adjusted base mean of the event from RNA-seq data.}
 \item{group}{group labels of ATR events, \code{increase} for increased REU upon RBP knock-down, and \code{decrease} for decreased, and \verb{no change} for no-changed.}
-\item{included}{logical, indicating whether the event is included into SURF ananlysis module 2.}
+\item{included}{logical, indicating whether the event is included into SURF analysis module 2.}
 }
 \description{
 Filter DrSeq results for the analysis module 2 of SURF (DASeq).

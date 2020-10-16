@@ -40,7 +40,7 @@ drseq(
     for more examples of other designs.
   }
 
-\item{remove.overlap.exon}{\code{logical}, remove overlaping exons across genes (default to \code{FALSE}).}
+\item{remove.overlap.exon}{\code{logical}, remove overlapping exons across genes (default to \code{FALSE}).}
 
 \item{anno.prefix}{\code{character}, file names for outputting annotation files.}
 
@@ -58,7 +58,7 @@ drseq(
 
 \item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \code{featureCounts}.}
 
-\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progess.}
+\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
 \value{
 a \code{surf} object

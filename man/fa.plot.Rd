@@ -16,7 +16,7 @@ fa.plot(
 
 \item{plot.event}{\code{character} vector, event type wanted. In particular, "all" means all event types.}
 
-\item{fdr.cutoff}{\code{numeric}, theshold for adjusted p-value in functional association test.}
+\item{fdr.cutoff}{\code{numeric}, threshold for adjusted p-value in functional association test.}
 }
 \value{
 a \code{ggplot} object.

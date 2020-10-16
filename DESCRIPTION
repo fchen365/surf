@@ -17,30 +17,41 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.5),
-    tidyverse,
     doParallel,
     DEXSeq
 Imports:
     arm,
     doMC,
     MASS,
+    rlang,
+    dplyr,
+    tidyr,
+    readr,
+    purrr,
     doRNG,
     scales,
+    tibble,
     ggpubr,
     Matrix,
     AUCell,
     methods,
+    stringr,
+    forcats,
+    ggplot2,
     reshape2,
+    magrittr,
     Rsubread,
     ensembldb,
+    tidyverse,
     data.table,
-    rtracklayer
+    rtracklayer,
+    SummarizedExperiment,
 Suggests:
     knitr,
     testthat,
     markdown,
-    BiocStyle,
     rmarkdown,
+    BiocStyle,
 Roxygen: 
     list(markdown = TRUE)
 VignetteBuilder: knitr

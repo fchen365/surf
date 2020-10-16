@@ -610,8 +610,8 @@ findNeighborFeature = function(plas,
 #' @param depth.intron \code{integer}, extended depth into intron, default 300 nt.
 #' @param cores \code{integer}, number of computing cores to use.
 #' @param remove.duplicate \code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).
-#' @param verbose logical, whether (default to \code{TRUE}) to echo progess
-#' @return a \code{surf} object with one added column called \code{feature}, which caontains a \code{GRangesList} of extracted location features.
+#' @param verbose logical, whether (default to \code{TRUE}) to echo progress
+#' @return a \code{surf} object with one added column called \code{feature}, which contains a \code{GRangesList} of extracted location features.
 getFeature = function(isoPLas, anno_event,
                       depth.exon = 100,
                       depth.intron = 300,

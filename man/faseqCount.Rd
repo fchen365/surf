@@ -24,11 +24,11 @@ faseqCount(
 
 \item{signal.type}{\code{character}, indicate the type of feature signal wanted, support "TPM" for Transcripts Per Kilobase Million, "FPKM" for Fragments Per Kilobase Million (for paired-end reads) and Reads Per Kilobase Million (for single-end reads), and "raw.count" for raw.count read counts}
 
-\item{FUN.aggregate}{\code{function}, used for aggreating signals within \code{conditon}, default to mean.}
+\item{FUN.aggregate}{\code{function}, used for aggregating signals within \code{condition}, default to mean.}
 
 \item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \link{featureCounts}}
 
-\item{verbose}{\code{logical}, whether (default to \code{TRUE}) to echo progess}
+\item{verbose}{\code{logical}, whether (default to \code{TRUE}) to echo progress}
 
 \item{minMQS;minOverlap;isPairedEnd;...}{parameters for \link{featureCounts}. \code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25\% of the typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.}
 }
@@ -36,7 +36,7 @@ faseqCount(
 a \code{surf} object, with (i) one column \code{featureSignal} added, (2) \code{faseqData} slot updated, and (3) \code{sampleData} slot updated.
 }
 \description{
-This function uantifies feature signals for location features using CLIP-seq data.
+This function quantifies feature signals for location features using CLIP-seq data.
 You align CLIP-seq reads to the genome and provide FASeq with the resulting bam files.
 We will take care of the rest.
 }

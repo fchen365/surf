@@ -18,7 +18,7 @@ drseqFit(
 
 \item{cores}{\code{integer}, number of computing workers.}
 
-\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progess.}
+\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
 \value{
 a \code{surf} object with (1) \code{drseqResults} and \code{sampleData} slot updated and (2) three added columns:

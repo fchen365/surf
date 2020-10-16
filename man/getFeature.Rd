@@ -27,10 +27,10 @@ getFeature(
 
 \item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).}
 
-\item{verbose}{logical, whether (default to \code{TRUE}) to echo progess}
+\item{verbose}{logical, whether (default to \code{TRUE}) to echo progress}
 }
 \value{
-a \code{surf} object with one added column called \code{feature}, which caontains a \code{GRangesList} of extracted location features.
+a \code{surf} object with one added column called \code{feature}, which contains a \code{GRangesList} of extracted location features.
 }
 \description{
 Generate location features for each ATR event.

@@ -33,7 +33,7 @@ drseqCount(
     for more examples of other designs.
   }
 
-\item{remove.overlap.exon}{\code{logical}, remove overlaping exons across genes (default to \code{FALSE}).}
+\item{remove.overlap.exon}{\code{logical}, remove overlapping exons across genes (default to \code{FALSE}).}
 
 \item{anno.prefix}{\code{character}, file names for outputting annotation files.}
 
@@ -41,7 +41,7 @@ drseqCount(
 
 \item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \code{featureCounts}.}
 
-\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progess.}
+\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 
 \item{...}{additional parameters for \code{Rsubread::featureCounts}.}
 

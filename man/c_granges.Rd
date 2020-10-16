@@ -11,7 +11,7 @@ c_granges(grl, use.names = T, sep = ".", save.names = F)
 
 \item{use.names}{logical, whether (\code{TRUE}) to inherit list names.}
 
-\item{sep}{character, seperator between list names and GRanges names.}
+\item{sep}{character, separator between list names and GRanges names.}
 
 \item{save.names}{logical or character, if not FALSE, save list names as an attribute (i.e., \code{\link[=mcols]{mcols()}}).s}
 }

@@ -12,7 +12,7 @@ getRankings(
 )
 }
 \arguments{
-\item{exprMat}{Expression matrix (genes/trnascripts as rows, samples as columns)
+\item{exprMat}{Expression matrix (genes/transcripts as rows, samples as columns)
 The expression matrix can also be provided as one of the Bioconductor classes:
 \itemize{
 \item \link{RangedSummarizedExperiment} and derived classes:

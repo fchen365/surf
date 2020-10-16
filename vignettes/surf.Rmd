@@ -1,5 +1,5 @@
 ---
-title: "Intergrative analysis of CLIP-seq and RNA-seq with `surf`"
+title: "Integrative analysis of CLIP-seq and RNA-seq with `surf`"
 author: "Fan Chen (fan.chen@wisc.edu)"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -56,7 +56,7 @@ genes <- resize(genes, width(genes) + 300, fix = "center")
 export(genes, "~/Downloads/gencode.v32.primary.region.bed")
 ```
 
-This document provides an example of using `surf` to ananlyze CLIP-seq and RNA-seq for predicting RNA-binding protein functions. `surf` is currently available from [GitHub](https://github.com/fchen365/surf.git). The analysis consists of four steps, which we describe in order. 
+This document provides an example of using `surf` to analyze CLIP-seq and RNA-seq for predicting RNA-binding protein functions. `surf` is currently available from [GitHub](https://github.com/fchen365/surf.git). The analysis consists of four steps, which we describe in order. 
 
 ## Step 1: parse ATR events from genome annotation.
 
@@ -75,8 +75,8 @@ The function allows multiple options.
 * `cores` specifies the number of computing processors. 
 * `min.event.length` allows you to filter out ATR event by a lower limit of lenght (in bp).
 * `location.feature` determines whether location features should also be extracted. This is useful if you are interested in perform differential regulation of ATR event using RNA-seq (DrSeq). The location features will be used to quantify CLIP-seq signals (and will not be used by the second step, DrSeq). 
-* `depth.exon` and `depth.intron` is relavent only if `location.feature=TRUE`. The configure the the sizes of location features. 
-* `remove.duplicate` defines wehther identical event should be removed. 
+* `depth.exon` and `depth.intron` is relevant only if `location.feature=TRUE`. The configure the the sizes of location features. 
+* `remove.duplicate` defines whether identical event should be removed. 
 * `verbose` controls whether or not the progress should be print out. 
 
 This step outputs a `surf` object. The `surf` object contains a `DataFrame`. 
@@ -109,7 +109,6 @@ Subsetting by overlaps is also implemented (`subsetByOverlaps`).
 subsetByOverlaps(event, ranges = gr0)
 ```
 
-
 ## Step 2: detect differential regulation (DR) of ATR events
 
 ```{bash prepare RNA-seq bam files, include=F, eval=F}
@@ -129,7 +128,7 @@ samtools view -b $WT2.sorted.bam chr16 -h chr16 > $WT2.chr16.bam
 conda deactivate
 ```
 
-To detect the differnetial regulation of ATR events, use `drseq()` function. The function requires a `sampleData` table that specifies the sample information of RNA-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned RNA-seq reads. 
+To detect the differential regulation of ATR events, use `drseq()` function. The function requires a `sampleData` table that specifies the sample information of RNA-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned RNA-seq reads. 
 ```{r drseq, eval=F}
 rna_seq_sample <- data.frame(
   row.names = c('sample1', 'sample2', 'sample3', 'sample4'),
@@ -189,7 +188,7 @@ samtools view -b $SMI.sort.bam chr16 -h chr16 > $SMI.chr16.bam
 conda deactivate
 ```
 
-To detect the differnetial regulation of ATR events, use `faseq()` function. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis. `fdr.cutoff` is the cutoff of FDR (BH adjusted p-values) in functional association testings. The default is 0.05 (here we set this to 0.3 for illustration purpose). `signal.cutoff` is the cut-off threshold for the eCLIP signals, default to 20, and is set to 2 for illustration purpose. 
+To detect the differential regulation of ATR events, use `faseq()` function. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis. `fdr.cutoff` is the cutoff of FDR (BH adjusted p-values) in functional association testings. The default is 0.05 (here we set this to 0.3 for illustration purpose). `signal.cutoff` is the cut-off threshold for the eCLIP signals, default to 20, and is set to 2 for illustration purpose. 
 ```{r, eval=F}
 clip_seq_sample = data.frame(
   row.names = c('sample5', 'sample6', 'sample7'),

@@ -11,13 +11,13 @@ faseqInfer(event, fdr.cutoff = 0.05, signal.cutoff = 20)
 
 \item{fdr.cutoff}{\code{numeric}, significance cutoff for the adjusted p-values of FAT.}
 
-\item{signal.cutoff}{\code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if dont wnat to filter those location with low eCLIP signals of the RBP.}
+\item{signal.cutoff}{\code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if don't want to filter those location with low eCLIP signals of the RBP.}
 }
 \value{
 a \code{surf} object, with one added \code{inferredFeature} column (inclusion/exclusion/none).
 }
 \description{
-Inference the functionality of individual locaiton features,
+Inference the functionality of individual location features,
 where the RBP is likely to interact and regulate the corresponding ATR event.
 A location feature is inferred as function associated if
 (i) it is included in FAT, and
