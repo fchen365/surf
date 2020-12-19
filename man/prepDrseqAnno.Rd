@@ -16,13 +16,13 @@ prepDrseqAnno(
 \arguments{
 \item{anno_event}{a \code{surf} object}
 
-\item{anno.prefix}{\code{character}, prefix of exon/event annotation files for saving. These files are needed by \code{Rsubread::featureCounts}.}
+\item{anno.prefix}{\code{character}, prefix of exon/event annotation files for saving. These files are needed by \link[Rsubread:featureCounts]{Rsubread::featureCounts}.}
 
-\item{anno.format}{\code{character}, e.g. "gtf", as accepted by \code{rtracklayer::export}.}
+\item{anno.format}{\code{character}, e.g. "gtf", as accepted by \link[rtracklayer:export]{rtracklayer::export}.}
 
 \item{remove.overlap.exon}{\code{logical}, remove overlapping exons across genes (default to \code{FALSE}).}
 
-\item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \code{Rsubread::featureCounts}.}
+\item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \link[Rsubread:featureCounts]{Rsubread::featureCounts}.}
 
 \item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
@@ -30,6 +30,6 @@ prepDrseqAnno(
 \code{NULL}, the function is a procedure and only output/export results to file system, except for messages and warnings.
 }
 \description{
-To use the \code{useMetaFeatures} functionality of \link{Rsubread::featureCounts}, we need the GTF input.
+To use the \code{useMetaFeatures} functionality of \link[Rsubread:featureCounts]{Rsubread::featureCounts}, we need the GTF input.
 This function helps to produce the \emph{two} annotation files ("event" and "exon") needed by \link{drseqCount}.
 }

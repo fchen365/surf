@@ -14,9 +14,14 @@ fa.plot(
 \arguments{
 \item{object}{a \code{surf} object from \link{faseq} or \link{faseqFit} or \link{faseqInfer}.}
 
-\item{plot.event}{\code{character} vector, event type wanted. In particular, "all" means all event types.}
+\item{plot.event}{\code{character} vector, event type wanted.
+In particular, "all" means all event types.}
 
-\item{fdr.cutoff}{\code{numeric}, threshold for adjusted p-value in functional association test.}
+\item{trim}{\code{numeric}, trimming quantile.
+The head and tail \code{trim/2} portion of the signal will be trimmed/ignored.}
+
+\item{fdr.cutoff}{\code{numeric}, threshold for adjusted p-value in functional
+association test.}
 }
 \value{
 a \code{ggplot} object.

@@ -22,9 +22,9 @@ getIsoPartsList(
 }
 \value{
 a \code{list} named by gene_id, each of which contains:
-\item{segment}{GRanges, genomic data of parts list.}
-\item{label}{integer vector, gene model (0 for intron) and exon numbers (coded as integer 1,2,...).}
-\item{layout}{lgCMatrix, transcript structure.}
+\item{segment}{\code{GRanges}, genomic data of parts list.}
+\item{label}{\code{integer} vector, gene model (0 for intron) and exon numbers (coded as integer 1,2,...).}
+\item{layout}{\code{lgCMatrix}, transcript structure.}
 }
 \description{
 Parse the isoform parts list from annotation.

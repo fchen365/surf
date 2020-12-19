@@ -7,14 +7,14 @@
 findBodyFeature(plas, type = c("lead", "lag"), depth.exon = 100)
 }
 \arguments{
-\item{plas}{one element from isoPLas.}
+\item{plas}{one element in \code{isoPLas}.}
 
-\item{type}{character, either "lead" for upstream, or "lag" for downstream}
+\item{type}{\code{character}, either "lead" for upstream, or "lag" for downstream}
 
 \item{depth.exon}{depth extended into exon, default is 100 nt}
 }
 \value{
-a \code{GRangesList}
+a \code{GRangesList}.
 }
 \description{
 Locate the body feature of AS events and extract the genomic bins.

@@ -17,9 +17,9 @@ parseEvent(
 )
 }
 \arguments{
-\item{anno.file}{\code{character(1)}, directory to genome annotation file.}
+\item{anno.file}{\code{character}, directory to genome annotation file.}
 
-\item{anno.format}{\code{character(1)}, the format of the annotation file. The format can be inferred from \code{anno.file} automatically, unless it is not implicit by the extension.}
+\item{anno.format}{\code{character}, the format of the annotation file. The format can be inferred from \code{anno.file} automatically, unless it is not implicit by the extension.}
 
 \item{cores}{\code{integer}, number of computing cores to use.}
 

@@ -21,7 +21,9 @@ drseqCount(
 \arguments{
 \item{event}{a \code{surf} object from \link{parseEvent}.}
 
-\item{sampleData}{\code{data.frame}, describes the RNA-seq samples, contains at least two columns -- \code{bam} and \code{condition}, the row.names represent sample names.}
+\item{sampleData}{\code{data.frame}, describes the RNA-seq samples and
+contains at least two columns -- \code{bam} and \code{condition},
+whose \code{row.names} represent sample names.}
 
 \item{design}{
     A formula which specifies the design of the experiment. It must
@@ -35,24 +37,28 @@ drseqCount(
 
 \item{remove.overlap.exon}{\code{logical}, remove overlapping exons across genes (default to \code{FALSE}).}
 
-\item{anno.prefix}{\code{character}, file names for outputting annotation files.}
+\item{anno.prefix}{\code{character}, file names for outputting annotation files.
+If prefix is absent, hidden file will be output to the current working directory.}
 
-\item{anno.format}{\code{character}, e.g. "gtf", as accepted by \link{rtracklayer::export}.}
+\item{anno.format}{\code{character}, e.g. "gtf", as accepted by \link[rtracklayer:export]{rtracklayer::export}.}
+
+\item{minMQS, isPairedEnd}{as defined in \link[Rsubread:featureCounts]{Rsubread::featureCounts}.
+Note that the default is customized for SURF (see details for more information).}
 
 \item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \code{featureCounts}.}
 
 \item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 
-\item{...}{additional parameters for \code{Rsubread::featureCounts}.}
-
-\item{minMQS;isPairedEnd}{as defined in \link{Rsubread::featureCounts}. Note that the default is customized for SURF (see details for more information).}
+\item{...}{additional parameters for \link[Rsubread:featureCounts]{Rsubread::featureCounts}.}
 }
 \value{
 a \code{surf} object, with \code{drseqData} slot updated.
 }
 \description{
-This function creates the \code{drseqData} slot needed by DrSeq analysis, which is a \link{DEXSeqDataSet}.
-This function requires two DrSeq annotation files created by \link{prepDrseqAnno}. Two files share the same prefix and end with ".exon.<file type>" and ".event.<file.type>" respective.
+This function creates the \code{drseqData} slot needed by DrSeq analysis, which is a \link[DEXSeq:DEXSeqDataSet]{DEXSeq::DEXSeqDataSet}.
+This function requires two DrSeq annotation files created by \link{prepDrseqAnno}.
+Two files have the same prefix (\code{anno.prefix}), the same suffix (\code{anno.format}),
+and only differ by "exon/event".
 If annotation files are missing, this function can create them freshly, which might take some time.
 This function counts the RNA-seq reads on ATR events and genes using \code{featureCounts}.
 }

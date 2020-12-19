@@ -2,12 +2,17 @@
 % Please edit documentation in R/help.R
 \name{sampleData}
 \alias{sampleData}
+\alias{sampleData,SummarizedExperiment-method}
 \title{Sample Data}
 \usage{
 sampleData(object, ...)
+
+\S4method{sampleData}{SummarizedExperiment}(object)
 }
 \arguments{
-\item{type}{\code{character}, any subset of "RNA-seq", "CLIP-seq", and "External".}
+\item{object}{any object that contains a \code{sampleData} slot.}
+
+\item{...}{various parameters.}
 }
 \value{
 \code{DataFrame} or \code{DataFrameList} (if \code{length(type)>1}).

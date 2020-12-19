@@ -7,16 +7,16 @@
 c_granges(grl, use.names = T, sep = ".", save.names = F)
 }
 \arguments{
-\item{grl}{a list of \link{GRanges}.}
+\item{grl}{a \code{list} of \code{GRanges}.}
 
-\item{use.names}{logical, whether (\code{TRUE}) to inherit list names.}
+\item{use.names}{\code{logical}, whether (\code{TRUE}) to inherit list names.}
 
-\item{sep}{character, separator between list names and GRanges names.}
+\item{sep}{\code{character}, separator between list names and GRanges names.}
 
-\item{save.names}{logical or character, if not FALSE, save list names as an attribute (i.e., \code{\link[=mcols]{mcols()}}).s}
+\item{save.names}{\code{logical} or \code{character}, if not \code{FALSE}, save list names as an attribute (i.e., \code{mcols()}).}
 }
 \value{
-a \link{GRanges} object
+a \code{GRanges} object
 }
 \description{
 Concatenate a list of GRanges

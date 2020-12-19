@@ -15,7 +15,7 @@ getFeature(
 )
 }
 \arguments{
-\item{isoPLas}{isoform parts list with AS events}
+\item{isoPLas}{isoform parts list with AS events.}
 
 \item{anno_event}{\code{DataFrame}, event annotation w/o features}
 
@@ -27,7 +27,7 @@ getFeature(
 
 \item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).}
 
-\item{verbose}{logical, whether (default to \code{TRUE}) to echo progress}
+\item{verbose}{\code{logical}, whether (default to \code{TRUE}) to echo progress}
 }
 \value{
 a \code{surf} object with one added column called \code{feature}, which contains a \code{GRangesList} of extracted location features.

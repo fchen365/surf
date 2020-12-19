@@ -18,22 +18,30 @@ daseq(
 )
 }
 \arguments{
-\item{event}{a \code{surf} object from \link{faseqInference} or \link{faseq}.}
+\item{event}{a \code{surf} object from \link{faseqInfer} or \link{faseq}.}
 
 \item{rankings}{a \code{SummarizedExperiment} object from \link{getRankings}.}
 
-\item{sampleData}{\code{data.frame}, external samples, which contain \code{condition} column, whose row names must match the column names of \code{rankings}.}
+\item{sampleData}{\code{data.frame}, external samples, which contain \code{condition} column,
+whose row names must match the column names of \code{rankings}.}
 
 \item{target.type}{\code{character(1)}, either "transcript" or "gene".}
+
+\item{targetSets}{a named \code{list} of \code{character}, the target IDs.}
+
+\item{controlSets}{a named \code{list} of \code{character}, the control IDs.}
 
 \item{n.sample}{\code{integer}, number of times of controlSet sampling, default to 1000.}
 
 \item{cores}{\code{integer}, number of computing cores.}
 
-\item{verbose}{\code{logical}, whether to print out progress report.}
+\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
+
+\item{...}{additional parameters for \link[AUCell:AUCell_calcAUC]{AUCell::AUCell_calcAUC}.}
 }
 \value{
-a \code{daseqResults} object if \code{targetSets} was given, a \code{surf} object if \code{event} was give.
+a \code{daseqResults} object if \code{targetSets} was given,
+or a \code{surf} object if \code{event} was give.
 }
 \description{
 Detect differential activity using the AUC measure and RNA-seq quantification.

@@ -28,7 +28,9 @@ drseq(
 \arguments{
 \item{event}{a \code{surf} object from \link{parseEvent}.}
 
-\item{sampleData}{\code{data.frame}, describes the RNA-seq samples, contains at least two columns -- \code{bam} and \code{condition}, the row.names represent sample names.}
+\item{sampleData}{\code{data.frame}, describes the RNA-seq samples and
+contains at least two columns -- \code{bam} and \code{condition},
+whose \code{row.names} represent sample names.}
 
 \item{design}{
     A formula which specifies the design of the experiment. It must
@@ -42,11 +44,32 @@ drseq(
 
 \item{remove.overlap.exon}{\code{logical}, remove overlapping exons across genes (default to \code{FALSE}).}
 
-\item{anno.prefix}{\code{character}, file names for outputting annotation files.}
+\item{anno.prefix}{\code{character}, file names for outputting annotation files.
+If prefix is absent, hidden file will be output to the current working directory.}
 
-\item{anno.format}{\code{character}, e.g. "gtf", as accepted by \link{rtracklayer::export}.}
+\item{anno.format}{\code{character}, e.g. "gtf", as accepted by \link[rtracklayer:export]{rtracklayer::export}.}
 
-\item{...}{parameters for \link{Rsubread::featureCounts}.}
+\item{minMQS}{as defined in \link[Rsubread:featureCounts]{Rsubread::featureCounts}.
+Note that the default is customized for SURF (see details for more information).}
+
+\item{isPairedEnd}{as defined in \link[Rsubread:featureCounts]{Rsubread::featureCounts}.
+Note that the default is customized for SURF (see details for more information).}
+
+\item{...}{parameters for \link[Rsubread:featureCounts]{Rsubread::featureCounts}.}
+
+\item{fullModel}{
+     The full model formula
+  }
+
+\item{reducedModel}{
+     Null model formula.
+  }
+
+\item{fitExpToVar}{
+    A variable name contained in the sample data. The expression 
+    values will be fitted to this variable using the the formula 
+    " ~ sample + fitExpToVar * exon".
+  }
 
 \item{drseq.fdr}{\code{numeric}, FDR (BH procedure) adjusted p-value cut-off.}
 
@@ -61,7 +84,7 @@ drseq(
 \item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
 \value{
-a \code{surf} object
+a \code{surf} object containing the DrSeq result in the \code{drseqResults} slot.
 }
 \description{
 Perform the differential REU (DrSeq) test in a single command.

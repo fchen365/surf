@@ -13,7 +13,9 @@ heatmapAUC(object, ...)
 \S4method{heatmapAUC}{daseqResults}(object, group = NULL)
 }
 \arguments{
-\item{object}{for \code{surf} object, it should be output from \link{daseq}.}
+\item{object}{a \code{surf} object output by \link{daseq}.}
+
+\item{...}{various parameters.}
 
 \item{group}{an optional \code{factor} vector, group of rows.}
 }

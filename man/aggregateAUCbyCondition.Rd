@@ -7,7 +7,9 @@
 aggregateAUCbyCondition(object, sampleData, FUN.aggregate = "median")
 }
 \arguments{
-\item{object}{a \code{SummarizedExperiment} output from \link{calculateAUC}}
+\item{object}{a \code{SummarizedExperiment} output from \link{calculateAUC}.}
+
+\item{sampleData}{\code{data.frame} of sample data, which contains a \code{condition} column,}
 
 \item{FUN.aggregate}{function, used for aggregating AUC within \code{condition}, default to \code{mean}.}
 }

@@ -7,13 +7,13 @@
 clusterByGroup(x, group)
 }
 \arguments{
-\item{x}{matrix}
+\item{x}{\code{matrix}.}
 
-\item{group}{group label of rows, disregard names, will be coerce to factor}
+\item{group}{group label of rows, disregard names, will be coerce to \code{factor}.}
 }
 \value{
-character vector of length \code{nrow(x)}, row names.
-If \code{x} doesn't have row.names, this function names it sequentially (from 1).
+\code{character} vector of length \code{nrow(x)}, row names.
+If \code{x} doesn't have \code{row.names}, this function names it sequentially (from 1).
 }
 \description{
 Hierarchical clustering of rows by groups

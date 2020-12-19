@@ -21,6 +21,8 @@
 \S4method{sampleData}{surf}(object, type = NULL)
 }
 \arguments{
+\item{object}{a \code{surf} object output by \link{daseq}.}
+
 \item{type}{\code{character}, any subset of "RNA-seq", "CLIP-seq", and "External".}
 }
 \description{

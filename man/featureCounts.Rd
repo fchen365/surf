@@ -7,13 +7,15 @@
 featureCounts(..., verbose = F)
 }
 \arguments{
-\item{...}{parameters for \code{Rsubread::featureCounts}.}
+\item{...}{parameters for \code{featureCounts}.}
+
+\item{verbose}{\code{logical}, whether to print out the progress information.}
 }
 \value{
-See \code{Rsubread::featureCounts} documentation.
+See \link[Rsubread:featureCounts]{Rsubread::featureCounts} documentation.
 }
 \description{
-This is a wrapper of \code{Rsubread::featureCounts} allowing verbose suppression.
+This is a wrapper of \link[Rsubread:featureCounts]{Rsubread::featureCounts} allowing verbose suppression.
 This redirects the output to \verb{/dev/null}, so it assumes a UNIX-like
 system.
 }

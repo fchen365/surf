@@ -21,7 +21,7 @@ library(rtracklayer)
 library(usethis)
 ## parse events from genome annotation (GTF)
 ## /path/to/genome/annotation/file
-anno_file <- "~/Downloads/gencode.vM23.primary_assembly.annotation.gtf"
+anno_file <- "~/Downloads/surf_vignette/gencode.vM23.primary_assembly.annotation.gtf"
 anno_mm <- import(anno_file)
 gene_id <- anno_mm[seqnames(anno_mm) == "chr14" &
                      anno_mm$gene_type == "protein_coding" &
@@ -30,7 +30,7 @@ gene_id_sampled <- sample(unique(gene_id), 50)
 anno_mm_select <- anno_mm[anno_mm$gene_id %in% gene_id_sampled]
 
 ## Mus musculus
-export(anno_mm_select, "~/Downloads/gencode.vM23.primary.example.gtf")
+export(anno_mm_select, "~/Downloads/surf_vignette/gencode.vM23.primary.example.gtf")
 ```
 
 ```{r prepare hs annotation, include=F, eval=F}
@@ -38,7 +38,7 @@ library(rtracklayer)
 library(usethis)
 ## parse events from genome annotation (GTF)
 ## /path/to/genome/annotation/file
-anno_file <- "~/Downloads/gencode.v32.primary_assembly.annotation.gtf"
+anno_file <- "~/Downloads/surf_vignette/gencode.v32.primary_assembly.annotation.gtf"
 anno_hs <- import(anno_file)
 gene_id <- anno_hs[seqnames(anno_hs) == "chr16" &
                      anno_hs$gene_type == "protein_coding" &
@@ -47,13 +47,13 @@ gene_id_sampled <- sample(unique(gene_id), 24)
 anno_hs_select <- anno_hs[anno_hs$gene_id %in% gene_id_sampled]
 
 ## Homo sapiens
-export(anno_hs_select, "~/Downloads/gencode.v32.primary.example.gtf")
+export(anno_hs_select, "~/Downloads/surf_vignette/gencode.v32.primary.example.gtf")
 
 ## export gene ranges 
 genes <- reduce(anno_hs_select)
 strand(genes) <- "*"
 genes <- resize(genes, width(genes) + 300, fix = "center")
-export(genes, "~/Downloads/gencode.v32.primary.region.bed")
+export(genes, "~/Downloads/surf_vignette/gencode.v32.primary.region.bed")
 ```
 
 This document provides an example of using `surf` to analyze CLIP-seq and RNA-seq for predicting RNA-binding protein functions. `surf` is currently available from [GitHub](https://github.com/fchen365/surf.git). The analysis consists of four steps, which we describe in order. 
@@ -63,11 +63,11 @@ This document provides an example of using `surf` to analyze CLIP-seq and RNA-se
 The first step is to part genome annotation for alternative transcriptional regulation (ATR) events. For this, `surf` provides a `parseEvent` function which takes as input various types of genome annotation files, e.g., GTF or GFF. 
 ```{r parse, eval=F}
 ## parse events from genome annotation (GTF)
-event <- parseEvent("~/Downloads/gencode.v32.primary.example.gtf")
+event <- parseEvent("~/Downloads/surf_vignette/gencode.v32.primary.example.gtf")
 ```
 ```{r, echo=F}
-# saveRDS(event, "~/Downloads/intermediate1.rds")
-event <- readRDS("~/Downloads/intermediate1.rds")
+# saveRDS(event, "~/Downloads/surf_vignette/intermediate1.rds")
+event <- readRDS("~/Downloads/surf_vignette/intermediate1.rds")
 ```
 
 The function allows multiple options. 
@@ -118,7 +118,7 @@ KD1=$DIR/ENCSR384BDV/ENCFF291ERF
 KD2=$DIR/ENCSR384BDV/ENCFF956SFY
 WT1=$DIR/ENCSR424QCW/ENCFF529TIM
 WT2=$DIR/ENCSR424QCW/ENCFF361KUQ
-# REGION=~/Downloads/gencode.v32.primary.region.bed
+# REGION=~/Downloads/surf_vignette/gencode.v32.primary.region.bed
 module load python/miniconda
 conda activate /workspace/fanchen/conda2
 samtools view -b $KD1.sorted.bam chr16 -h chr16 > $KD1.chr16.bam
@@ -132,15 +132,15 @@ To detect the differential regulation of ATR events, use `drseq()` function. The
 ```{r drseq, eval=F}
 rna_seq_sample <- data.frame(
   row.names = c('sample1', 'sample2', 'sample3', 'sample4'),
-  bam = paste0("~/Downloads/",c("KD1", "KD2", "WT1", "WT2"),".bam"),
+  bam = paste0("~/Downloads/surf_vignette/",c("KD1", "KD2", "WT1", "WT2"),".bam"),
   condition = c('knockdown', 'knockdown', 'wildtype', 'wildtype'),
   stringsAsFactors = FALSE
 ) 
 event <- drseq(event, rna_seq_sample)
 ```
 ```{r, echo=F}
-# saveRDS(event, "~/Downloads/intermediate2.rds")
-event <- readRDS("~/Downloads/intermediate2.rds")
+# saveRDS(event, "~/Downloads/surf_vignette/intermediate2.rds")
+event <- readRDS("~/Downloads/surf_vignette/intermediate2.rds")
 ```
 
 The output of `drseq` (still a `surf` object) contains 6 additional columns (the 7-12th) to the existing output from Step 1. 
@@ -173,7 +173,7 @@ DIR=clip-seq/bam
 IP1=$DIR/ENCSR532VUB/ENCFF751GZQ
 IP2=$DIR/ENCSR532VUB/ENCFF550ZSZ
 SMI=$DIR/ENCSR249WNK/ENCFF842FFD
-# REGION=~/Downloads/gencode.v32.primary.region.bed
+# REGION=~/Downloads/surf_vignette/gencode.v32.primary.region.bed
 module load python/miniconda
 conda activate /workspace/fanchen/conda2
 samtools sort $IP1.bam -o $IP1.sort.bam
@@ -192,7 +192,7 @@ To detect the differential regulation of ATR events, use `faseq()` function. The
 ```{r, eval=F}
 clip_seq_sample = data.frame(
   row.names = c('sample5', 'sample6', 'sample7'),
-  bam = paste0("~/Downloads/",c("IP1", "IP2", "SMI"),".bam"),
+  bam = paste0("~/Downloads/surf_vignette/",c("IP1", "IP2", "SMI"),".bam"),
   condition = c('IP', 'IP', 'SMI'),
   stringsAsFactors = FALSE
 )
@@ -200,8 +200,8 @@ event <- faseq(event, clip_seq_sample,
                min.size = 3, fdr.cutoff = 0.3, signal.cutoff = 2)
 ```
 ```{r, echo=F}
-# saveRDS(event, "~/Downloads/intermediate3.rds")
-event <- readRDS("~/Downloads/intermediate3.rds")
+# saveRDS(event, "~/Downloads/surf_vignette/intermediate3.rds")
+event <- readRDS("~/Downloads/surf_vignette/intermediate3.rds")
 ```
 
 The output of `faseq` (still a `surf` object) adds two additional columns (the 13th and 14th) to the existing output from Step 2. 
@@ -223,11 +223,19 @@ The descriptions of columns can be found by the `mcols()` function:
 mcols(far)
 ```
 
-Two visualization methods are available: (1) `fa.plot()` which plots the fitted dispersion functions for each ATR event type, and (2) `inferredFeature()` which plots the volcano plot for each ATR events stratified by different event types. 
-
-```{r, fig.width=8}
-fa.plot(event)
+Two visualization methods are available. 
+In particular, `fa.plot()` generates the functional association (FA) plots. The FA plot depicts the fitted dispersion functions for each ATR event type. 
+For example, we generate the FA plots for four ATR events: AFE, A5U, IAP, and TAP. 
+In such set of plots, the upper panels (box plots) depicts the actual CLIP-seq binding signals on various location features, stratified by the differential event usage (DEU) upon the RBP knock-down (as the results of Step 2 -- DrSeq). 
+The top strips indicate the ATR event type and the number of ATR events in each DEU group are reported in the parenthesis. 
+The lower panels shows the p-values of the functional association test (FAT). 
+Since we used a very small subset of genes/transcripts in the example, the statistical power is lower than what they are usually like. 
+Despite this, it can still be seen that the binding of the RBP may result in the exclusion of TAP site by binding at either $\gamma$ or $\delta$ location features.
+```{r, fig.width=7, fig.height=4}
+fa.plot(event, plot.event = c("AFE", "A5U", "IAP", "TAP"))
 ```
+
+Next, we could use `inferredFeature()` to infer the transcript targets that of the RBP through specific ATR event type and location feature. 
 ```{r}
 inferredFeature(event)
 ```
@@ -238,7 +246,7 @@ inferredFeature(event)
 `daseq()` function performs RBP-related discovery. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis.
 ```{r, eval=F}
 ## rank transcripts (TPM)
-exprMat <- readRDS('~/Downloads/TcgaTargetGtex_rsem_isoform_tpm_laml_blood_10each.rds')
+exprMat <- readRDS('~/Downloads/surf_vignette/TcgaTargetGtex_rsem_isoform_tpm_laml_blood_10each.rds')
 ## sample data
 ext_sample <- data.frame(
   condition = rep(c('TCGA', 'GTEx'), each = 10),
@@ -249,8 +257,8 @@ ext_sample <- data.frame(
 event <- daseq(event, getRankings(exprMat), cores = 1, ext_sample)
 ```
 ```{r, echo=F}
-# saveRDS(event, "~/Downloads/intermediate4.rds")
-event <- readRDS("~/Downloads/intermediate4.rds")
+# saveRDS(event, "~/Downloads/surf_vignette/intermediate4.rds")
+event <- readRDS("~/Downloads/surf_vignette/intermediate4.rds")
 ```
 
 The output also contains a `daseqResults` slot, which can be simply accessed by the `daseqResults()` function. 

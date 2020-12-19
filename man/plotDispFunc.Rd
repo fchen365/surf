@@ -15,6 +15,8 @@ plotDispFunc(object, ...)
 \arguments{
 \item{object}{a \code{drseqResults} object.}
 
+\item{...}{various parameters.}
+
 \item{x.limits}{\code{numeric(2)}, limits for x-axis.}
 }
 \value{
@@ -27,5 +29,5 @@ This allows DrSeq to better account for the nuance in the over-dispersion presen
 For more details, please refer to SURF paper.
 }
 \details{
-By SURF default, ATR type are colored with the \code{Paired} palette (see \url{http://colorbrewer2.org}).
+By SURF default, ATR type are colored with the \code{Paired} palette.
 }

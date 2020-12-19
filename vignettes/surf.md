@@ -1,7 +1,7 @@
 ---
 title: "Integrative analysis of CLIP-seq and RNA-seq with `surf`"
 author: "Fan Chen (fan.chen@wisc.edu)"
-date: "2020-09-11"
+date: "2020-12-16"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::knitr}
@@ -22,7 +22,7 @@ This document provides an example of using `surf` to analyze CLIP-seq and RNA-se
 The first step is to part genome annotation for alternative transcriptional regulation (ATR) events. For this, `surf` provides a `parseEvent` function which takes as input various types of genome annotation files, e.g., GTF or GFF. 
 
 ```r
-event <- parseEvent("~/Downloads/gencode.v32.primary.example.gtf")
+event <- parseEvent("~/Downloads/surf_vignette/gencode.v32.primary.example.gtf")
 ```
 
 
@@ -301,8 +301,8 @@ To detect the differential regulation of ATR events, use `drseq()` function. The
 
 ```r
 rna_seq_sample <- data.frame(row.names = c("sample1", "sample2", "sample3", "sample4"), 
-    bam = paste0("~/Downloads/", c("KD1", "KD2", "WT1", "WT2"), ".bam"), condition = c("knockdown", 
-        "knockdown", "wildtype", "wildtype"), stringsAsFactors = FALSE)
+    bam = paste0("~/Downloads/surf_vignette/", c("KD1", "KD2", "WT1", "WT2"), ".bam"), 
+    condition = c("knockdown", "knockdown", "wildtype", "wildtype"), stringsAsFactors = FALSE)
 event <- drseq(event, rna_seq_sample)
 ```
 
@@ -481,7 +481,7 @@ For both `surf` and `drseqResults`, two visualization methods are available: (1)
 To detect the differential regulation of ATR events, use `faseq()` function. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis. `fdr.cutoff` is the cutoff of FDR (BH adjusted p-values) in functional association testings. The default is 0.05 (here we set this to 0.3 for illustration purpose). `signal.cutoff` is the cut-off threshold for the eCLIP signals, default to 20, and is set to 2 for illustration purpose. 
 
 ```r
-clip_seq_sample = data.frame(row.names = c("sample5", "sample6", "sample7"), bam = paste0("~/Downloads/", 
+clip_seq_sample = data.frame(row.names = c("sample5", "sample6", "sample7"), bam = paste0("~/Downloads/surf_vignette/", 
     c("IP1", "IP2", "SMI"), ".bam"), condition = c("IP", "IP", "SMI"), stringsAsFactors = FALSE)
 event <- faseq(event, clip_seq_sample, min.size = 3, fdr.cutoff = 0.3, signal.cutoff = 2)
 ```
@@ -566,14 +566,22 @@ mcols(far)
 ## padj             faseq  adjusted p value (BH)
 ```
 
-Two visualization methods are available: (1) `fa.plot()` which plots the fitted dispersion functions for each ATR event type, and (2) `inferredFeature()` which plots the volcano plot for each ATR events stratified by different event types. 
-
+Two visualization methods are available. 
+In particular, `fa.plot()` generates the functional association (FA) plots. The FA plot depicts the fitted dispersion functions for each ATR event type. 
+For example, we generate the FA plots for four ATR events: AFE, A5U, IAP, and TAP. 
+In such set of plots, the upper panels (box plots) depicts the actual CLIP-seq binding signals on various location features, stratified by the differential event usage (DEU) upon the RBP knock-down (as the results of Step 2 -- DrSeq). 
+The top strips indicate the ATR event type and the number of ATR events in each DEU group are reported in the parenthesis. 
+The lower panels shows the p-values of the functional association test (FAT). 
+Since we used a very small subset of genes/transcripts in the example, the statistical power is lower than what they are usually like. 
+Despite this, it can still be seen that the binding of the RBP may result in the exclusion of TAP site by binding at either $\gamma$ or $\delta$ location features.
 
 ```r
-fa.plot(event)
+fa.plot(event, plot.event = c("AFE", "A5U", "IAP", "TAP"))
 ```
 
 ![plot of chunk unnamed-chunk-19](figure/unnamed-chunk-19-1.png)
+
+Next, we could use `inferredFeature()` to infer the transcript targets that of the RBP through specific ATR event type and location feature. 
 
 ```r
 inferredFeature(event)
@@ -606,7 +614,7 @@ inferredFeature(event)
 `daseq()` function performs RBP-related discovery. The function requires a `sampleData` table that specifies the sample information of CLIP-seq. In particular, a `condition` column indicating the experimental conditions is required, as well as a `bam` column giving the file directory for the aligned CLIP-seq reads. In this example, the `min.size` parameter is set to 3 for presentation purpose. For reliable statistical inference, we recommend a value of at least 100 (default, or 50 for event types like retained intron (RI)) in genome-wide analysis.
 
 ```r
-exprMat <- readRDS("~/Downloads/TcgaTargetGtex_rsem_isoform_tpm_laml_blood_10each.rds")
+exprMat <- readRDS("~/Downloads/surf_vignette/TcgaTargetGtex_rsem_isoform_tpm_laml_blood_10each.rds")
 ext_sample <- data.frame(condition = rep(c("TCGA", "GTEx"), each = 10), row.names = colnames(exprMat))
 event <- daseq(event, getRankings(exprMat), cores = 1, ext_sample)
 ```

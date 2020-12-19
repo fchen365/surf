@@ -9,9 +9,10 @@ faseqFit(event, min.size = 60, trim = 0.025, verbose = F)
 \arguments{
 \item{event}{a \code{surf} object output by \link{faseqCount}.}
 
-\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to \code{60}.}
+\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to 60.}
 
-\item{trim}{\code{numeric}, the percentile used to trim the training data. This is useful in producing a more robust estimation of functional association.}
+\item{trim}{\code{numeric}, the percentile used to trim the training data.
+This is useful in producing a more robust estimation of functional association.}
 
 \item{verbose}{\code{logical}, whether to print out progress information.}
 }
@@ -20,5 +21,6 @@ a \code{surf} object with \code{faseqResults} slot updated.
 }
 \description{
 This function performs functional association test (FAT).
-The null hypothesis of FAT is that there is no association between feature signals and differential ATR.
+The null hypothesis of FAT is that there is no association between
+feature signals and differential ATR.
 }

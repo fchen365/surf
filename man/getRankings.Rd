@@ -16,13 +16,13 @@ getRankings(
 The expression matrix can also be provided as one of the Bioconductor classes:
 \itemize{
 \item \link{RangedSummarizedExperiment} and derived classes:
-The matrix will be obtained through assay(exprMatrix),
+The matrix will be obtained through \code{assay(exprMat)},
 -which will extract the first assay (usually the counts)-
-or the assay name given in 'assayName'
+or the assay name given in \code{assayName}
 \item \link[Matrix]{dgCMatrix-class}:
 Sparse matrix
 \item \code{ExpressionSet}:
-The matrix will be obtained through exprs(exprMatrix)
+The matrix will be obtained through \code{exprs(exprMat)}
 }}
 
 \item{plotStats}{Should the function plot the expression boxplots/histograms?
@@ -31,13 +31,16 @@ with the function \code{\link[AUCell]{plotGeneCount}}.}
 
 \item{cores}{\code{integer}, number of computing workers.}
 
-\item{verbose}{Should the function show progress messages? (TRUE / FALSE)}
+\item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
 \value{
 a \code{SummarizedExperiment} object.
 }
 \description{
-Builds the "rankings" for each sample: expression-based ranking for all the genes/transcripts in each sample
-The genes/transcripts with same expression value are shuffled. Therefore, genes/transcripts with expression '0' are randomly sorted at the end of the ranking.
-These "rankings" can be seen as a new representation of the original dataset. Once they are calculated, they can be saved for future analyses.
+Builds the "rankings" for each sample: expression-based ranking for all the
+genes/transcripts in each sample
+The genes/transcripts with same expression value are shuffled.
+Therefore, genes/transcripts with expression '0' are randomly sorted at the end of the ranking.
+These "rankings" can be seen as a new representation of the original dataset.
+Once they are calculated, they can be saved for future analyses.
 }

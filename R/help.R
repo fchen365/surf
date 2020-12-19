@@ -1,7 +1,7 @@
 ## what: various helper functions 
 ## who: fan chen (fan.chen@wisc.edu) 
 ## when: 08/12/2018 
-## ------------------------------------------------------------
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 suppressPackageStartupMessages({
   library(tidyverse)
@@ -9,25 +9,35 @@ suppressPackageStartupMessages({
   library(DEXSeq)
 })
 
-#' @importClassesFrom SummarizedExperiment SummarizedExperiment
-#' @importMethodsFrom SummarizedExperiment assay assays rowData colData dimnames
-#' @importFrom stats setNames
-#' @importFrom methods is as new
-# @importFrom doParallel registerDoParallel foreach %dopar% stopImplicitCluster
-#' @importFrom magrittr %>%
-#' @importFrom dplyr mutate select filter summarise summarize arrange 
+#' @importFrom stats setNames aggregate binomial dist hclust na.omit
+#' @importFrom stats p.adjust pnorm quantile weighted.mean
+#' @importFrom methods is as new selectMethod slot
+#' @importFrom parallel detectCores
+#' @importFrom doParallel registerDoParallel stopImplicitCluster
+#' @import foreach
+#' @importFrom magrittr %>% 
+#' @importFrom dplyr mutate select filter summarise summarize arrange n 
 #' @importFrom dplyr group_by ungroup left_join bind_rows 
 #' @importFrom tidyr pivot_wider pivot_longer
 #' @importFrom ggplot2 ggplot aes vars facet_wrap facet_grid
 #' @importFrom ggplot2 stat_function stat_summary
-#' @importFrom ggplot2 geom_point geom_boxplot geom_raster geom_vline geom_hline  
+#' @importFrom ggplot2 geom_point geom_boxplot geom_raster geom_vline geom_hline 
 #' @importFrom ggplot2 scale_color_manual scale_color_distiller 
 #' @importFrom ggplot2 scale_fill_manual scale_fill_distiller 
 #' @importFrom ggplot2 scale_size
 #' @importFrom ggplot2 scale_x_discrete scale_y_discrete  
 #' @importFrom ggplot2 scale_x_continuous scale_y_continuous  
-#' @importFrom ggplot2 labs guides element_blank theme theme_bw 
+#' @importFrom ggplot2 labs guides element_blank theme theme_bw unit
 #' @importFrom rlang .data
+#' @importFrom S4Vectors DataFrame mcols mcols<- metadata metadata<- rbind cbind
+#' @importFrom S4Vectors List elementNROWS head
+#' @importFrom S4Vectors Hits queryHits from to
+#' @importFrom BiocParallel MulticoreParam multicoreWorkers bplapply bpparam
+#' @importFrom IRanges IRanges DataFrameList FactorList
+#' @import BiocGenerics
+#' @import GenomicRanges
+#' @import DEXSeq
+#' @import SummarizedExperiment
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## ------ global variable ------
@@ -39,14 +49,14 @@ surf.colors <- c('#fb9a99','#e31a1c','#fdbf6f','#ff7f00',
 surf.features <- c("up3", "up2", "up1", "bd1", "bd2", "dn1", "dn2", "dn3")
 greek.features <- c(bquote(alpha), bquote(beta), bquote(gamma), bquote(delta), 
                     bquote(epsilon), bquote(zeta), bquote(eta), bquote(theta))
-
+globalVariables(c("g", "label", "pl", "plas", "segment"))
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## ------ class ------
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' DrSeq class
 #' 
-#' \code{drseqResults} is a  stand-alone object of DrSeq (the analysis module 1 of SURF) results.  
+#' `drseqResults` is a  stand-alone object of DrSeq (the analysis module 1 of SURF) results.  
 setClass(
   "drseqResults",
   contains = "DataFrame",
@@ -100,14 +110,14 @@ setValidity("daseqResults", function(object) {
 
 #' SURF class
 #' 
-#' The \code{surf} class is an all-in-one analytic object used in SURF framework. 
-#' A \code{surf} object contains results of DrSeq (analysis module 1), FASeq (analysis module 2), and DASeq (discovery module 1).
+#' The `surf` class is an all-in-one analytic object used in SURF framework. 
+#' A `surf` object contains results of DrSeq (analysis module 1), FASeq (analysis module 2), and DASeq (discovery module 1).
 #' In addition, it also contain gene (isoform) parts list, parsing from genome annotation. 
 #' The gene parts list is essential for ATR event construction. 
 #' If the any analysis module or discovery module is performed, the sample metadata will also be recorded. 
 #' Each of the components mentioned above can be accessed through a function listed below.
 #' 
-#' @seealso \link{genePartsList}, \link{drseqResults}, \link{faseqResults}, \link{daseqResults}, \link{sampleData}.
+#' @seealso [genePartsList], [drseqResults], [faseqResults], [daseqResults], [sampleData].
 #' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
 setClass(
   "surf",
@@ -152,8 +162,8 @@ setValidity("surf", function(object) {
 
 ## ------ _ genePartsList ------
 #' FASeq results
-#' @param object a \code{surf} object output by \link{faseq} or \link{faseqFit} or \link{faseqInference}.
-#' @return a \code{DataFrame} object.
+#' @param object a `surf` object output by [faseq] or [faseqFit] or [faseqInfer].
+#' @return a `DataFrame` object.
 setGeneric(
   name = "genePartsList",
   def = function(object)
@@ -173,8 +183,8 @@ setMethod(
 ## ------ _ **seqResults ------
 
 #' DrSeq Results
-#' @param object a \code{surf} object output by \link{drseq} or \link{drseqFit} or \link{drseqFilter}.
-#' @return a \code{drseqResults} object
+#' @param object a `surf` object output by [drseq] or [drseqFit] or [drseqFilter].
+#' @return a `drseqResults` object
 setGeneric(
   name = "drseqResults",
   def = function(object)
@@ -191,8 +201,8 @@ setMethod(
 )
 
 #' FASeq Results
-#' @param object a \code{surf} object output by \link{faseq} or \link{faseqFit} or \link{faseqInference}.
-#' @return a \code{faseqResults} object
+#' @param object a `surf` object output by [faseq] or [faseqFit] or [faseqInfer].
+#' @return a `faseqResults` object
 setGeneric(
   name = "faseqResults",
   def = function(object)
@@ -209,8 +219,8 @@ setMethod(
 )
 
 #' DASeq Results
-#' @param object a \code{surf} object output by \link{daseq}.
-#' @return a \code{daseqResults} object.
+#' @param object a `surf` object output by [daseq].
+#' @return a `daseqResults` object.
 setGeneric(
   name = "daseqResults",
   def = function(object)
@@ -218,6 +228,7 @@ setGeneric(
 )
 
 #' @rdname surf-class
+#' @param object a `surf` object output by [daseq].
 #' @exportMethod daseqResults
 setMethod(
   "daseqResults", "surf",
@@ -229,8 +240,9 @@ setMethod(
 ## ------ _ sampleData ------
 #' Sample Data 
 #' @name sampleData
-#' @param type \code{character}, any subset of "RNA-seq", "CLIP-seq", and "External".
-#' @return \code{DataFrame} or \code{DataFrameList} (if \code{length(type)>1}).
+#' @param object any object that contains a `sampleData` slot.
+#' @param ... various parameters.
+#' @return `DataFrame` or `DataFrameList` (if `length(type)>1`).
 #' @export sampleData 
 setGeneric(
   name = "sampleData",
@@ -238,7 +250,7 @@ setGeneric(
     standardGeneric("sampleData")
 )
 
-#' @rdname SummarizedExperiment-class
+#' @rdname sampleData
 #' @exportMethod sampleData
 setMethod(
   "sampleData", "SummarizedExperiment",
@@ -248,6 +260,8 @@ setMethod(
 )
 
 #' @rdname daseqResults-class
+#' @rdname sampleData
+#' @param object a `surf` object output by [daseq].
 #' @exportMethod sampleData
 setMethod(
   "sampleData", "daseqResults",
@@ -257,7 +271,8 @@ setMethod(
 )
 
 #' @rdname surf-class
-#' @param type \code{character}, any subset of "RNA-seq", "CLIP-seq", and "External".
+#' @rdname sampleData
+#' @param type `character`, any subset of "RNA-seq", "CLIP-seq", and "External".
 #' @exportMethod sampleData
 setMethod(
   "sampleData", "surf", 
@@ -342,9 +357,10 @@ setMethod(
 #' This allows DrSeq to better account for the nuance in the over-dispersion presented by different ATR event types.
 #' For more details, please refer to SURF paper.
 #' 
-#' @param object a \code{drseqResults} object.
-#' @return a \code{ggplot} object.
-#' @details By SURF default, ATR type are colored with the `Paired` palette (see \url{http://colorbrewer2.org}).
+#' @param object a `drseqResults` object.
+#' @param ... various parameters. 
+#' @return a `ggplot` object.
+#' @details By SURF default, ATR type are colored with the `Paired` palette.
 setGeneric(
   name = "plotDispFunc",
   def = function(object, ...)
@@ -352,7 +368,7 @@ setGeneric(
 )
 
 #' @rdname plotDispFunc
-#' @param x.limits \code{numeric(2)}, limits for x-axis.
+#' @param x.limits `numeric(2)`, limits for x-axis.
 #' @exportMethod plotDispFunc
 setMethod(
   "plotDispFunc",
@@ -360,7 +376,7 @@ setMethod(
   function(object, x.limits = c(1e-1, 1e4)) {
     colrs = setNames(surf.colors, surf.events) ## surf colors
     func <- object@dispersionFunction
-    g <- ggplot(data.frame(x = 0), aes(x = x))
+    g <- ggplot(data.frame(x = 0), aes(x = .data$x))
     for (event in names(func)) {
       g <- g +
         stat_function(fun = func[[event]], color = colrs[event])
@@ -390,9 +406,9 @@ setMethod("plotDispFunc", "surf",
 #' Create a volcano plot for the DrSeq results, stratified by alternative transcriptional regulation (ATR) event types.
 #' A volcano plot is a scatter plot of tested units, where log2 fold change is in x-axis, and -log10(p.value) is in y-axis.
 #' 
-#' @param object a \code{drseqResults} object.
-#' @return a \code{ggplot} object.
-#' @details By default, ATR type are colored with the `Paired` palette (see \url{http://colorbrewer2.org}).
+#' @param object a `drseqResults` object.
+#' @return a `ggplot` object.
+#' @details By default, ATR type are colored with the `Paired` palette.
 setGeneric(
   name = "volcano.plot",
   def = function(object, ...)
@@ -400,12 +416,21 @@ setGeneric(
 )
 
 #' @rdname volcano.plot
-#' @param lfc.cutoff \code{numeric(2)}, the range of log2 fold change that is consider NOT significant.
-#' @param fdr.cutoff \code{numeric(1)}, significance level of adjusted p-value.
-#' @param x.limits \code{numeric(2)}, range of log2 fold change. Any values beyond this range will be projected onto the boundary.
-#' @param y.limits \code{numeric(2)}, range of -log10(p.value). Any values beyond this range will be projected onto the boundary.
-#' @param remove.portion.grey \code{numeric}, between 0 and 1, the portion of non-significant points to be randomly remove. This is only for speeding up plotting.
-#' @param remove.portion.color \code{numeric}, between 0 and 1, the portion of significant points to be randomly remove. This is only for speeding up plotting.
+#' @param lfc.cutoff `numeric(2)`, the range of log2 fold change that is 
+#'   consider NOT significant.
+#' @param fdr.cutoff `numeric(1)`, significance level of adjusted p-value.
+#' @param x.limits `numeric(2)`, range of log2 fold change. 
+#'   Any values beyond this range will be projected onto the boundary.
+#' @param y.limits `numeric(2)`, range of -log10(p.value). 
+#'   Any values beyond this range will be projected onto the boundary.
+#' @param remove.portion.grey `numeric`, between 0 and 1, the portion of 
+#'   non-significant points to be randomly remove. 
+#'   This is only for speeding up plotting.
+#' @param remove.portion.color `numeric`, between 0 and 1, the portion of 
+#'   significant points to be randomly remove. 
+#'   This is only for speeding up plotting.
+#' @param colrs a `character` vector, named by ATR event types, whose values
+#'   are the corresponding color codes.
 #' @exportMethod volcano.plot
 setMethod(
   "volcano.plot",
@@ -426,14 +451,16 @@ setMethod(
     dat <- data.frame(x = object$logFoldChange, 
                       y = -log10(object$padj), 
                       group = object$event_name) %>%
-      dplyr::filter(!is.na(x), !is.na(y)) %>%
-      mutate(x = pmax(x, x.limits[1]),
-             x = pmin(x, x.limits[2]),
-             y = pmin(y, y.limits[2]),
-             color = ifelse(x > lfc.cutoff[1] & x < lfc.cutoff[2] | 
-                              y < fdr.cutoff, "No Sig.", as.character(group)), 
-             color = factor(color, c(surf.events, "No Sig.")),
-             size = ifelse(color == "No Sig.", 1, 2))
+      dplyr::filter(!is.na(.data$x), !is.na(.data$y)) %>%
+      mutate(x = pmax(.data$x, x.limits[1]),
+             x = pmin(.data$x, x.limits[2]),
+             y = pmin(.data$y, y.limits[2]),
+             color = ifelse(.data$x > lfc.cutoff[1] & 
+                              .data$x < lfc.cutoff[2] | 
+                              .data$y < fdr.cutoff, 
+                            "No Sig.", as.character(.data$group)), 
+             color = factor(.data$color, c(surf.events, "No Sig.")),
+             size = ifelse(.data$color == "No Sig.", 1, 2))
     ## remove some "No Sig." to reduce plot size
     if (remove.portion.grey < 1 && remove.portion.grey > 0) {
       index <- which(dat$color == "No Sig.")
@@ -445,7 +472,8 @@ setMethod(
       remove.index = sample(index, round(length(index) * remove.portion.color))
       dat <- dat[-remove.index,]
     }
-    g <- ggplot(dat, aes(x, y, color = color, size = size)) + 
+    g <- ggplot(dat, aes(.data$x, .data$y, color = .data$color, 
+                         size = .data$size)) + 
       geom_vline(xintercept = c(lfc.cutoff[1], lfc.cutoff[2]), 
                  color = "grey40", linetype = 2, alpha = .9) + 
       geom_hline(yintercept = fdr.cutoff, color = "grey40", 
@@ -458,16 +486,17 @@ setMethod(
       guides(size = "none") + 
       scale_x_continuous(limits = x.limits) + 
       scale_y_continuous(limits = y.limits) + 
-      facet_wrap(~ group, nrow = 2) +
+      facet_wrap(vars(.data$group), nrow = 2) +
       theme_bw()
     return(g)
   }
 )
 
 #' @rdname volcano.plot
+#' @param ... various parameters. 
 #' @exportMethod volcano.plot
 setMethod("volcano.plot", "surf",
-          function(object,...) {
+          function(object, ...) {
             volcano.plot(drseqResults(object))
           })
 
@@ -479,10 +508,14 @@ setMethod("volcano.plot", "surf",
 #' 
 #' This function provides a ggplot implementation for functional association (FA) plot.
 #' 
-#' @param object a \code{surf} object from \link{faseq} or \link{faseqFit} or \link{faseqInfer}.
-#' @param plot.event \code{character} vector, event type wanted. In particular, "all" means all event types.
-#' @param fdr.cutoff \code{numeric}, threshold for adjusted p-value in functional association test.
-#' @return a \code{ggplot} object.
+#' @param object a `surf` object from [faseq] or [faseqFit] or [faseqInfer].
+#' @param plot.event `character` vector, event type wanted. 
+#'   In particular, "all" means all event types.
+#' @param trim `numeric`, trimming quantile. 
+#'   The head and tail `trim/2` portion of the signal will be trimmed/ignored.
+#' @param fdr.cutoff `numeric`, threshold for adjusted p-value in functional 
+#'   association test.
+#' @return a `ggplot` object.
 #' @export
 fa.plot <- function(object, 
                     plot.event = "all", 
@@ -490,7 +523,7 @@ fa.plot <- function(object,
                     fdr.cutoff = 0.05){
   stopifnot(is(object, "surf"))
   if (any(plot.event == "all")) plot.event = levels(object$event_name)
-  levels <- outer(surf.events, surf.features, paste) %>% t %>% as.vector
+  levels <- outer(surf.events, surf.features, paste) %>% t() %>% as.vector()
   
   ## box plot: feature signals
   trainData <- object[object$included, ]
@@ -503,15 +536,15 @@ fa.plot <- function(object,
     feature = unlist(lapply(featureSignal, names), use.names = F),
     group = rep(trainData$group, elementNROWS(featureSignal)),
     signal = unlist(featureSignal, use.names = F)) %>% 
-    group_by(event, feature) %>%
-    mutate(lower = quantile(signal, trim * 2), 
-           upper = quantile(signal, 1 - trim * 2),
-           x = factor(feature, surf.features)) %>% 
-    dplyr::filter(signal > lower, signal < upper) %>% 
-    ungroup %>% 
-    mutate(strip = paste0(event, " (", groupSize[event], ")") %>% 
+    group_by(.data$event, .data$feature) %>%
+    mutate(lower = quantile(.data$signal, trim * 2), 
+           upper = quantile(.data$signal, 1 - trim * 2),
+           x = factor(.data$feature, surf.features)) %>% 
+    dplyr::filter(.data$signal > .data$lower, .data$signal < .data$upper) %>% 
+    ungroup() %>% 
+    mutate(strip = paste0(.data$event, " (", groupSize[.data$event], ")") %>% 
              factor(paste0(names(groupSize), " (", groupSize, ")")))
-  g1 <- ggplot(dat1, aes(x, signal, fill = group)) +
+  g1 <- ggplot(dat1, aes(.data$x, .data$signal, fill = .data$group)) +
     geom_boxplot(color = "grey30", alpha = .9, 
                  outlier.shape = ".", outlier.color = "grey80") + 
     labs(y = "feature signal") + 
@@ -519,7 +552,7 @@ fa.plot <- function(object,
                                  "no change" = "grey50",
                                  "decrease" = "#c51b7d")) + 
     scale_x_discrete(breaks = surf.features, labels = greek.features) +
-    facet_grid(cols = vars(strip), scales = "free_x", space = "free_x") + 
+    facet_grid(cols = vars(.data$strip), scales = "free_x", space = "free_x") + 
     theme_bw() + 
     theme(axis.title.x = element_blank(), 
           axis.text.x = element_blank(), 
@@ -528,26 +561,26 @@ fa.plot <- function(object,
   ## dot-line plot: adjusted p-values
   suppressWarnings({
     dat2 <- dat1 %>% 
-      group_by(event, feature) %>% 
+      group_by(.data$event, .data$feature) %>% 
       summarise(n = n()) %>%
       ungroup() %>%
-      left_join(data.frame(faseqResults(object)), 
+      dplyr::left_join(data.frame(faseqResults(object)), 
                 by = c("event", "feature")) %>% 
       mutate(
-        event = factor(event, surf.events),
-        logp = - log10(padj), 
-        x = factor(feature, surf.features), 
-        functional = ifelse(is.na(logp), "not tested", 
-                            as.character(functional)) %>%
+        event = factor(.data$event, surf.events),
+        logp = - log10(.data$padj), 
+        x = factor(.data$feature, surf.features), 
+        functional = ifelse(is.na(.data$logp), "not tested", 
+                            as.character(.data$functional)) %>%
           factor(c("exclusion", "inclusion", "not tested")), 
-        logp = ifelse(is.na(logp), 0, logp)
+        logp = ifelse(is.na(.data$logp), 0, .data$logp)
       ) 
   })
-  g2 <- ggplot(dat2, aes(x, logp, color = functional)) +
+  g2 <- ggplot(dat2, aes(.data$x, .data$logp, color = .data$functional)) +
     geom_hline(yintercept = -log10(fdr.cutoff), color = "grey40", 
                alpha = .9, linetype = 2, show.legend = T) + 
     geom_point(alpha = .9) +
-    stat_summary(aes(group = functional), alpha = .8, 
+    stat_summary(aes(group = .data$functional), alpha = .8, 
                  fun = sum, geom = "line") +
     labs(x = "location feature", y = "-log"[10]~"(adjusted p value)", 
          color = "association") +
@@ -555,7 +588,7 @@ fa.plot <- function(object,
                                   inclusion = "#c51b7d", 
                                   "not tested" = "grey40")) + 
     scale_x_discrete(breaks = surf.features, labels = greek.features) +
-    facet_grid(cols = vars(event), scales = "free_x", space = "free_x") + 
+    facet_grid(cols = vars(.data$event), scales = "free_x", space = "free_x") + 
     theme_bw() + 
     theme(strip.background = element_blank(), 
           strip.text = element_blank())
@@ -570,8 +603,8 @@ fa.plot <- function(object,
 
 #' Extract SURF-inferred location features
 #'  
-#' @param object a \code{surf} object from \link{faseq} or \link{faseqInfer}.
-#' @return a \code{GRanges} object of all SURF-inferred location features.
+#' @param object a `surf` object from [faseq] or [faseqInfer].
+#' @return a `GRanges` object of all SURF-inferred location features.
 #' @export
 inferredFeature = function(object) {
   stopifnot(is(object, "surf"))
@@ -600,7 +633,8 @@ inferredFeature = function(object) {
 #' Get AUC
 #' 
 #' Get AUC measure for each target set (row) in every sample (column).
-#' @return a \code{matrix} of AUC, whose rows correspond to target sets and columns correspond to samples.
+#' @param object a `SummarizedExperiment`, or `surf`, or `daseqResults` object.
+#' @return a `matrix` of AUC, whose rows correspond to target sets and columns correspond to samples.
 setGeneric(
   name = "getAUC",
   def = function(object)
@@ -621,6 +655,7 @@ setMethod(
 )
 
 #' @rdname getAUC
+#' @param object a `surf` object output by [daseq].
 #' @exportMethod getAUC
 setMethod(
   "getAUC", "daseqResults",
@@ -630,6 +665,7 @@ setMethod(
 )
 
 #' @rdname getAUC
+#' @param object a `surf` object output by [daseq].
 #' @exportMethod getAUC
 setMethod(
   "getAUC", "surf",
@@ -644,8 +680,9 @@ setMethod(
 #' 
 #' This function produces the heatmap of AUC scores.
 #' 
-#' @param object for \code{surf} object, it should be output from \link{daseq}.
-#' @return a \code{ggplot} object.
+#' @param object for `surf` object, it should be output from [daseq].
+#' @param ... various parameters. 
+#' @return a `ggplot` object.
 setGeneric(
   name = "heatmapAUC",
   def = function(object, ...)
@@ -653,9 +690,9 @@ setGeneric(
 )
 
 
-#' @description Row blocking is allowed by providing the \code{group} parameter.
+#' @description Row blocking is allowed by providing the `group` parameter.
 #' @rdname heatmapAUC
-#' @param group an optional \code{factor} vector, group of rows.
+#' @param group an optional `factor` vector, group of rows.
 #' @exportMethod heatmapAUC
 setMethod(
   "heatmapAUC", "SummarizedExperiment",
@@ -680,12 +717,12 @@ setMethod(
     dat$group = group[dat$set]
     dat$condition <- sampleData$condition[dat$sample]
     
-    g <- ggplot(dat, aes(sample, set, fill = AUC)) +
+    g <- ggplot(dat, aes(.data$sample, .data$set, fill = .data$AUC)) +
       geom_raster() + 
       scale_x_discrete(breaks = sample_cluster) +
       scale_y_discrete(breaks = set_cluster) +
       scale_fill_distiller(palette = "GnBu", direction = 1) + 
-      facet_grid(rows = vars(group), cols = vars(condition), 
+      facet_grid(rows = vars(.data$group), cols = vars(.data$condition), 
                  scales = "free", space = "free") + 
       labs(x = "Sample", y = "Set", fill = "AUC") +
       theme_bw() +
@@ -700,6 +737,7 @@ setMethod(
 )
 
 #' @rdname heatmapAUC
+#' @param object a `surf` object output by [daseq].
 #' @exportMethod heatmapAUC
 setMethod(
   "heatmapAUC", "daseqResults",
@@ -715,12 +753,13 @@ setMethod(
 
 #' Bind list by row into data.frame
 #' 
-#' Bind by row a \code{list} of \code{data.frame} with the same \code{ncol} into \code{data.frame}. 
-#' In particular, if the input is a list of vector-like objects (e.g. numeric, atomic, double, etc), each unit of list will be coerced into row vector.
+#' Bind by row a `list` of `data.frame` with the same `ncol` into `data.frame`. 
+#' In particular, if the input is a list of vector-like objects 
+#' (e.g. numeric, atomic, double, etc), each unit of list will be coerced into row vector.
 #' In addition, the function allows to save list names if needed.
 #' 
-#' @param x list, all elements are vectors of the same length or array of the same column size
-#' @param save.names logical or character, if not FALSE, save list names into an new column
+#' @param x `list`, all elements are vectors of the same length or array of the same column size
+#' @param save.names `logical` or `character`, if not `FALSE`, save list names into an new column
 list_rbind = function(x, save.names = F) {
   x = as.list(x)
   x = x[!sapply(x, is.null)]
@@ -747,17 +786,20 @@ list_rbind = function(x, save.names = F) {
 }
 
 
-#' return maximum in absolute value
+#' L-infinity norm
+#' @return maximum in absolute value
+#' @param x a `numeric` vector.
+#' @param ... other parameters for [which.max].
 abs.max = function(x, ...) {
-  x[which.max(abs(x), ...)]
+  x[which.max(x = abs(x), ...)]
 }
 
 
 #' Hierarchical clustering of rows by groups
-#' @param x matrix
-#' @param group group label of rows, disregard names, will be coerce to factor
-#' @return character vector of length \code{nrow(x)}, row names. 
-#' If `x` doesn't have row.names, this function names it sequentially (from 1).
+#' @param x `matrix`.
+#' @param group group label of rows, disregard names, will be coerce to `factor`.
+#' @return `character` vector of length `nrow(x)`, row names. 
+#' If `x` doesn't have `row.names`, this function names it sequentially (from 1).
 clusterByGroup = function(x, group) {
   ## check
   if (nrow(x) < 2 || is.null(dim(x))) {
@@ -791,11 +833,11 @@ clusterByGroup = function(x, group) {
 
 #' Concatenate a list of GRanges
 #' 
-#' @param grl a list of [GRanges].
-#' @param use.names logical, whether (`TRUE`) to inherit list names.
-#' @param sep character, separator between list names and GRanges names.
-#' @param save.names logical or character, if not FALSE, save list names as an attribute (i.e., [mcols()]).s
-#' @return a [GRanges] object
+#' @param grl a `list` of `GRanges`.
+#' @param use.names `logical`, whether (`TRUE`) to inherit list names.
+#' @param sep `character`, separator between list names and GRanges names.
+#' @param save.names `logical` or `character`, if not `FALSE`, save list names as an attribute (i.e., `mcols()`).
+#' @return a `GRanges` object
 c_granges <- function(grl, 
                       use.names = T, 
                       sep = ".", 
@@ -819,8 +861,8 @@ c_granges <- function(grl,
 #' Add identifiers of genes and transcripts
 #' Fill up missing "gene" and "transcript" in genome annotation
 #' If the genome annotation lacks "gene" and "transcript" entries, add to it.
-#' @param anno a \code{GRanges} object of genome annotation, from \link{import}.
-#' @return a \code{GRanges} object with added `gene_id` and `transcript_id` columns.
+#' @param anno a `GRanges` object of genome annotation, from [import].
+#' @return a `GRanges` object with added `gene_id` and `transcript_id` columns.
 addGeneTx <- function(anno) {
   l <- levels(anno$type)
   if (! "transcript" %in% l) {
@@ -845,11 +887,11 @@ addGeneTx <- function(anno) {
 
 #' Import annotation files
 #' 
-#' This is a wrapper of \link{rtracklayer::import} with specialty in genome annotation.
+#' This is a wrapper of [rtracklayer::import] with specialty in genome annotation.
 #' Specifically, it checks whether "gene" or "transcript" exist in the annotation and fill them in if possible.
 #' 
-#' @param ... whatever input to \link{rtracklayer::import}.
-#' @return a \code{GRanges} object.
+#' @param ... whatever input to [rtracklayer::import].
+#' @return a `GRanges` object.
 import <- function(...) {
   anno <- rtracklayer::import(...) 
   
@@ -866,88 +908,26 @@ import <- function(...) {
 
 #' Find genes that contain multiple transcripts
 #' 
-#' @param anno data.frame or GRanges, annotation
-#' @param min integer, minimum number of tx's
-#' @param max integer, maximum number of tx's
-#' @return gene_id's
+#' @param anno `data.frame` or `GRanges`, annotation.
+#' @param min `integer`, minimum number of transcripts.
+#' @param max `integer`, maximum number of transcripts.
+#' @return a `character` vector of gene_id's
 getMultiTxGene = function(anno, min = 2, max = Inf) {
   anno_tx = anno[anno$type == 'transcript']
   cnt_tx = table(anno_tx$gene_id)
   names(cnt_tx)[cnt_tx >= min & cnt_tx <= max]
 }
 
-## FUN: get raw read count matrix from a list of BAM files
-## INPUT:
-##    peaks - standard GRanges object 
-##    bamfiles - the full paths to the list of BAM files
-##    colname - the colnames of output objects
-##    n.cores - no. of cores 
-##    is.PE - is paired end data or not
-## OUTPUT: list()
-##    $countMat - n x p count matrix. n <- length(peaks), p <- length(bamfiles)
-##    $fragment_counts - a list of length equal to no. of bamfiles
-##    $designInfo - the sequencing depth (no. of paired reads if is.PE = TRUE) for each BAM file
-##    $peaks - the same as input
-## DEPENDS:
-##    chromVAR, GenomicAlignments
-# getCountMatrix <- function(peaks, bamfiles, 
-#                            colname = seq_along(bamfiles), 
-#                            n.cores = 1, is.PE = TRUE){
-#   if(length(bamfiles) != length(colname)){
-#     stop("BAM File list must have the same length as column names list!")
-#   }
-#   
-#   fragment_counts <-
-#     mclapply(
-#       as.list(bamfiles),
-#       getCounts,
-#       peaks,
-#       paired = is.PE,
-#       by_rg = FALSE,
-#       format = "bam",
-#       mc.cores = n.cores,
-#       mc.preschedule = TRUE
-#     )
-#   countMat <- matrix(NA, length(peaks), length(bamfiles))
-#   colnames(countMat) <- colname
-#   seqDepth <- NULL
-#   for(k in seq_along(bamfiles)){
-#     countMat[, k] <- counts(fragment_counts[[k]])[,1]
-#     seqDepth[k] <- fragment_counts[[k]]@colData[1,1]
-#   }
-#   designInfo <- data.frame(exps = colname, depth = seqDepth)
-#   
-#   res <- list(countMat = countMat, 
-#               fragment_counts = fragment_counts, 
-#               designInfo = designInfo,
-#               peaks = peaks)
-#   return(res)
-# }
 
-#' Get URL's for UCSC Genome Browser 
-#' @param gr a \code{GRanges} object
-#' @return a vector of URL's
-getURL = function(gr, hub = NULL) {
-  if (is.null(hub) || !length(hub)) {
-    hub = "http://genome.ucsc.edu/cgi-bin/hgTracks?hubUrl=ftp://ftp.cs.wisc.edu/pub/users/kelesgroup/fchen/hub.txt"
-  } else {
-    hub = paste0("http://genome.ucsc.edu/cgi-bin/hgTracks?hubUrl=ftp://ftp.cs.wisc.edu/pub/users/kelesgroup/fchen/",hub,".txt")
-  }
-  if (!is.null(gr$feature)) {
-    gr = unlist(range(gr$feature))
-  }
-  paste0(hub, "&position=", seqnames(gr), ':', start(gr), '-', end(gr))
-}
-
-
-#' Customized \code{featureCounts}
+#' Customized `featureCounts`
 #' 
-#' This is a wrapper of \code{Rsubread::featureCounts} allowing verbose suppression.
+#' This is a wrapper of [Rsubread::featureCounts] allowing verbose suppression.
 #' This redirects the output to `/dev/null`, so it assumes a UNIX-like
 #' system.
-#'
-#' @param ... parameters for \code{Rsubread::featureCounts}.
-#' @return See \code{Rsubread::featureCounts} documentation.
+#' 
+#' @param verbose `logical`, whether to print out the progress information.
+#' @param ... parameters for `featureCounts`.
+#' @return See [Rsubread::featureCounts] documentation.
 featureCounts <- function(..., verbose = F) {
   if (verbose) {
     Rsubread::featureCounts(...)
@@ -956,169 +936,172 @@ featureCounts <- function(..., verbose = F) {
   }
 }
 
-#' Import transcriptome quantification results
-#' 
-#' Customized tximport from \code{DESeq2} and `RSEM` transcriptome quantification results.
-#' 
-#' @param files character, files to transcriptome quantification results
-#' @return a list of length four, named as `abundance`, `counts`, `length`, and `countsFromAbundance`
-tximport2 = function (files, 
-                      type = c("none", "kallisto", "salmon", "sailfish", "rsem"), 
-                      txIn = TRUE, txOut = FALSE, 
-                      countsFromAbundance = c("no", "scaledTPM", "lengthScaledTPM"), 
-                      tx2gene = NULL, reader = read.delim, 
-                      geneIdCol, txIdCol, abundanceCol, countsCol, lengthCol, importer,
-                      collatedFiles, ignoreTxVersion = FALSE, 
-                      quiet = F) 
-{
-  type <- match.arg(type, c("none", "kallisto", "salmon", "sailfish", 
-                            "rsem"))
-  countsFromAbundance <- match.arg(
-    countsFromAbundance, c("no", "scaledTPM", "lengthScaledTPM"))
-  stopifnot(all(file.exists(files)))
-  if (!txIn & txOut) 
-    stop("txOut only an option when transcript-level data is read in (txIn=TRUE)")
-  if (type == "kallisto") {
-    geneIdCol = "gene_id"
-    txIdCol <- "target_id"
-    abundanceCol <- "tpm"
-    countsCol <- "est_counts"
-    lengthCol <- "eff_length"
-    importer <- reader
-  }
-  if (type %in% c("salmon", "sailfish")) {
-    geneIdCol = "gene_id"
-    txIdCol <- "Name"
-    abundanceCol <- "TPM"
-    countsCol <- "NumReads"
-    lengthCol <- "EffectiveLength"
-    importer <- function(x) reader(x, comment = "#")
-  }
-  # if (type == "rsem") {
-  #   txIn <- FALSE
-  #   geneIdCol <- "gene_id"
-  #   abundanceCol <- "FPKM"
-  #   countsCol <- "expected_count"
-  #   lengthCol <- "effective_length"
-  #   importer <- reader
-  # }
-  if (type == "rsem") {
-    # txIn <- FALSE
-    geneIdCol <- "gene_id"
-    txIdCol <- "transcript_id"
-    abundanceCol <- "TPM"
-    countsCol <- "expected_count"
-    lengthCol <- "effective_length"
-    percentCol <- "IsoPct"
-    importer <- reader
-  }
-  if (type == "cufflinks") {
-    stop("reading from collated files not yet implemented")
-  }
-  if (txIn) {
-    if (!quiet) message("reading in files")
-    for (i in seq_along(files)) {
-      if (!quiet) message(i, " ", appendLF = FALSE)
-      raw <- as.data.frame(importer(files[i]))
-      if ((i == 1) & (type %in% c("salmon", "sailfish")) & 
-          !("EffectiveLength" %in% names(raw))) {
-        lengthCol <- "Length"
-        importer <- function(x) {
-          tmp <- reader(x, comment = "#", header = FALSE)
-          names(tmp) <- c("Name", "Length", "TPM", "NumReads")
-          tmp
-        }
-        raw <- try(as.data.frame(importer(files[i])), silent = TRUE)
-        if (inherits(raw, "try-error")) {
-          importer <- function(x) {
-            reader(x, comment = "#", 
-                   col_names = c("Name", "Length", "TPM", "NumReads"))
-          }
-          raw <- try(as.data.frame(importer(files[i])))
-          if (inherits(raw, "try-error")) 
-            stop("tried but couldn't use reader() without error\n", 
-                 "user will need to define the importer() as well")
-        }
-      }
-      if (is.null(tx2gene) & !txOut) {
-        if (!geneIdCol %in% names(raw)) {
-          if (!quiet) message()
-          stop("\n\n  tximport failed at summarizing to the gene-level.\n", 
-               "Please see 'Solutions' in the Details section of the man page:", 
-               "?tximport\n\n")
-        }
-        stopifnot(all(c(lengthCol, abundanceCol) %in% 
-                        names(raw)))
-        if (i == 1) {
-          geneId <- raw[[geneIdCol]]
-        }
-        else {
-          stopifnot(all(geneId == raw[[geneIdCol]]))
-        }
-      }
-      else {
-        stopifnot(all(c(lengthCol, abundanceCol) %in% 
-                        names(raw)))
-        if (i == 1) {
-          txId <- raw[[txIdCol]]
-        }
-        else {
-          stopifnot(all(txId == raw[[txIdCol]]))
-        }
-      }
-      if (i == 1) {
-        mat <- matrix(nrow = nrow(raw), ncol = length(files))
-        rownames(mat) <- raw[[txIdCol]]
-        colnames(mat) <- names(files)
-        abundanceMatTx <- mat
-        countsMatTx <- mat
-        lengthMatTx <- mat
-        percentMatTx <- mat
-      }
-      abundanceMatTx[, i] <- raw[[abundanceCol]]
-      countsMatTx[, i] <- raw[[countsCol]]
-      lengthMatTx[, i] <- raw[[lengthCol]]
-      percentMatTx[, i] <- raw[[percentCol]]
-    }
-    if (!quiet) message("")
-    txi <- list(abundance = abundanceMatTx, counts = countsMatTx, 
-                length = lengthMatTx, percent = percentMatTx,
-                countsFromAbundance = "no")
-    if (txOut) {
-      return(txi)
-    }
-    txi[["countsFromAbundance"]] <- NULL
-    txiGene <- summarizeToGene(txi, tx2gene, ignoreTxVersion, 
-                               countsFromAbundance)
-    return(txiGene)
-  }
-  else {
-    if (!quiet) message("reading in files")
-    for (i in seq_along(files)) {
-      if (!quiet) message(i, " ", appendLF = FALSE)
-      raw <- as.data.frame(importer(files[i]))
-      stopifnot(all(c(geneIdCol, abundanceCol, lengthCol) %in% 
-                      names(raw)))
-      if (i == 1) {
-        mat <- matrix(nrow = nrow(raw), ncol = length(files))
-        rownames(mat) <- raw[[geneIdCol]]
-        colnames(mat) <- names(files)
-        abundanceMat <- mat
-        countsMat <- mat
-        lengthMat <- mat
-      }
-      abundanceMat[, i] <- raw[[abundanceCol]]
-      countsMat[, i] <- raw[[countsCol]]
-      lengthMat[, i] <- raw[[lengthCol]]
-    }
-  }
-  if (!quiet) message("")
-  return(list(abundance = abundanceMat, counts = countsMat, 
-              length = lengthMat, countsFromAbundance = "no"))
-}
-
 
 # ## ------ depreciated ------ 
+# 
+# #' Import transcriptome quantification results
+# #' 
+# #' Customized `tximport` function from `DESeq2` and `RSEM` transcriptome quantification results.
+# #' @inheritParams tximport::tximport
+# #' @param files `character`, files to transcriptome quantification results.
+# #' @return a `list` of length four, named as `abundance`, `counts`, `length`, 
+# #'   and `countsFromAbundance`.
+# tximport2 = function (files,
+#                       type = c("none", "kallisto", "salmon", "sailfish", "rsem"),
+#                       txIn = TRUE, txOut = FALSE,
+#                       countsFromAbundance = c("no", "scaledTPM", "lengthScaledTPM"),
+#                       tx2gene = NULL, reader = read.delim,
+#                       geneIdCol, txIdCol, abundanceCol, countsCol, lengthCol, importer,
+#                       collatedFiles, ignoreTxVersion = FALSE,
+#                       quiet = F)
+# {
+#   type <- match.arg(type, c("none", "kallisto", "salmon", "sailfish",
+#                             "rsem"))
+#   countsFromAbundance <- match.arg(
+#     countsFromAbundance, c("no", "scaledTPM", "lengthScaledTPM"))
+#   stopifnot(all(file.exists(files)))
+#   if (!txIn & txOut)
+#     stop("txOut only an option when transcript-level data is read in (txIn=TRUE)")
+#   if (type == "kallisto") {
+#     geneIdCol = "gene_id"
+#     txIdCol <- "target_id"
+#     abundanceCol <- "tpm"
+#     countsCol <- "est_counts"
+#     lengthCol <- "eff_length"
+#     importer <- reader
+#   }
+#   if (type %in% c("salmon", "sailfish")) {
+#     geneIdCol = "gene_id"
+#     txIdCol <- "Name"
+#     abundanceCol <- "TPM"
+#     countsCol <- "NumReads"
+#     lengthCol <- "EffectiveLength"
+#     importer <- function(x) reader(x, comment = "#")
+#   }
+#   # if (type == "rsem") {
+#   #   txIn <- FALSE
+#   #   geneIdCol <- "gene_id"
+#   #   abundanceCol <- "FPKM"
+#   #   countsCol <- "expected_count"
+#   #   lengthCol <- "effective_length"
+#   #   importer <- reader
+#   # }
+#   if (type == "rsem") {
+#     # txIn <- FALSE
+#     geneIdCol <- "gene_id"
+#     txIdCol <- "transcript_id"
+#     abundanceCol <- "TPM"
+#     countsCol <- "expected_count"
+#     lengthCol <- "effective_length"
+#     percentCol <- "IsoPct"
+#     importer <- reader
+#   }
+#   if (type == "cufflinks") {
+#     stop("reading from collated files not yet implemented")
+#   }
+#   if (txIn) {
+#     if (!quiet) message("reading in files")
+#     for (i in seq_along(files)) {
+#       if (!quiet) message(i, " ", appendLF = FALSE)
+#       raw <- as.data.frame(importer(files[i]))
+#       if ((i == 1) & (type %in% c("salmon", "sailfish")) &
+#           !("EffectiveLength" %in% names(raw))) {
+#         lengthCol <- "Length"
+#         importer <- function(x) {
+#           tmp <- reader(x, comment = "#", header = FALSE)
+#           names(tmp) <- c("Name", "Length", "TPM", "NumReads")
+#           tmp
+#         }
+#         raw <- try(as.data.frame(importer(files[i])), silent = TRUE)
+#         if (inherits(raw, "try-error")) {
+#           importer <- function(x) {
+#             reader(x, comment = "#",
+#                    col_names = c("Name", "Length", "TPM", "NumReads"))
+#           }
+#           raw <- try(as.data.frame(importer(files[i])))
+#           if (inherits(raw, "try-error"))
+#             stop("tried but couldn't use reader() without error\n",
+#                  "user will need to define the importer() as well")
+#         }
+#       }
+#       if (is.null(tx2gene) & !txOut) {
+#         if (!geneIdCol %in% names(raw)) {
+#           if (!quiet) message()
+#           stop("\n\n  tximport failed at summarizing to the gene-level.\n",
+#                "Please see 'Solutions' in the Details section of the man page:",
+#                "?tximport\n\n")
+#         }
+#         stopifnot(all(c(lengthCol, abundanceCol) %in%
+#                         names(raw)))
+#         if (i == 1) {
+#           geneId <- raw[[geneIdCol]]
+#         }
+#         else {
+#           stopifnot(all(geneId == raw[[geneIdCol]]))
+#         }
+#       }
+#       else {
+#         stopifnot(all(c(lengthCol, abundanceCol) %in%
+#                         names(raw)))
+#         if (i == 1) {
+#           txId <- raw[[txIdCol]]
+#         }
+#         else {
+#           stopifnot(all(txId == raw[[txIdCol]]))
+#         }
+#       }
+#       if (i == 1) {
+#         mat <- matrix(nrow = nrow(raw), ncol = length(files))
+#         rownames(mat) <- raw[[txIdCol]]
+#         colnames(mat) <- names(files)
+#         abundanceMatTx <- mat
+#         countsMatTx <- mat
+#         lengthMatTx <- mat
+#         percentMatTx <- mat
+#       }
+#       abundanceMatTx[, i] <- raw[[abundanceCol]]
+#       countsMatTx[, i] <- raw[[countsCol]]
+#       lengthMatTx[, i] <- raw[[lengthCol]]
+#       percentMatTx[, i] <- raw[[percentCol]]
+#     }
+#     if (!quiet) message("")
+#     txi <- list(abundance = abundanceMatTx, counts = countsMatTx,
+#                 length = lengthMatTx, percent = percentMatTx,
+#                 countsFromAbundance = "no")
+#     if (txOut) {
+#       return(txi)
+#     }
+#     txi[["countsFromAbundance"]] <- NULL
+#     txiGene <- summarizeToGene(txi, tx2gene, ignoreTxVersion,
+#                                countsFromAbundance)
+#     return(txiGene)
+#   }
+#   else {
+#     if (!quiet) message("reading in files")
+#     for (i in seq_along(files)) {
+#       if (!quiet) message(i, " ", appendLF = FALSE)
+#       raw <- as.data.frame(importer(files[i]))
+#       stopifnot(all(c(geneIdCol, abundanceCol, lengthCol) %in%
+#                       names(raw)))
+#       if (i == 1) {
+#         mat <- matrix(nrow = nrow(raw), ncol = length(files))
+#         rownames(mat) <- raw[[geneIdCol]]
+#         colnames(mat) <- names(files)
+#         abundanceMat <- mat
+#         countsMat <- mat
+#         lengthMat <- mat
+#       }
+#       abundanceMat[, i] <- raw[[abundanceCol]]
+#       countsMat[, i] <- raw[[countsCol]]
+#       lengthMat[, i] <- raw[[lengthCol]]
+#     }
+#   }
+#   if (!quiet) message("")
+#   return(list(abundance = abundanceMat, counts = countsMat,
+#               length = lengthMat, countsFromAbundance = "no"))
+# }
+# 
+# 
 # ## FUN: transform idr result (overlapped peaks) table into GRanges 
 # ## INPUT: idr w/ the following columns:
 # # [1] "chr1"       "start1"     "stop1"      "sig.value1" "chr2"      
@@ -1178,4 +1161,68 @@ tximport2 = function (files,
 #   if (length(set) == 1) 
 #     return(list(set))
 #   return(combn(x = set, ...))
+# }
+
+## FUN: get raw read count matrix from a list of BAM files
+## INPUT:
+##    peaks - standard GRanges object 
+##    bamfiles - the full paths to the list of BAM files
+##    colname - the colnames of output objects
+##    n.cores - no. of cores 
+##    is.PE - is paired end data or not
+## OUTPUT: list()
+##    $countMat - n x p count matrix. n <- length(peaks), p <- length(bamfiles)
+##    $fragment_counts - a list of length equal to no. of bamfiles
+##    $designInfo - the sequencing depth (no. of paired reads if is.PE = TRUE) for each BAM file
+##    $peaks - the same as input
+## DEPENDS:
+##    chromVAR, GenomicAlignments
+# getCountMatrix <- function(peaks, bamfiles, 
+#                            colname = seq_along(bamfiles), 
+#                            n.cores = 1, is.PE = TRUE){
+#   if(length(bamfiles) != length(colname)){
+#     stop("BAM File list must have the same length as column names list!")
+#   }
+#   
+#   fragment_counts <-
+#     mclapply(
+#       as.list(bamfiles),
+#       getCounts,
+#       peaks,
+#       paired = is.PE,
+#       by_rg = FALSE,
+#       format = "bam",
+#       mc.cores = n.cores,
+#       mc.preschedule = TRUE
+#     )
+#   countMat <- matrix(NA, length(peaks), length(bamfiles))
+#   colnames(countMat) <- colname
+#   seqDepth <- NULL
+#   for(k in seq_along(bamfiles)){
+#     countMat[, k] <- counts(fragment_counts[[k]])[,1]
+#     seqDepth[k] <- fragment_counts[[k]]@colData[1,1]
+#   }
+#   designInfo <- data.frame(exps = colname, depth = seqDepth)
+#   
+#   res <- list(countMat = countMat, 
+#               fragment_counts = fragment_counts, 
+#               designInfo = designInfo,
+#               peaks = peaks)
+#   return(res)
+# }
+
+# #' Get URL's for UCSC Genome Browser
+# #' @param gr a `GRanges` object
+# #' @return a vector of URL's
+# 
+# getURL = function(gr, hub = NULL) {
+#   if (is.null(hub) || !length(hub)) {
+#     hub = "http://genome.ucsc.edu/cgi-bin/hgTracks?hubUrl=ftp://ftp.cs.wisc.edu/pub/users/kelesgroup/fchen/hub.txt"
+#   } else {
+#     hub = paste0("http://genome.ucsc.edu/cgi-bin/hgTracks?hubUrl=ftp://ftp.cs.wisc.edu/pub/users/kelesgroup/fchen/",hub,".txt")
+#   }
+#   if (!is.null(gr$feature)) {
+#     gr = unlist(range(gr$feature))
+#   }
+#   paste0(hub, "&position=", seqnames(gr), ':', start(gr), '-', end(gr))
 # }

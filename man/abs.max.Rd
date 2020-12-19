@@ -2,10 +2,18 @@
 % Please edit documentation in R/help.R
 \name{abs.max}
 \alias{abs.max}
-\title{return maximum in absolute value}
+\title{L-infinity norm}
 \usage{
 \method{abs}{max}(x, ...)
 }
+\arguments{
+\item{x}{a \code{numeric} vector.}
+
+\item{...}{other parameters for \link{which.max}.}
+}
+\value{
+maximum in absolute value
+}
 \description{
-return maximum in absolute value
+L-infinity norm
 }

@@ -7,7 +7,9 @@
 numberAS(as, gm)
 }
 \arguments{
-\item{as}{factor of AS events /isoform}
+\item{as}{factor of AS events /isoform.}
+
+\item{gm}{gene model.}
 }
 \description{
 Enumerate AS events

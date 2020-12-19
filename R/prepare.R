@@ -9,15 +9,15 @@
 #' It also identifies location features for each event.
 #' The latter task could be computationally demanding for unfiltered (raw) genome annotation.
 #'
-#' @param anno.file \code{character(1)}, directory to genome annotation file.
-#' @param anno.format \code{character(1)}, the format of the annotation file. The format can be inferred from \code{anno.file} automatically, unless it is not implicit by the extension.
+#' @param anno.file `character`, directory to genome annotation file.
+#' @param anno.format `character`, the format of the annotation file. The format can be inferred from `anno.file` automatically, unless it is not implicit by the extension.
 #' @inheritParams getIsoPartsList
 #' @inheritParams getEvent
 #' @inheritParams annotateEvent
 #' @inheritParams getFeature
-#' @param location.feature \code{logical}, whether (default to \code{TRUE}) to add location features for each event. This usually takes the longest time in annotation parsing procedure.
-#' @param verbose \code{logical}, whether (default to \code{TRUE}) to print out progress.
-#' @return a \code{surf} object with ATR event annotation and updated \code{genePartsList} slot.
+#' @param location.feature `logical`, whether (default to `TRUE`) to add location features for each event. This usually takes the longest time in annotation parsing procedure.
+#' @param verbose `logical`, whether (default to `TRUE`) to print out progress.
+#' @return a `surf` object with ATR event annotation and updated `genePartsList` slot.
 #' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
 #' @export
 parseEvent <- function(anno.file,
@@ -73,10 +73,10 @@ parseEvent <- function(anno.file,
 #' Find multi-transciption gene
 #'
 #' Find genes that contain multiple transcripts.
-#' @param anno data.frame or GRanges, annotation.
-#' @param min integer, minimum number of tx"s.
-#' @param max integer, maximum number of tx"s.
-#' @return a character vector of gene identifiers that possess multiple transcripts.
+#' @param anno `data.frame` or `GRanges`, genome annotation.
+#' @param min `integer`, minimum number of transcripts.
+#' @param max `integer`, maximum number of transcripts..
+#' @return a `character` vector of gene identifiers that possess multiple transcripts.
 getMultiTxGene = function(anno, min = 2, max = Inf) {
   anno_tx = anno[anno$type == "transcript"]
   cnt_tx = table(anno_tx$gene_id)
@@ -95,14 +95,15 @@ countLogicRle = function(x) {
 #' Parse isoform parts list from annotation
 #'
 #' Parse the isoform parts list from annotation.
-#' @param anno a \code{GRanges} object of genome annotation, return by \link{import}.
-#' @param gene_id \code{character}, gene_id"s to analyze, default to all multi-transcript genes.
-#' @param depth.intron \code{integer}, extended depth into gene's flanks, default 300 nt.
-#' @param cores \code{integer}, number of computing cores to use.
-#' @return a \code{list} named by gene_id, each of which contains:
-#' \item{segment}{GRanges, genomic data of parts list.}
-#' \item{label}{integer vector, gene model (0 for intron) and exon numbers (coded as integer 1,2,...).}
-#' \item{layout}{lgCMatrix, transcript structure.}
+#' 
+#' @param anno a `GRanges` object of genome annotation, return by [import].
+#' @param gene_id `character`, gene_id"s to analyze, default to all multi-transcript genes.
+#' @param depth.intron `integer`, extended depth into gene's flanks, default 300 nt.
+#' @param cores `integer`, number of computing cores to use.
+#' @return a `list` named by gene_id, each of which contains:
+#' \item{segment}{`GRanges`, genomic data of parts list.}
+#' \item{label}{`integer` vector, gene model (0 for intron) and exon numbers (coded as integer 1,2,...).}
+#' \item{layout}{`lgCMatrix`, transcript structure.}
 #' @export
 getIsoPartsList = function(anno,
                            gene_id = getMultiTxGene(anno),
@@ -168,13 +169,18 @@ getIsoPartsList = function(anno,
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## ------ 2. find ATR events ------
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#' Get exon end site from exon parts list
+#' Get exon end site from exon parts list 
+#' 
+#' This is a helper function of [getEvent].
+#' @param x an element of isoform part list.
 getEES = function(x) {
   nEES = length(x) - match(F, rev(x), nomatch = length(x) + 1) + 1
   rep(c(F, T), c(nEES, length(x) - nEES))
 }
 
 #' Reconstruct exon parts list to isoform parts list
+#' 
+#' This is a helper function of [getEvent].
 #' @param ex exon parts list.
 #' @param gm gene model.
 stream = function(ex, gm) {
@@ -184,6 +190,9 @@ stream = function(ex, gm) {
 }
 
 #' Get exon start site from exon parts list
+#' 
+#' This is a helper function of [getEvent].
+#' @param x an element of isoform part list.
 getESS = function(x) {
   nESS = match(F, x, nomatch = length(x) + 1)
   rep(c(T, F), c(nESS - 1, length(x) - nESS + 1))
@@ -235,7 +244,8 @@ getIsoAS = function(li, gm) {
 #' Enumerate AS events
 #' 
 #' @details AFE, IAP, and consecutive SE events will be merged.
-#' @param as factor of AS events /isoform
+#' @param as factor of AS events /isoform.
+#' @param gm gene model.
 numberAS = function(as, gm) {
   as.tmp = as.character(as[!!gm])
   runs <- rle(as.tmp)
@@ -263,11 +273,11 @@ numberAS = function(as, gm) {
 # }
 
 #' Find AS events from isoform parts list
-#' @param isoPL isoform parts \code{list}
-#' @param cores \code{integer}, number of computing cores to use.
-#' @return a \code{list} as input with added two components:
-#' \item{asNum}{\code{integer matrix}, dim = dim of segment 0 means no event, and other integers indicate event number.}
-#' \item{asName}{a \code{list} of named \code{character} vector, with each element corresponding to one isoform. name is event number, character is event name}
+#' @param isoPL isoform parts `list`
+#' @param cores `integer`, number of computing cores to use.
+#' @return a `list` as input with added two components:
+#' \item{asNum}{integer `matrix`, dim = dim of segment 0 means no event, and other integers indicate event number.}
+#' \item{asName}{a `list` of named `character` vector, with each element corresponding to one isoform. name is event number, character is event name}
 getEvent = function(isoPL, cores = max(1, detectCores()-2)) {
   registerDoParallel(cores)
   isoPLas = foreach (pl = isoPL, g = names(isoPL)) %dopar% {
@@ -317,11 +327,11 @@ getASName <- function(plas) {
 #' Annotate AS events (generate feature bins)
 #'
 #' @param isoPLas isoform parts list with AS events
-#' @param cores \code{integer}, number of computing cores to use.
-#' @param min.event.length \code{numeric} (positive), minimum length of a valid event.
-#' @param anno_ss a \code{GRanges} of start/stop codon, UTR, Selenocysteine, etc; used to exclude some interior events (i.e., SE/RI/A3SS/A5SS)
-#' @param remove.duplicate \code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).
-#' @return a \code{surf} object.
+#' @param cores `integer`, number of computing cores to use.
+#' @param min.event.length `numeric` (positive), minimum length of a valid event.
+#' @param anno_ss a `GRanges` of start/stop codon, UTR, Selenocysteine, etc; used to exclude some interior events (i.e., SE/RI/A3SS/A5SS)
+#' @param remove.duplicate `logical`, whether (default to `TRUE`) to remove identical event duplicates (by keeping one).
+#' @return a `surf` object.
 annotateEvent <- function(isoPLas,
                           cores = max(1, detectCores()-2),
                           min.event.length = 6,
@@ -331,64 +341,65 @@ annotateEvent <- function(isoPLas,
   event.list = foreach (
     plas = isoPLas,
     g = names(isoPLas),
-    .combine = "c") %dopar% {
-      segment = plas$segment
-      asNum = plas$asNum
-      strand <- as.vector(strand(segment[1]))
-      
-      ## input check 1: existence of variable bins
-      if (any(!sapply(asNum, max))) {
-        warning(paste(colnames(asNum)[!sapply(asNum, max)], collapse = ", "), ": no (0) variable bin.")
-      }
-      
-      ## collect event name
-      event_name <- getASName(plas)
-      event_name <- factor(event_name, surf.events)
-      
-      ## merge variable bins by events
-      body = lapply(asNum, function(x) {
-        ## remove 0 segments, merge segments by event
-        ## note: reduce() will re-order segments by genomic coordinates.
-        asSeg <- unlist(GenomicRanges::reduce(S4Vectors::split(segment, replace(x, x == 0, NA))))
-        if (strand == "-" && length(asSeg)) {
-          i <- unlist(aggregate(seq_along(asSeg), by = list(names(asSeg)), FUN = rev)$x)
-        } else i <- seq_along(asSeg)
-        asSeg <- asSeg[i]
-        asSeg$event_part_number = unlist(lapply(rle(names(asSeg))$lengths, seq_len))
-        return(asSeg)
-      })
-      
-      ## construct GRangesList of events
-      event <- c_granges(body, sep = "@")
-      event <- GRangesList(S4Vectors::split(unname(event), names(event)))
-      mcols(event)$event_id = event_id = names(event)
-      mcols(event)$event_name = event_name[event_id]
-      mcols(event)$gene_id = rep(g, length(event_id))
-      mcols(event)$transcript_id = sapply(strsplit(event_id, "@"), head, 1)
-      
-      ## ---- clean up
-      ## (1) event body length (an amino acid spans 3 bps)
-      event = event[sapply(width(event), sum) >= min.event.length]
-      
-      ## (2) when A3SS/A5SS/RI/SE overlap with AFE/ALE, keep the latter
-      if (!is.null(anno_ss)) {
-        cnt = suppressWarnings(countOverlaps(event, anno_ss[anno_ss$gene_id == g]))
-        event = event[!mcols(event)$event_name %in% c("A3SS","A5SS","RI","SE") | !cnt]
-      }
-      
-      ## (3) remove duplicated event:
-      ##    with the same (i) `exonic part` and (ii) `event_name`
-      if (remove.duplicate) {
-        hit <- findOverlaps(event, event)
-        hit <- hit[from(hit) < to(hit)]
-        hit <- hit[mcols(event)$event_name[from(hit)] == mcols(event)$event_name[to(hit)]] ## (ii)
-        hit <- hit[as.logical(sapply(event[from(hit)] == event[to(hit)], all))] ## (i)
-        if (length(hit)) event <- event[to(hit)] else event = event[integer(0)]
-      }
-      
-      ## this is the event annotation (w/o features) for one gene
-      event
+    .combine = "c"
+  ) %dopar% {
+    segment = plas$segment
+    asNum = plas$asNum
+    strand <- as.vector(strand(segment[1]))
+    
+    ## input check 1: existence of variable bins
+    if (any(!sapply(asNum, max))) {
+      warning(paste(colnames(asNum)[!sapply(asNum, max)], collapse = ", "), ": no (0) variable bin.")
     }
+    
+    ## collect event name
+    event_name <- getASName(plas)
+    event_name <- factor(event_name, surf.events)
+    
+    ## merge variable bins by events
+    body = lapply(asNum, function(x) {
+      ## remove 0 segments, merge segments by event
+      ## note: reduce() will re-order segments by genomic coordinates.
+      asSeg <- unlist(GenomicRanges::reduce(S4Vectors::split(segment, replace(x, x == 0, NA))))
+      if (strand == "-" && length(asSeg)) {
+        i <- unlist(aggregate(seq_along(asSeg), by = list(names(asSeg)), FUN = rev)$x)
+      } else i <- seq_along(asSeg)
+      asSeg <- asSeg[i]
+      asSeg$event_part_number = unlist(lapply(rle(names(asSeg))$lengths, seq_len))
+      return(asSeg)
+    })
+    
+    ## construct GRangesList of events
+    event <- c_granges(body, sep = "@")
+    event <- GRangesList(S4Vectors::split(unname(event), names(event)))
+    mcols(event)$event_id = event_id = names(event)
+    mcols(event)$event_name = event_name[event_id]
+    mcols(event)$gene_id = rep(g, length(event_id))
+    mcols(event)$transcript_id = sapply(strsplit(event_id, "@"), head, 1)
+    
+    ## ---- clean up
+    ## (1) event body length (an amino acid spans 3 bps)
+    event = event[sapply(width(event), sum) >= min.event.length]
+    
+    ## (2) when A3SS/A5SS/RI/SE overlap with AFE/ALE, keep the latter
+    if (!is.null(anno_ss)) {
+      cnt = suppressWarnings(countOverlaps(event, anno_ss[anno_ss$gene_id == g]))
+      event = event[!mcols(event)$event_name %in% c("A3SS","A5SS","RI","SE") | !cnt]
+    }
+    
+    ## (3) remove duplicated event:
+    ##    with the same (i) `exonic part` and (ii) `event_name`
+    if (remove.duplicate) {
+      hit <- findOverlaps(event, event)
+      hit <- hit[from(hit) < to(hit)]
+      hit <- hit[mcols(event)$event_name[from(hit)] == mcols(event)$event_name[to(hit)]] ## (ii)
+      hit <- hit[as.logical(sapply(event[from(hit)] == event[to(hit)], all))] ## (i)
+      if (length(hit)) event <- event[to(hit)] else event = event[integer(0)]
+    }
+    
+    ## this is the event annotation (w/o features) for one gene
+    event
+  }
   stopImplicitCluster()
   
   anno_event <- mcols(event.list)
@@ -438,10 +449,10 @@ annotateEvent <- function(isoPLas,
 #' Locate the body feature of AS events and extract the genomic bins.
 #' This is a helper function to `getFeature()`
 #'
-#' @param plas one element from isoPLas.
-#' @param type character, either "lead" for upstream, or "lag" for downstream
+#' @param plas one element in `isoPLas`.
+#' @param type `character`, either "lead" for upstream, or "lag" for downstream
 #' @param depth.exon depth extended into exon, default is 100 nt
-#' @return a `GRangesList`
+#' @return a `GRangesList`.
 findBodyFeature = function(plas,
                            type = c("lead", "lag"),
                            depth.exon = 100) {
@@ -478,11 +489,11 @@ findBodyFeature = function(plas,
 #' Find adjacent features of given feature
 #'
 #' Locate the adjacent bins at the desired direction and extract the genomic bins, given some location features of AS events. This is a helper function to `getFeature()`
-#' @param plas one isoform element from isoPLas
-#' @param body list, $id_tx, $event_id = body bins indices
-#' @param type character, either"lead" for upstream, or "lag" for downstream
-#' @param depth.exon extended depth into exon, default 100 nt
-#' @param depth.intron extended depth into intron, default 300 nt
+#' @param plas one isoform element in `isoPLas`.
+#' @param body `list`, $id_tx, $event_id = body bins indices
+#' @param type `character`, either"lead" for upstream, or "lag" for downstream
+#' @param depth.exon `integer`, extended depth into exon, default 100 nt
+#' @param depth.intron `integer`, extended depth into intron, default 300 nt
 #' @return a `GRangesList`
 findAdjacentFeature = function(plas,
                                body,
@@ -524,12 +535,12 @@ findAdjacentFeature = function(plas,
 #' Find features on the (upstream or downstream) constitutive exons
 #'
 #' Locate the feature on the (upstream or downstream) constitutive exons and extract the genomic bins, given some body features of AS events. This is a helper function to `getFeature()`
-#' @param plas one isoform element from isoPLas
-#' @param body list, $id_tx$event_id = body bins indices
-#' @param type character, either "lead" for upstream, or "lag" for downstream
-#' @param depth.exon extended depth into exon
-#' @param constitutive logical, whether to use consecutive or adjacent neighbor exon. The default is `TRUE`.
-#' @return a `GRangesList`
+#' @param plas one isoform element in `isoPLas`.
+#' @param body `list`, $id_tx$event_id = body bins indices
+#' @param type `character`, either "lead" for upstream, or "lag" for downstream
+#' @param depth.exon `integer`, extended depth into exon
+#' @param constitutive `logical`, whether to use consecutive or adjacent neighbor exon. The default is `TRUE`.
+#' @return a `GRangesList`.
 findNeighborFeature = function(plas,
                                body,
                                type = c("lead", "lag"),
@@ -604,14 +615,14 @@ findNeighborFeature = function(plas,
 #'
 #' Generate location features for each ATR event.
 #'
-#' @param isoPLas isoform parts list with AS events
-#' @param anno_event \code{DataFrame}, event annotation w/o features
-#' @param depth.exon \code{integer}, extended depth into exon, default 50 nt.
-#' @param depth.intron \code{integer}, extended depth into intron, default 300 nt.
-#' @param cores \code{integer}, number of computing cores to use.
-#' @param remove.duplicate \code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).
-#' @param verbose logical, whether (default to \code{TRUE}) to echo progress
-#' @return a \code{surf} object with one added column called \code{feature}, which contains a \code{GRangesList} of extracted location features.
+#' @param isoPLas isoform parts list with AS events.
+#' @param anno_event `DataFrame`, event annotation w/o features
+#' @param depth.exon `integer`, extended depth into exon, default 50 nt.
+#' @param depth.intron `integer`, extended depth into intron, default 300 nt.
+#' @param cores `integer`, number of computing cores to use.
+#' @param remove.duplicate `logical`, whether (default to `TRUE`) to remove identical event duplicates (by keeping one).
+#' @param verbose `logical`, whether (default to `TRUE`) to echo progress
+#' @return a `surf` object with one added column called `feature`, which contains a `GRangesList` of extracted location features.
 getFeature = function(isoPLas, anno_event,
                       depth.exon = 100,
                       depth.intron = 300,

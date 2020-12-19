@@ -9,12 +9,15 @@ faseqInfer(event, fdr.cutoff = 0.05, signal.cutoff = 20)
 \arguments{
 \item{event}{a \code{surf} object from \link{faseq} or \link{faseqFit}.}
 
-\item{fdr.cutoff}{\code{numeric}, significance cutoff for the adjusted p-values of FAT.}
+\item{fdr.cutoff}{\code{numeric}, significance cutoff for the adjusted p-values.}
 
-\item{signal.cutoff}{\code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if don't want to filter those location with low eCLIP signals of the RBP.}
+\item{signal.cutoff}{\code{numeric}, threshold cut-off for the eCLIP signals,
+default to 20. Set this to 0 if don't want to filter those location with
+low eCLIP signals of the RBP.}
 }
 \value{
-a \code{surf} object, with one added \code{inferredFeature} column (inclusion/exclusion/none).
+a \code{surf} object, with one added \code{inferredFeature} column
+(inclusion/exclusion/none).
 }
 \description{
 Inference the functionality of individual location features,

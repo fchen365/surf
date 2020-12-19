@@ -7,7 +7,7 @@
 genePartsList(object)
 }
 \arguments{
-\item{object}{a \code{surf} object output by \link{faseq} or \link{faseqFit} or \link{faseqInference}.}
+\item{object}{a \code{surf} object output by \link{faseq} or \link{faseqFit} or \link{faseqInfer}.}
 }
 \value{
 a \code{DataFrame} object.

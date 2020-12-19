@@ -2,16 +2,20 @@
 % Please edit documentation in R/estimate.R
 \name{fat}
 \alias{fat}
-\title{Perform the functional association test}
+\title{Perform the functional association test (FAT)}
 \usage{
 fat(data, min.size = 60, trim = 0.025)
 }
 \arguments{
 \item{data}{\code{data.frame}, contains training data for one RBP and one event type}
 
-\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to \code{60}.}
+\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to 60.}
 
-\item{trim}{\code{numeric}, the percentile used to trim the training data. This is useful in producing a more robust estimation of functional association.}
+\item{trim}{\code{numeric}, the percentile used to trim the training data.
+This is useful in producing a more robust estimation of functional association.}
+}
+\value{
+a \code{data.frame} that summarizes the FAT.
 }
 \description{
 This is a learning one unit of SURF.

@@ -12,5 +12,5 @@ stream(ex, gm)
 \item{gm}{gene model.}
 }
 \description{
-Reconstruct exon parts list to isoform parts list
+This is a helper function of \link{getEvent}.
 }

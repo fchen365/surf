@@ -2,13 +2,18 @@ Package: surf
 Type: Package
 Title: Statistical Utility for RBP (RNA binding protein) Functions
 Version: 0.0.0.9000
-Date: 2019-08-30
+Date: 2020-12-12
 Authors@R: 
     person(given = "Fan",
            family = "Chen",
            role = c("aut", "cre"),
            email = "fan.chen@wisc.edu",
            comment = c(ORCID = "0000-0003-4508-6023"))
+    person(given = "Sunduz",
+           family = "Keles",
+           role = c("aut", "cre"),
+           email = "keles@stat.wisc.edu",
+           comment = c(ORCID = "0000-0001-9048-0922"))
 Description: 
     The marriage of RNA-seq and CLIP-seq for data-supported hypothesis for RBP functions.
 URL: https:github.com/fchen365/surf
@@ -23,6 +28,7 @@ Imports:
     arm,
     doMC,
     MASS,
+    withr,
     rlang,
     dplyr,
     tidyr,
@@ -34,17 +40,24 @@ Imports:
     ggpubr,
     Matrix,
     AUCell,
+    IRanges,
     methods,
     stringr,
     forcats,
     ggplot2,
+    foreach,
+    parallel,
     reshape2,
     magrittr,
     Rsubread,
+    S4Vectors,
     ensembldb,
     tidyverse,
     data.table,
     rtracklayer,
+    BiocGenerics,
+    BiocParallel,
+    GenomicRanges,
     SummarizedExperiment,
 Suggests:
     knitr,

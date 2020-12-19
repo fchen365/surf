@@ -9,16 +9,16 @@ getMultiTxGene(anno, min = 2, max = Inf)
 getMultiTxGene(anno, min = 2, max = Inf)
 }
 \arguments{
-\item{anno}{data.frame or GRanges, annotation.}
+\item{anno}{\code{data.frame} or \code{GRanges}, genome annotation.}
 
-\item{min}{integer, minimum number of tx"s.}
+\item{min}{\code{integer}, minimum number of transcripts.}
 
-\item{max}{integer, maximum number of tx"s.}
+\item{max}{\code{integer}, maximum number of transcripts..}
 }
 \value{
-gene_id's
+a \code{character} vector of gene_id's
 
-a character vector of gene identifiers that possess multiple transcripts.
+a \code{character} vector of gene identifiers that possess multiple transcripts.
 }
 \description{
 Find genes that contain multiple transcripts.

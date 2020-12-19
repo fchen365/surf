@@ -16,6 +16,20 @@ drseqFit(
 \arguments{
 \item{drd}{a \code{surf} object from \link{drseqCount}.}
 
+\item{fullModel}{
+     The full model formula
+  }
+
+\item{reducedModel}{
+     Null model formula.
+  }
+
+\item{fitExpToVar}{
+    A variable name contained in the sample data. The expression 
+    values will be fitted to this variable using the the formula 
+    " ~ sample + fitExpToVar * exon".
+  }
+
 \item{cores}{\code{integer}, number of computing workers.}
 
 \item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
@@ -30,5 +44,5 @@ a \code{surf} object with (1) \code{drseqResults} and \code{sampleData} slot upd
 Fit DrSeq models using the DEXSeq as the estimation engine.
 }
 \details{
-the \code{drseqResults} slot contains extensive DrSeq results. To access the object, use \link{deseqResults} function.
+the \code{drseqResults} slot contains extensive DrSeq results. To access the object, use \link{drseqResults} function.
 }

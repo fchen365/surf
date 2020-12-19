@@ -18,20 +18,27 @@ diffAUC(
 \arguments{
 \item{targetSet}{\code{character} vector, set of targeted units.}
 
-\item{controlSet}{\code{character} vector, control set for contrast. If \code{NULL} (default), the full set of elements in \code{rankings} will be used.}
+\item{controlSet}{\code{character} vector, control set for contrast.
+If \code{NULL} (default), the full set of elements in \code{rankings} will be used.}
 
-\item{rankings}{a \code{SummarizedExperiment} object, with row correponding to transcript or gene and column corresponding to samples. Each element is a expression measure (e.g., TPM).}
+\item{rankings}{a \code{SummarizedExperiment} object, with row corresponding to
+transcript or gene and column corresponding to samples.
+Each element is a expression measure (e.g., TPM).}
+
+\item{sampleData}{\code{data.frame} of sample data, which contains a \code{condition} column,}
 
 \item{n.sample}{\code{integer}, number of times of controlSet sampling, default to 1000.}
 
 \item{cores}{\code{integer}, number of computing cores.}
 
 \item{verbose}{\code{logical}, whether to print out progress report.}
+
+\item{...}{additional parameters for \link[AUCell:AUCell_calcAUC]{AUCell::AUCell_calcAUC}.}
 }
 \value{
 a \code{data.frame} of DASeq results.
 }
 \description{
 Detect differential activity using the AUC measure and RNA-seq quantification.
-This unit is a helper of \code{daseq}.
+This unit is a helper of \link{daseq}.
 }

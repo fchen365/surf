@@ -24,23 +24,48 @@ faseq(
 \arguments{
 \item{event}{a \code{surf} object.}
 
-\item{sampleData}{\code{data.frame}, must contain two columns -- "bam" and "condition" (for "IP" and "input", where "IP" should come first), whose \code{row.names} represent the sample names. "bam" is the file name of CLIP-seq bam. "condition" will be coerced to factor, whose first level will be treated as IP, and the second level as input.}
+\item{sampleData}{\code{data.frame}, must contain two columns --
+"bam" and "condition" (for "IP" and "input", where "IP" should come first),
+whose \code{row.names} represent the sample names. "bam" is the file name of
+CLIP-seq bam. "condition" will be coerced to factor, whose first level will
+be treated as IP, and the second level as input.}
 
-\item{signal.type}{\code{character}, indicate the type of feature signal wanted, support "TPM" for Transcripts Per Kilobase Million, "FPKM" for Fragments Per Kilobase Million (for paired-end reads) and Reads Per Kilobase Million (for single-end reads), and "raw.count" for raw.count read counts}
+\item{signal.type}{\code{character}, indicate the type of feature signal wanted,
+support "TPM" for Transcripts Per Kilobase Million,
+"FPKM" for Fragments Per Kilobase Million (for paired-end reads) and
+Reads Per Kilobase Million (for single-end reads), and
+"raw.count" for raw read counts}
 
-\item{FUN.aggregate}{\code{function}, used for aggregating signals within \code{condition}, default to mean.}
+\item{FUN.aggregate}{\code{function}, used for aggregating signals within \code{condition},
+default to \code{\link[=mean]{mean()}}.}
 
-\item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \link{featureCounts}}
+\item{minMQS}{parameters for \link{featureCounts}.
+\code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25\% of the
+typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.}
 
-\item{...}{parameters for \link{Rsubread::featureCounts}.}
+\item{minOverlap}{parameters for \link{featureCounts}.
+\code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25\% of the
+typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.}
 
-\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to \code{60}.}
+\item{isPairedEnd}{parameters for \link{featureCounts}.
+\code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25\% of the
+typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.}
 
-\item{trim}{\code{numeric}, the percentile used to trim the training data. This is useful in producing a more robust estimation of functional association.}
+\item{cores}{\code{integer}, number of available workers,
+sent to \code{nthreads} of \link{featureCounts}}
 
-\item{fdr.cutoff}{\code{numeric}, significance cutoff for the adjusted p-values of FAT.}
+\item{...}{parameters for \link[Rsubread:featureCounts]{Rsubread::featureCounts}.}
 
-\item{signal.cutoff}{\code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if don't want to filter those location with low eCLIP signals of the RBP.}
+\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to 60.}
+
+\item{trim}{\code{numeric}, the percentile used to trim the training data.
+This is useful in producing a more robust estimation of functional association.}
+
+\item{fdr.cutoff}{\code{numeric}, significance cutoff for the adjusted p-values.}
+
+\item{signal.cutoff}{\code{numeric}, threshold cut-off for the eCLIP signals,
+default to 20. Set this to 0 if don't want to filter those location with
+low eCLIP signals of the RBP.}
 
 \item{verbose}{\code{logical}, whether (default to \code{TRUE}) to echo progress}
 }

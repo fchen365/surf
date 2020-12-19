@@ -9,7 +9,7 @@ library(surf)
 #  library(usethis)
 #  ## parse events from genome annotation (GTF)
 #  ## /path/to/genome/annotation/file
-#  anno_file <- "~/Downloads/gencode.vM23.primary_assembly.annotation.gtf"
+#  anno_file <- "~/Downloads/surf_vignette/gencode.vM23.primary_assembly.annotation.gtf"
 #  anno_mm <- import(anno_file)
 #  gene_id <- anno_mm[seqnames(anno_mm) == "chr14" &
 #                       anno_mm$gene_type == "protein_coding" &
@@ -18,14 +18,14 @@ library(surf)
 #  anno_mm_select <- anno_mm[anno_mm$gene_id %in% gene_id_sampled]
 #  
 #  ## Mus musculus
-#  export(anno_mm_select, "~/Downloads/gencode.vM23.primary.example.gtf")
+#  export(anno_mm_select, "~/Downloads/surf_vignette/gencode.vM23.primary.example.gtf")
 
 ## ----prepare hs annotation, include=F, eval=F---------------------------------
 #  library(rtracklayer)
 #  library(usethis)
 #  ## parse events from genome annotation (GTF)
 #  ## /path/to/genome/annotation/file
-#  anno_file <- "~/Downloads/gencode.v32.primary_assembly.annotation.gtf"
+#  anno_file <- "~/Downloads/surf_vignette/gencode.v32.primary_assembly.annotation.gtf"
 #  anno_hs <- import(anno_file)
 #  gene_id <- anno_hs[seqnames(anno_hs) == "chr16" &
 #                       anno_hs$gene_type == "protein_coding" &
@@ -34,21 +34,21 @@ library(surf)
 #  anno_hs_select <- anno_hs[anno_hs$gene_id %in% gene_id_sampled]
 #  
 #  ## Homo sapiens
-#  export(anno_hs_select, "~/Downloads/gencode.v32.primary.example.gtf")
+#  export(anno_hs_select, "~/Downloads/surf_vignette/gencode.v32.primary.example.gtf")
 #  
 #  ## export gene ranges
 #  genes <- reduce(anno_hs_select)
 #  strand(genes) <- "*"
 #  genes <- resize(genes, width(genes) + 300, fix = "center")
-#  export(genes, "~/Downloads/gencode.v32.primary.region.bed")
+#  export(genes, "~/Downloads/surf_vignette/gencode.v32.primary.region.bed")
 
 ## ----parse, eval=F------------------------------------------------------------
 #  ## parse events from genome annotation (GTF)
-#  event <- parseEvent("~/Downloads/gencode.v32.primary.example.gtf")
+#  event <- parseEvent("~/Downloads/surf_vignette/gencode.v32.primary.example.gtf")
 
 ## ---- echo=F------------------------------------------------------------------
-# saveRDS(event, "~/Downloads/intermediate1.rds")
-event <- readRDS("~/Downloads/intermediate1.rds")
+# saveRDS(event, "~/Downloads/surf_vignette/intermediate1.rds")
+event <- readRDS("~/Downloads/surf_vignette/intermediate1.rds")
 
 ## -----------------------------------------------------------------------------
 event
@@ -74,15 +74,15 @@ subsetByOverlaps(event, ranges = gr0)
 ## ----drseq, eval=F------------------------------------------------------------
 #  rna_seq_sample <- data.frame(
 #    row.names = c('sample1', 'sample2', 'sample3', 'sample4'),
-#    bam = paste0("~/Downloads/",c("KD1", "KD2", "WT1", "WT2"),".bam"),
+#    bam = paste0("~/Downloads/surf_vignette/",c("KD1", "KD2", "WT1", "WT2"),".bam"),
 #    condition = c('knockdown', 'knockdown', 'wildtype', 'wildtype'),
 #    stringsAsFactors = FALSE
 #  )
 #  event <- drseq(event, rna_seq_sample)
 
 ## ---- echo=F------------------------------------------------------------------
-# saveRDS(event, "~/Downloads/intermediate2.rds")
-event <- readRDS("~/Downloads/intermediate2.rds")
+# saveRDS(event, "~/Downloads/surf_vignette/intermediate2.rds")
+event <- readRDS("~/Downloads/surf_vignette/intermediate2.rds")
 
 ## -----------------------------------------------------------------------------
 event[,7:12]
@@ -100,7 +100,7 @@ mcols(drr)
 ## ---- eval=F------------------------------------------------------------------
 #  clip_seq_sample = data.frame(
 #    row.names = c('sample5', 'sample6', 'sample7'),
-#    bam = paste0("~/Downloads/",c("IP1", "IP2", "SMI"),".bam"),
+#    bam = paste0("~/Downloads/surf_vignette/",c("IP1", "IP2", "SMI"),".bam"),
 #    condition = c('IP', 'IP', 'SMI'),
 #    stringsAsFactors = FALSE
 #  )
@@ -108,8 +108,8 @@ mcols(drr)
 #                 min.size = 3, fdr.cutoff = 0.3, signal.cutoff = 2)
 
 ## ---- echo=F------------------------------------------------------------------
-# saveRDS(event, "~/Downloads/intermediate3.rds")
-event <- readRDS("~/Downloads/intermediate3.rds")
+# saveRDS(event, "~/Downloads/surf_vignette/intermediate3.rds")
+event <- readRDS("~/Downloads/surf_vignette/intermediate3.rds")
 
 ## -----------------------------------------------------------------------------
 event[,13:14]
@@ -124,15 +124,15 @@ far
 ## -----------------------------------------------------------------------------
 mcols(far)
 
-## ---- fig.width=8-------------------------------------------------------------
-fa.plot(event)
+## ---- fig.width=7, fig.height=4-----------------------------------------------
+fa.plot(event, plot.event = c("AFE", "A5U", "IAP", "TAP"))
 
 ## -----------------------------------------------------------------------------
 inferredFeature(event)
 
 ## ---- eval=F------------------------------------------------------------------
 #  ## rank transcripts (TPM)
-#  exprMat <- readRDS('~/Downloads/TcgaTargetGtex_rsem_isoform_tpm_laml_blood_10each.rds')
+#  exprMat <- readRDS('~/Downloads/surf_vignette/TcgaTargetGtex_rsem_isoform_tpm_laml_blood_10each.rds')
 #  ## sample data
 #  ext_sample <- data.frame(
 #    condition = rep(c('TCGA', 'GTEx'), each = 10),
@@ -143,8 +143,8 @@ inferredFeature(event)
 #  event <- daseq(event, getRankings(exprMat), cores = 1, ext_sample)
 
 ## ---- echo=F------------------------------------------------------------------
-# saveRDS(event, "~/Downloads/intermediate4.rds")
-event <- readRDS("~/Downloads/intermediate4.rds")
+# saveRDS(event, "~/Downloads/surf_vignette/intermediate4.rds")
+event <- readRDS("~/Downloads/surf_vignette/intermediate4.rds")
 
 ## -----------------------------------------------------------------------------
 dar <- daseqResults(event)

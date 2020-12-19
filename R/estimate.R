@@ -6,16 +6,16 @@
 
 #' Prepare DrSeq annotation files
 #'
-#' To use the \code{useMetaFeatures} functionality of \link{Rsubread::featureCounts}, we need the GTF input.
-#' This function helps to produce the *two* annotation files ("event" and "exon") needed by \link{drseqCount}.
+#' To use the `useMetaFeatures` functionality of [Rsubread::featureCounts], we need the GTF input.
+#' This function helps to produce the *two* annotation files ("event" and "exon") needed by [drseqCount].
 #'
-#' @param anno_event a \code{surf} object
-#' @param anno.prefix \code{character}, prefix of exon/event annotation files for saving. These files are needed by \code{Rsubread::featureCounts}.
-#' @param anno.format \code{character}, e.g. "gtf", as accepted by \code{rtracklayer::export}.
-#' @param remove.overlap.exon \code{logical}, remove overlapping exons across genes (default to \code{FALSE}).
-#' @param cores \code{integer}, number of available workers, sent to \code{nthreads} of \code{Rsubread::featureCounts}.
-#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progress.
-#' @return \code{NULL}, the function is a procedure and only output/export results to file system, except for messages and warnings.
+#' @param anno_event a `surf` object
+#' @param anno.prefix `character`, prefix of exon/event annotation files for saving. These files are needed by [Rsubread::featureCounts].
+#' @param anno.format `character`, e.g. "gtf", as accepted by [rtracklayer::export].
+#' @param remove.overlap.exon `logical`, remove overlapping exons across genes (default to `FALSE`).
+#' @param cores `integer`, number of available workers, sent to `nthreads` of [Rsubread::featureCounts].
+#' @param verbose `logical`, whether (`TRUE`) to echo progress.
+#' @return `NULL`, the function is a procedure and only output/export results to file system, except for messages and warnings.
 #' @export
 prepDrseqAnno = function(anno_event,
                          anno.prefix = "annotation.drseq",
@@ -116,23 +116,30 @@ prepDrseqAnno = function(anno_event,
 
 #' Construct DrSeq Data
 #'
-#' This function creates the \code{drseqData} slot needed by DrSeq analysis, which is a \link{DEXSeqDataSet}.
-#' This function requires two DrSeq annotation files created by \link{prepDrseqAnno}. Two files share the same prefix and end with ".exon.<file type>" and ".event.<file.type>" respective.
+#' This function creates the `drseqData` slot needed by DrSeq analysis, which is a [DEXSeq::DEXSeqDataSet].
+#' This function requires two DrSeq annotation files created by [prepDrseqAnno]. 
+#' Two files have the same prefix (`anno.prefix`), the same suffix (`anno.format`),
+#' and only differ by "exon/event".
 #' If annotation files are missing, this function can create them freshly, which might take some time.
-#' This function counts the RNA-seq reads on ATR events and genes using \code{featureCounts}.
+#' This function counts the RNA-seq reads on ATR events and genes using `featureCounts`.
 #'
-#' @param event a \code{surf} object from \link{parseEvent}.
-#' @param sampleData \code{data.frame}, describes the RNA-seq samples, contains at least two columns -- `bam` and `condition`, the row.names represent sample names.
-#' @inheritParams DEXSeq::DEXSeqDataSet ## the \code{design} parameter.
-#' @param remove.overlap.exon \code{logical}, remove overlapping exons across genes (default to \code{FALSE}).
-#' @param anno.prefix \code{character}, file names for outputting annotation files.
-#' @param anno.format \code{character}, e.g. "gtf", as accepted by \link{rtracklayer::export}.
-#' @param minMQS;isPairedEnd as defined in \link{Rsubread::featureCounts}. Note that the default is customized for SURF (see details for more information).
-#' @param cores \code{integer}, number of available workers, sent to \code{nthreads} of \code{featureCounts}.
-#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progress.
-#' @param ... additional parameters for \code{Rsubread::featureCounts}.
-#' @details If you used Illumina HiSeq 2000, set \code{strandSpecific = 2} (reversed strand).
-#' @return a \code{surf} object, with \code{drseqData} slot updated.
+#' @param event a `surf` object from [parseEvent].
+#' @param sampleData `data.frame`, describes the RNA-seq samples and 
+#'   contains at least two columns -- `bam` and `condition`, 
+#'   whose `row.names` represent sample names.
+#' @inheritParams DEXSeq::DEXSeqDataSet
+#' @param remove.overlap.exon `logical`, remove overlapping exons across genes (default to `FALSE`).
+#' @param anno.prefix `character`, file names for outputting annotation files.
+#'   If prefix is absent, hidden file will be output to the current working directory. 
+#' @param anno.format `character`, e.g. "gtf", as accepted by [rtracklayer::export].
+#' @param minMQS,isPairedEnd as defined in [Rsubread::featureCounts]. 
+#'   Note that the default is customized for SURF (see details for more information).
+#' @param cores `integer`, number of available workers, sent to `nthreads` of `featureCounts`.
+#' @param verbose `logical`, whether (`TRUE`) to echo progress.
+#' @param ... additional parameters for [Rsubread::featureCounts].
+#' @details 
+#'   If you used Illumina HiSeq 2000, set `strandSpecific = 2` (reversed strand).
+#' @return a `surf` object, with `drseqData` slot updated.
 #' @export
 drseqCount = function(event, sampleData,
                       design = ~ sample + exon + condition:exon,
@@ -252,14 +259,16 @@ drseqCount = function(event, sampleData,
 #' DrSeq Fit
 #'
 #' Fit DrSeq models using the DEXSeq as the estimation engine.
-#' @param drd a \code{surf} object from \link{drseqCount}.
-#' @param cores \code{integer}, number of computing workers.
-#' @param verbose \code{logical}, whether (\code{TRUE}) to echo progress.
-#' @return a \code{surf} object with (1) \code{drseqResults} and \code{sampleData} slot updated and (2) three added columns:
+#' 
+#' @param drd a `surf` object from [drseqCount].
+#' @param cores `integer`, number of computing workers.
+#' @param verbose `logical`, whether (`TRUE`) to echo progress.
+#' @inheritParams DEXSeq::DEXSeq
+#' @return a `surf` object with (1) `drseqResults` and `sampleData` slot updated and (2) three added columns:
 #' \item{eventBaseMean}{base read coverage of the event from RNA-seq data.}
 #' \item{padj}{adjusted p-value for differential REU.}
 #' \item{logFoldChange}{estimated log2 fold change of REU: log2(condition of the 1st sample / another condition)}
-#' @details the \code{drseqResults} slot contains extensive DrSeq results. To access the object, use \link{deseqResults} function.
+#' @details the `drseqResults` slot contains extensive DrSeq results. To access the object, use [drseqResults] function.
 #' @export
 drseqFit <- function(drd,
                      fullModel = design(drd@drseqData),
@@ -334,14 +343,14 @@ drseqFit <- function(drd,
 #'
 #' Filter DrSeq results for the analysis module 2 of SURF (DASeq).
 #'
-#' @param event a \code{surf} object output by \link{drseqFit}.
-#' @param drseq.fdr \code{numeric}, FDR (BH procedure) adjusted p-value cut-off.
-#' @param read.length \code{numeric}, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.
-#' @param min.adjMean \code{numeric}, adjusted event base mean threshold.
-#' @param filter.overlap.event \code{logical}, whether (default to \code{TRUE}) to select one representitive event from overlapping ones and remove the others.
-#' @param verbose \code{logical}, whether (default to \code{FALSE}) to print out basic summary statistics.
+#' @param event a `surf` object output by [drseqFit].
+#' @param drseq.fdr `numeric`, FDR (BH procedure) adjusted p-value cut-off.
+#' @param read.length `numeric`, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.
+#' @param min.adjMean `numeric`, adjusted event base mean threshold.
+#' @param filter.overlap.event `logical`, whether (default to `TRUE`) to select one representitive event from overlapping ones and remove the others.
+#' @param verbose `logical`, whether (default to `FALSE`) to print out basic summary statistics.
 #'
-#' @return a \code{surf} object, with three columns added:
+#' @return a `surf` object, with three columns added:
 #' \item{adjMean}{adjusted base mean of the event from RNA-seq data.}
 #' \item{group}{group labels of ATR events, `increase` for increased REU upon RBP knock-down, and `decrease` for decreased, and `no change` for no-changed.}
 #' \item{included}{logical, indicating whether the event is included into SURF analysis module 2.}
@@ -443,11 +452,12 @@ drseqFilter = function(event,
 #'
 #' Perform the differential REU (DrSeq) test in a single command.
 #' This function is a wrapper that calls the necessary functions in order for DrSeq.
+#' 
 #' @inheritParams drseqCount
-#' @param ... parameters for \link{Rsubread::featureCounts}.
+#' @param ... parameters for [Rsubread::featureCounts].
 #' @inheritParams drseqFit
 #' @inheritParams drseqFilter
-#' @return a \code{surf} object
+#' @return a `surf` object containing the DrSeq result in the `drseqResults` slot.
 #' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
 #' @export
 drseq <- function(event,
@@ -530,15 +540,31 @@ drseq <- function(event,
 #' You align CLIP-seq reads to the genome and provide FASeq with the resulting bam files.
 #' We will take care of the rest.
 #'
-#' @param event a \code{surf} object.
-#' @param sampleData \code{data.frame}, must contain two columns -- "bam" and "condition" (for "IP" and "input", where "IP" should come first), whose \code{row.names} represent the sample names. "bam" is the file name of CLIP-seq bam. "condition" will be coerced to factor, whose first level will be treated as IP, and the second level as input.
-#' @param signal.type \code{character}, indicate the type of feature signal wanted, support "TPM" for Transcripts Per Kilobase Million, "FPKM" for Fragments Per Kilobase Million (for paired-end reads) and Reads Per Kilobase Million (for single-end reads), and "raw.count" for raw.count read counts
-#' @param FUN.aggregate \code{function}, used for aggregating signals within \code{condition}, default to mean.
-#' @param cores \code{integer}, number of available workers, sent to \code{nthreads} of \link{featureCounts}
-#' @param verbose \code{logical}, whether (default to \code{TRUE}) to echo progress
-#' @param minMQS;minOverlap;isPairedEnd;... parameters for \link{featureCounts}. \code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25% of the typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.
-#' @return a \code{surf} object, with (i) one column \code{featureSignal} added, (2) \code{faseqData} slot updated, and (3) \code{sampleData} slot updated.
-#' @details If your sequencing platform is Illumina HiSeq 2000, set \code{strandSpecific = 2}.
+#' @param event a `surf` object.
+#' @param sampleData `data.frame`, must contain two columns -- 
+#'   "bam" and "condition" (for "IP" and "input", where "IP" should come first), 
+#'   whose `row.names` represent the sample names. "bam" is the file name of 
+#'   CLIP-seq bam. "condition" will be coerced to factor, whose first level will 
+#'   be treated as IP, and the second level as input.
+#' @param signal.type `character`, indicate the type of feature signal wanted, 
+#'   support "TPM" for Transcripts Per Kilobase Million, 
+#'   "FPKM" for Fragments Per Kilobase Million (for paired-end reads) and 
+#'   Reads Per Kilobase Million (for single-end reads), and 
+#'   "raw.count" for raw read counts
+#' @param FUN.aggregate `function`, used for aggregating signals within `condition`, 
+#'   default to [mean()].
+#' @param cores `integer`, number of available workers, 
+#'   sent to `nthreads` of [featureCounts]
+#' @param verbose `logical`, whether (default to `TRUE`) to echo progress
+#' @param minMQS,minOverlap,isPairedEnd,... parameters for [featureCounts]. 
+#'   `minMQS` is default to 10, and `minOverlap` is default to 12 (25% of the 
+#'   typical read length of CLIP-seq (~50bp)), and `isPairedEnd` is default to `TRUE`.
+#' @return a `surf` object, with 
+#'   (1) one column `featureSignal` added, 
+#'   (2) `faseqData` slot updated, and 
+#'   (3) `sampleData` slot updated.
+#' @details 
+#'   If your sequencing platform is Illumina HiSeq 2000, set `strandSpecific = 2`.
 #' @keywords feature signal, CLIP-seq
 #' @references \url{https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/}
 #' @export
@@ -689,14 +715,16 @@ faseqCount <- function(event, sampleData,
   return(res)
 }
 
-#' Perform the functional association test
+#' Perform the functional association test (FAT)
 #'
 #' This is a learning one unit of SURF.
 #' It trains a GLM model for the functional association of one RBP with one ATR event.
 #'
-#' @param data \code{data.frame}, contains training data for one RBP and one event type
-#' @param min.size \code{integer}, the minimum size of "reliable" training set, default to `60`.
-#' @param trim \code{numeric}, the percentile used to trim the training data. This is useful in producing a more robust estimation of functional association.
+#' @param data `data.frame`, contains training data for one RBP and one event type
+#' @param min.size `integer`, the minimum size of "reliable" training set, default to 60.
+#' @param trim `numeric`, the percentile used to trim the training data. 
+#'   This is useful in producing a more robust estimation of functional association.
+#' @return a `data.frame` that summarizes the FAT.
 fat = function(data, min.size = 60, trim = 0.025) {
   feature = intersect(colnames(data), c("up3", "up2", "up1", "bd1", "bd2", "dn1", "dn2", "dn3"))
   res = data.frame()
@@ -734,19 +762,20 @@ fat = function(data, min.size = 60, trim = 0.025) {
     as.data.frame(coef.dec),
     functional = "inclusion"))
   
-  res = dplyr::filter(res, size >= min.size)
+  res = dplyr::filter(res, .data$size >= min.size)
   return(res)
 }
 
 #' Functional Association using Sequencing data
 #'
 #' This function performs functional association test (FAT).
-#' The null hypothesis of FAT is that there is no association between feature signals and differential ATR.
+#' The null hypothesis of FAT is that there is no association between 
+#' feature signals and differential ATR.
 #'
-#' @param event a \code{surf} object output by \link{faseqCount}.
+#' @param event a `surf` object output by [faseqCount].
 #' @inheritParams fat
-#' @param verbose \code{logical}, whether to print out progress information.
-#' @return a \code{surf} object with \code{faseqResults} slot updated.
+#' @param verbose `logical`, whether to print out progress information.
+#' @return a `surf` object with `faseqResults` slot updated.
 #' @export
 faseqFit <- function(event,
                      min.size = 60,
@@ -814,10 +843,13 @@ faseqFit <- function(event,
 #' (ii) the corresponding FAT is significant (padj < cut.off), and
 #' (iii) it has strong binding signal (featureSignal > cut.off).
 #'
-#' @param event a \code{surf} object from \link{faseq} or \link{faseqFit}.
-#' @param fdr.cutoff \code{numeric}, significance cutoff for the adjusted p-values of FAT.
-#' @param signal.cutoff \code{numeric}, threshold cut-off for the eCLIP signals, default to 20. Set this to 0 if don't want to filter those location with low eCLIP signals of the RBP.
-#' @return a \code{surf} object, with one added \code{inferredFeature} column (inclusion/exclusion/none).
+#' @param event a `surf` object from [faseq] or [faseqFit].
+#' @param fdr.cutoff `numeric`, significance cutoff for the adjusted p-values.
+#' @param signal.cutoff `numeric`, threshold cut-off for the eCLIP signals, 
+#'   default to 20. Set this to 0 if don't want to filter those location with 
+#'   low eCLIP signals of the RBP.
+#' @return a `surf` object, with one added `inferredFeature` column 
+#'   (inclusion/exclusion/none).
 #' @export
 faseqInfer = function(event,
                       fdr.cutoff = 0.05,
@@ -884,10 +916,10 @@ faseqInfer = function(event,
 #' This function is a wrapper that calls the necessary functions in order for DASeq.
 #'
 #' @inheritParams faseqCount
-#' @param ... parameters for \link{Rsubread::featureCounts}.
+#' @param ... parameters for [Rsubread::featureCounts].
 #' @inheritParams faseqFit
 #' @inheritParams faseqInfer
-#' @return a \code{surf} object DASeq results updated.
+#' @return a `surf` object DASeq results updated.
 #' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
 #' @export
 faseq <- function(event,
@@ -950,8 +982,11 @@ faseq <- function(event,
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## SURF Discovery Module 1
 
-#' Get target set based on \code{inferredFeature}
-#' @return list of character, sets of target identifiers.
+#' Get target set based on `inferredFeature`
+#' @param event a `surf` object from [faseqInfer] or [faseq].
+#' @param id_column `character`, the name of the column that contains target IDs.
+#' @param verbose `logical`, whether (`TRUE`) to echo progress.
+#' @return a `list` of `character`, each being a set of target identifiers.
 getTargetSet <- function(event,
                          id_column = "transcript_id",
                          verbose = F) {
@@ -963,7 +998,11 @@ getTargetSet <- function(event,
 }
 
 #' Get control sets
-#' @return list of character, find a control set for each one of targetSets.
+#' @param event a `surf` object from [faseqInfer] or [faseq].
+#' @param targetSets a named `list` of `character`, the target IDs. 
+#' @param id_column `character`, the name of the column that contains target IDs.
+#' @param verbose `logical`, whether (`TRUE`) to echo progress.
+#' @return a `list` of `character`, containing the control set for each target set.
 getControlSet <- function(event, targetSets,
                           id_column = "transcript_id",
                           verbose = F) {
@@ -977,25 +1016,29 @@ getControlSet <- function(event, targetSets,
 
 #' Build gene/transcript rankings for each sample
 #'
-#' Builds the "rankings" for each sample: expression-based ranking for all the genes/transcripts in each sample
-#' The genes/transcripts with same expression value are shuffled. Therefore, genes/transcripts with expression '0' are randomly sorted at the end of the ranking.
-#' These "rankings" can be seen as a new representation of the original dataset. Once they are calculated, they can be saved for future analyses.
+#' Builds the "rankings" for each sample: expression-based ranking for all the 
+#' genes/transcripts in each sample
+#' The genes/transcripts with same expression value are shuffled. 
+#' Therefore, genes/transcripts with expression '0' are randomly sorted at the end of the ranking.
+#' These "rankings" can be seen as a new representation of the original dataset. 
+#' Once they are calculated, they can be saved for future analyses.
 #'
 #' @param exprMat Expression matrix (genes/transcripts as rows, samples as columns)
 #' The expression matrix can also be provided as one of the Bioconductor classes:
 #' \itemize{
-#' \item \link{RangedSummarizedExperiment} and derived classes:
-#' The matrix will be obtained through assay(exprMatrix),
+#' \item [RangedSummarizedExperiment] and derived classes:
+#' The matrix will be obtained through `assay(exprMat)`,
 #' -which will extract the first assay (usually the counts)-
-#' or the assay name given in 'assayName'
+#' or the assay name given in `assayName`
 #' \item \link[Matrix]{dgCMatrix-class}:
 #' Sparse matrix
-#' \item \code{ExpressionSet}:
-#' The matrix will be obtained through exprs(exprMatrix)
+#' \item `ExpressionSet`:
+#' The matrix will be obtained through `exprs(exprMat)`
 #' }
-#' @param cores \code{integer}, number of computing workers.
+#' @param cores `integer`, number of computing workers.
+#' @param verbose `logical`, whether (`TRUE`) to echo progress.
 #' @inheritParams AUCell::AUCell_buildRankings
-#' @return a \code{SummarizedExperiment} object.
+#' @return a `SummarizedExperiment` object.
 #' @export
 getRankings <- function(exprMat,
                         plotStats = F,
@@ -1016,10 +1059,12 @@ getRankings <- function(exprMat,
 }
 
 #' Calculate AUC
-#' @param set a `list` of sets (or signatures) to test. The sets should be provided as `GeneSet`, `GeneSetCollection` or `character` list.
+#' @param set a `list` of sets (or signatures) to test. 
+#'   The sets should be provided as `GeneSet`, `GeneSetCollection` or `character` list.
 #' @param cores integer, number of computing cores to use.
+#' @param ... additional parameters for [AUCell::AUCell_calcAUC].
 #' @inheritParams AUCell::AUCell_calcAUC
-#' @return a \code{SummarizedExperiment} object
+#' @return a `SummarizedExperiment` object.
 calculateAUC <- function(set, rankings,
                          cores = 1,
                          verbose = F, ...) {
@@ -1039,25 +1084,26 @@ calculateAUC <- function(set, rankings,
 
 #' Aggregate AUC by sample condition
 #'
-#' @param object a \code{SummarizedExperiment} output from \link{calculateAUC}
-#' @param FUN.aggregate function, used for aggregating AUC within `condition`, default to \code{mean}.
-#' @return a \code{data.frame} with 4 columns: \code{set}, \code{condition.1}, \code{condition.2}, and \code{diff}.
+#' @param object a `SummarizedExperiment` output from [calculateAUC].
+#' @param sampleData `data.frame` of sample data, which contains a `condition` column, 
+#' @param FUN.aggregate function, used for aggregating AUC within `condition`, default to `mean`.
+#' @return a `data.frame` with 4 columns: `set`, `condition.1`, `condition.2`, and `diff`.
 aggregateAUCbyCondition <- function(object, sampleData,
                                     FUN.aggregate = "median") {
   conditions <- levels(sampleData$condition)
   getAUC(object) %>%
     reshape2::melt(value.name = "AUC") %>%
-    dplyr::mutate(set = as.character(set),
-                  sample = as.character(sample)) %>%
+    dplyr::mutate(set = as.character(.data$set),
+                  sample = as.character(.data$sample)) %>%
     left_join(data.frame(sampleData), by = "sample") %>%
-    group_by(set, condition) %>%
-    summarise(AUC = match.fun(FUN.aggregate)(AUC)) %>%
+    group_by(.data$set, .data$condition) %>%
+    summarise(AUC = match.fun(FUN.aggregate)(.data$AUC)) %>%
     ungroup() %>%
-    pivot_wider(id_cols = set,
-                names_from = condition,
+    pivot_wider(id_cols = .data$set,
+                names_from = .data$condition,
                 values_from = "AUC") %>%
     # dplyr::select(set, conditions[1], conditions[2]) %>%
-    dplyr::mutate(diff = .[[2]] - .[[3]])
+    dplyr::mutate(diff = .data[[2]] - .data[[3]])
   
   # AUC <- getAUC(object)
   # set <- rownames(AUC)
@@ -1074,16 +1120,20 @@ aggregateAUCbyCondition <- function(object, sampleData,
 #' Differential activity (via AUC)
 #'
 #' Detect differential activity using the AUC measure and RNA-seq quantification.
-#' This unit is a helper of \code{daseq}.
+#' This unit is a helper of [daseq].
 #'
-#' @param targetSet \code{character} vector, set of targeted units.
-#' @param controlSet \code{character} vector, control set for contrast. If `NULL` (default), the full set of elements in \code{rankings} will be used.
-#' @param rankings a \code{SummarizedExperiment} object, with row correponding to transcript or gene and column corresponding to samples. Each element is a expression measure (e.g., TPM).
-#' @param n.sample \code{integer}, number of times of controlSet sampling, default to 1000.
-#' @param cores \code{integer}, number of computing cores.
-#' @param verbose \code{logical}, whether to print out progress report.
+#' @param targetSet `character` vector, set of targeted units.
+#' @param controlSet `character` vector, control set for contrast. 
+#'   If `NULL` (default), the full set of elements in `rankings` will be used.
+#' @param rankings a `SummarizedExperiment` object, with row corresponding to 
+#'   transcript or gene and column corresponding to samples. 
+#'   Each element is a expression measure (e.g., TPM).
+#' @param n.sample `integer`, number of times of controlSet sampling, default to 1000.
+#' @param cores `integer`, number of computing cores.
+#' @param verbose `logical`, whether to print out progress report.
 #' @inheritParams calculateAUC
-#' @return a \code{data.frame} of DASeq results.
+#' @inheritParams aggregateAUCbyCondition
+#' @return a `data.frame` of DASeq results.
 diffAUC <- function(targetSet,
                     controlSet = NULL,
                     rankings,
@@ -1135,16 +1185,22 @@ diffAUC <- function(targetSet,
 #' Detect differential activity using the AUC measure and RNA-seq quantification.
 #' For more details about methodology, see Details.
 #' This function can be used as part of SURF or as well a stand-along analysis.
-#' For the former, input a \code{surf} object to \code{event}.
-#' For the latter, input \code{targetSets} and optionally \code{controlSets}.
+#' For the former, input a `surf` object to `event`.
+#' For the latter, input `targetSets` and optionally `controlSets`.
 #'
-#' @param rankings a \code{SummarizedExperiment} object from \link{getRankings}.
-#' @param sampleData \code{data.frame}, external samples, which contain `condition` column, whose row names must match the column names of \code{rankings}.
-#' @param event a \code{surf} object from \link{faseqInference} or \link{faseq}.
-#' @param target.type \code{character(1)}, either "transcript" or "gene".
+#' @param rankings a `SummarizedExperiment` object from [getRankings].
+#' @param sampleData `data.frame`, external samples, which contain `condition` column, 
+#'   whose row names must match the column names of `rankings`.
+#' @param event a `surf` object from [faseqInfer] or [faseq].
+#' @param target.type `character(1)`, either "transcript" or "gene".
+#' @param controlSets a named `list` of `character`, the control IDs. 
+#' @param verbose `logical`, whether (`TRUE`) to echo progress.
+#' @inheritParams getControlSet
 #' @inheritParams diffAUC
 ## @example inst/examples/example_AUCell_buildRankings.R
-#' @return a \code{daseqResults} object if \code{targetSets} was given, a \code{surf} object if \code{event} was give.
+#' @return 
+#'   a `daseqResults` object if `targetSets` was given, 
+#'   or a `surf` object if `event` was give.
 #' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
 #' @export
 daseq <- function(event = NULL, 

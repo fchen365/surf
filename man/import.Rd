@@ -7,12 +7,12 @@
 import(...)
 }
 \arguments{
-\item{...}{whatever input to \link{rtracklayer::import}.}
+\item{...}{whatever input to \link[rtracklayer:export]{rtracklayer::import}.}
 }
 \value{
 a \code{GRanges} object.
 }
 \description{
-This is a wrapper of \link{rtracklayer::import} with specialty in genome annotation.
+This is a wrapper of \link[rtracklayer:export]{rtracklayer::import} with specialty in genome annotation.
 Specifically, it checks whether "gene" or "transcript" exist in the annotation and fill them in if possible.
 }

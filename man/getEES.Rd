@@ -6,6 +6,9 @@
 \usage{
 getEES(x)
 }
+\arguments{
+\item{x}{an element of isoform part list.}
+}
 \description{
-Get exon end site from exon parts list
+This is a helper function of \link{getEvent}.
 }

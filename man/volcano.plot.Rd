@@ -24,17 +24,29 @@ volcano.plot(object, ...)
 \arguments{
 \item{object}{a \code{drseqResults} object.}
 
-\item{lfc.cutoff}{\code{numeric(2)}, the range of log2 fold change that is consider NOT significant.}
+\item{...}{various parameters.}
+
+\item{lfc.cutoff}{\code{numeric(2)}, the range of log2 fold change that is
+consider NOT significant.}
 
 \item{fdr.cutoff}{\code{numeric(1)}, significance level of adjusted p-value.}
 
-\item{x.limits}{\code{numeric(2)}, range of log2 fold change. Any values beyond this range will be projected onto the boundary.}
+\item{x.limits}{\code{numeric(2)}, range of log2 fold change.
+Any values beyond this range will be projected onto the boundary.}
 
-\item{y.limits}{\code{numeric(2)}, range of -log10(p.value). Any values beyond this range will be projected onto the boundary.}
+\item{y.limits}{\code{numeric(2)}, range of -log10(p.value).
+Any values beyond this range will be projected onto the boundary.}
 
-\item{remove.portion.grey}{\code{numeric}, between 0 and 1, the portion of non-significant points to be randomly remove. This is only for speeding up plotting.}
+\item{remove.portion.grey}{\code{numeric}, between 0 and 1, the portion of
+non-significant points to be randomly remove.
+This is only for speeding up plotting.}
 
-\item{remove.portion.color}{\code{numeric}, between 0 and 1, the portion of significant points to be randomly remove. This is only for speeding up plotting.}
+\item{remove.portion.color}{\code{numeric}, between 0 and 1, the portion of
+significant points to be randomly remove.
+This is only for speeding up plotting.}
+
+\item{colrs}{a \code{character} vector, named by ATR event types, whose values
+are the corresponding color codes.}
 }
 \value{
 a \code{ggplot} object.
@@ -44,5 +56,5 @@ Create a volcano plot for the DrSeq results, stratified by alternative transcrip
 A volcano plot is a scatter plot of tested units, where log2 fold change is in x-axis, and -log10(p.value) is in y-axis.
 }
 \details{
-By default, ATR type are colored with the \code{Paired} palette (see \url{http://colorbrewer2.org}).
+By default, ATR type are colored with the \code{Paired} palette.
 }

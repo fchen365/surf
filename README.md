@@ -20,8 +20,7 @@ analyzed 104 RBP data (K562 cells, available from
 this [shiny](http://www.statlab.wisc.edu/shiny/surf/) app\!
 
 *A detailed vignette is in preparation, which we expect to put out by
-**Fall
-2020**\!*
+**Winter 2020**\!*
 
 ## Installation
 
@@ -44,8 +43,7 @@ devtools::install_github("fchen365/surf")
 ## What can you do with SURF?
 
 SURF is versatile in handling ATR event-centric analysis. Provided the
-data, here are four different things you could do with
-SURF.
+data, here are four different things you could do with SURF.
 
 |   | Data                |      Format       | Task                                  |
 | :-: | ------------------- | :---------------: | ------------------------------------- |
