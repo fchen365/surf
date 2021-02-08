@@ -259,7 +259,6 @@ setMethod(
   }
 )
 
-#' @rdname daseqResults-class
 #' @rdname sampleData
 #' @param object a `surf` object output by [daseq].
 #' @exportMethod sampleData
@@ -270,7 +269,6 @@ setMethod(
   }
 )
 
-#' @rdname surf-class
 #' @rdname sampleData
 #' @param type `character`, any subset of "RNA-seq", "CLIP-seq", and "External".
 #' @exportMethod sampleData

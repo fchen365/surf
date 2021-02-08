@@ -3,14 +3,7 @@
 \docType{class}
 \name{daseqResults-class}
 \alias{daseqResults-class}
-\alias{sampleData,daseqResults-method}
 \title{DASeq class}
-\usage{
-\S4method{sampleData}{daseqResults}(object)
-}
-\arguments{
-\item{object}{a \code{surf} object output by \link{daseq}.}
-}
 \description{
 \code{daseqResults} is a stand-alone object of DASeq (the discovery module of SURF) results.
 }

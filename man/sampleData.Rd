@@ -3,16 +3,24 @@
 \name{sampleData}
 \alias{sampleData}
 \alias{sampleData,SummarizedExperiment-method}
+\alias{sampleData,daseqResults-method}
+\alias{sampleData,surf-method}
 \title{Sample Data}
 \usage{
 sampleData(object, ...)
 
 \S4method{sampleData}{SummarizedExperiment}(object)
+
+\S4method{sampleData}{daseqResults}(object)
+
+\S4method{sampleData}{surf}(object, type = NULL)
 }
 \arguments{
-\item{object}{any object that contains a \code{sampleData} slot.}
+\item{object}{a \code{surf} object output by \link{daseq}.}
 
 \item{...}{various parameters.}
+
+\item{type}{\code{character}, any subset of "RNA-seq", "CLIP-seq", and "External".}
 }
 \value{
 \code{DataFrame} or \code{DataFrameList} (if \code{length(type)>1}).

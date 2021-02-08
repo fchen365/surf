@@ -19,6 +19,9 @@ analyzed 104 RBP data (K562 cells, available from
 [ENCODE](https://www.encodeproject.org)). Check out the results from
 this [shiny](http://www.statlab.wisc.edu/shiny/surf/) app\!
 
+We have a detailed vignette
+[here](https://github.com/fchen365/surf/blob/master/vignettes/surf.R).
+
 *A detailed vignette is in preparation, which we expect to put out by
 **Winter 2020**\!*
 

@@ -42,11 +42,11 @@ prepDrseqAnno = function(anno_event,
   stopImplicitCluster()
   anno <- c_granges(setNames(anno, isoPL$gene_id),
                     use.names = F, save.names = "gene_id")
-  
+
   ## ---- "exon" flattened file
   output.exon <- paste0(anno.prefix, '.exon.', anno.format)
   if (verbose) cat("Outputing exon flattened file to", output.exon, "...\n")
-  
+
   ## merge exons by genes
   exon = anno[anno$type == 'exon']
   exon = GRangesList(S4Vectors::split(exon, exon$gene_id))
@@ -55,7 +55,7 @@ prepDrseqAnno = function(anno_event,
   if (remove.overlap.exon) {
     exon = exon[countOverlaps(exon, exon) < 2]
   }
-  
+
   ## exonic_part
   exon$source = factor('drseq')
   exon$type = factor('exonic_part')
@@ -63,7 +63,7 @@ prepDrseqAnno = function(anno_event,
   num = unlist(lapply(rle(exon$gene_id)$lengths, seq_len))
   exon$exonic_part_number = stringr::str_pad(num, 3, pad = "0")
   exon$exonic_part_id = paste(exon$gene_id, exon$exonic_part_number, sep = ":")
-  
+
   ## aggregate_gene
   gene = anno[anno$type == 'gene' & anno$gene_id %in% exon$gene_id]
   names(gene) = gene$gene_id
@@ -71,23 +71,23 @@ prepDrseqAnno = function(anno_event,
   gene$source = factor('drseq')
   gene$type = factor('aggregate_gene')
   gene$gene_id = names(gene)
-  
+
   ## output exon annotation
   gr1 = c(gene, exon)
   gr1 = unlist(GRangesList(S4Vectors::split(unname(gr1), gr1$gene_id)), use.names = F)
   rtracklayer::export(gr1, output.exon, anno.format)
-  
+
   ## ---- "event" flattened file
   output.event <- paste(anno.prefix, 'event', anno.format, sep = ".")
   if (verbose) cat("Outputing event flattened file to", output.event, "...\n")
-  
+
   ## remove events outside exons (if some exons are removed)
   if (remove.overlap.exon) {
     hit <- findOverlaps(anno_event, exon, type = "within") ## AFE1/ALE1 may range multiple exons
     hit <- hit[anno_event$gene_id[from(hit)] == exon$gene_id[to(hit)]]
     anno_event <- anno_event[unique(from(hit))]
   }
-  
+
   ## exonic_part
   event <- c_granges(anno_event$genomicData, sep = "")
   exonic_part_count <- elementNROWS(anno_event$genomicData)
@@ -99,45 +99,45 @@ prepDrseqAnno = function(anno_event,
   num = rep(unlist(lapply(rle(anno_event$gene_id)$lengths, seq_len)), exonic_part_count)
   event$event_number = stringr::str_pad(num, 3, pad = "0")
   # event$exonic_part_id = paste(event$gene_id, event$exonic_part_number, sep = ":")
-  
+
   # ## aggregate_gene
   # gene = unlist(range(anno_event$genomicData))
   # gene$source = factor('drseq')
   # gene$type = factor('aggregate_gene')
   # gene$gene_id = names(gene)
-  
+
   ## output
   gr2 = c(gene, event)
   gr2 = unlist(GRangesList(S4Vectors::split(unname(gr2), gr2$gene_id)), use.names = F)
   rtracklayer::export(gr2, output.event, anno.format)
-  
+
 }
 
 
 #' Construct DrSeq Data
 #'
 #' This function creates the `drseqData` slot needed by DrSeq analysis, which is a [DEXSeq::DEXSeqDataSet].
-#' This function requires two DrSeq annotation files created by [prepDrseqAnno]. 
+#' This function requires two DrSeq annotation files created by [prepDrseqAnno].
 #' Two files have the same prefix (`anno.prefix`), the same suffix (`anno.format`),
 #' and only differ by "exon/event".
 #' If annotation files are missing, this function can create them freshly, which might take some time.
 #' This function counts the RNA-seq reads on ATR events and genes using `featureCounts`.
 #'
 #' @param event a `surf` object from [parseEvent].
-#' @param sampleData `data.frame`, describes the RNA-seq samples and 
-#'   contains at least two columns -- `bam` and `condition`, 
+#' @param sampleData `data.frame`, describes the RNA-seq samples and
+#'   contains at least two columns -- `bam` and `condition`,
 #'   whose `row.names` represent sample names.
 #' @inheritParams DEXSeq::DEXSeqDataSet
 #' @param remove.overlap.exon `logical`, remove overlapping exons across genes (default to `FALSE`).
 #' @param anno.prefix `character`, file names for outputting annotation files.
-#'   If prefix is absent, hidden file will be output to the current working directory. 
+#'   If prefix is absent, hidden file will be output to the current working directory.
 #' @param anno.format `character`, e.g. "gtf", as accepted by [rtracklayer::export].
-#' @param minMQS,isPairedEnd as defined in [Rsubread::featureCounts]. 
+#' @param minMQS,isPairedEnd as defined in [Rsubread::featureCounts].
 #'   Note that the default is customized for SURF (see details for more information).
 #' @param cores `integer`, number of available workers, sent to `nthreads` of `featureCounts`.
 #' @param verbose `logical`, whether (`TRUE`) to echo progress.
 #' @param ... additional parameters for [Rsubread::featureCounts].
-#' @details 
+#' @details
 #'   If you used Illumina HiSeq 2000, set `strandSpecific = 2` (reversed strand).
 #' @return a `surf` object, with `drseqData` slot updated.
 #' @export
@@ -168,7 +168,7 @@ drseqCount = function(event, sampleData,
       unlist(lapply(rle(as.character(sampleData$condition))$lengths, seq_len))
     )
   }
-  
+
   exon.file <- paste(anno.prefix, 'exon', anno.format, sep = ".")
   event.file <- paste(anno.prefix, 'event', anno.format, sep = ".")
   if (!file.exists(exon.file) || !file.exists(event.file)) {
@@ -184,7 +184,7 @@ drseqCount = function(event, sampleData,
       verbose = verbose
     )
   }
-  
+
   ## count reads on exons
   count.exon = featureCounts(
     files = bam.files,
@@ -202,7 +202,7 @@ drseqCount = function(event, sampleData,
     colnames(count.exon$stat)[-1] =
     rownames(sampleData)
   # cat("Total count:", sum(count.exon$counts), "\n")
-  
+
   ## count reads on events
   count.event = featureCounts(
     files = bam.files,
@@ -219,7 +219,7 @@ drseqCount = function(event, sampleData,
   colnames(count.event$counts) =
     colnames(count.event$stat)[-1] =
     rownames(sampleData)
-  
+
   ## DEXSeqDataSet
   index <- match(event$event_id, rownames(count.event$counts))
   if (any(is.na(index))) {
@@ -233,7 +233,7 @@ drseqCount = function(event, sampleData,
     groupID = event$gene_id
   )
   cat(fill = TRUE)
-  
+
   ## replace with gene reads count (still a DEXSeqDataSet)
   cnt.other = count.exon$counts[rowData(drd)$groupID,] - counts(drd)[,seq_along(bam.files)]
   counts(drd)[,length(bam.files)+seq_along(bam.files)] = cnt.other
@@ -242,7 +242,7 @@ drseqCount = function(event, sampleData,
     warning(sum(rowMin < 0), " event(s) prompt to invalid REU coefficients.")
     drd = drd[rowMin >= 0,]
   }
-  
+
   ## update our "surf" object
   event@drseqData = drd
   event@sampleData$"RNA-seq" = DataFrame(
@@ -251,7 +251,7 @@ drseqCount = function(event, sampleData,
   )
   metadata(event) = metadata(event)
   metadata(event)$remove.overlap.exon = remove.overlap.exon
-  
+
   return(event)
 }
 
@@ -259,7 +259,7 @@ drseqCount = function(event, sampleData,
 #' DrSeq Fit
 #'
 #' Fit DrSeq models using the DEXSeq as the estimation engine.
-#' 
+#'
 #' @param drd a `surf` object from [drseqCount].
 #' @param cores `integer`, number of computing workers.
 #' @param verbose `logical`, whether (`TRUE`) to echo progress.
@@ -278,10 +278,10 @@ drseqFit <- function(drd,
                      verbose = F) {
   dxd <- drd@drseqData ## "DEXSeqDataSet"
   if (is.null(dxd)) stop("Cannot find drseqData.")
-  
+
   BPPARAM = MulticoreParam(workers = cores)
   dxdl = S4Vectors::split(dxd, drd[mcols(dxd)$featureID, "event_name"])
-  
+
   if (verbose) cat("Fitting DrSeq for", paste(names(dxdl), collapse = ", "), "...\n")
   t <- system.time({
     dxrl <- lapply(dxdl, DEXSeq,
@@ -292,7 +292,7 @@ drseqFit <- function(drd,
                    quiet = !verbose)
   })
   if (verbose) cat("Running time:", t[3], "sec. \n")
-  
+
   ## added columns
   dxr = do.call("rbind", dxrl)
   index <- match(drd$event_id, dxr$featureID)
@@ -307,24 +307,24 @@ drseqFit <- function(drd,
   mcols(dxr_sub)["eventBaseMean", "description"] <- "mean of the counts across samples in each event"
   mcols(dxr_sub)["dispersion", "description"] <- "event dispersion estimate"
   mcols(dxr_sub)["countData", "type"] <- "RNA-seq"
-  
+
   ## representation
   sampleData = dxrl[[1]]@sampleData
   modelFrameBM = lapply(dxrl, slot, "modelFrameBM")
   dispersionFunction = lapply(dxrl, slot, "dispersionFunction")
   metadata = do.call("c", lapply(dxrl, slot, "metadata"))
-  
+
   ## take a subset of drd's column
-  
-  drr <- new("drseqResults", 
+
+  drr <- new("drseqResults",
              cbind(as(drd, "DataFrame"), as(dxr_sub, "DataFrame")),
              modelFrameBM = DataFrameList(modelFrameBM),
              dispersionFunction = List(dispersionFunction))
   drr@metadata <- c(drd@metadata, metadata)
-  
+
   res <- new(
     "surf",
-    cbind(as(drd, "DataFrame"), 
+    cbind(as(drd, "DataFrame"),
           as(drr[c("eventBaseMean", "padj", "logFoldChange")], "DataFrame")),
     genePartsList = drd@genePartsList,
     drseqData = drd@drseqData,
@@ -370,7 +370,7 @@ drseqFilter = function(event,
     event$group = NULL
     event$included = NULL
   }
-  
+
   ## event read coverage
   eventLen = sapply(width(event$genomicData), sum)
   adjMean = event$eventBaseMean / (eventLen + read.length - 1)
@@ -379,7 +379,7 @@ drseqFilter = function(event,
   group[event$padj < drseq.fdr & event$logFoldChange < 0] = "decrease"
   group[event$padj < drseq.fdr & event$logFoldChange > 0] = "increase"
   group = ordered(group, c("decrease", "no change", "increase"))
-  
+
   ## included event id
   id_evtDU = event$event_id[!is.na(event$padj) &
                               event$padj < drseq.fdr &
@@ -395,7 +395,7 @@ drseqFilter = function(event,
     cat("Identified", length(id_evtDU), "DR events and",
         length(id_evtEU), "ER events.\n")
   id_evt = union(id_evtDU, id_evtEU)
-  
+
   ## pooling duplicated events by max{adjMean}
   ## (i) same ATR event
   ## (ii) overlapped event body
@@ -409,10 +409,10 @@ drseqFilter = function(event,
     if (verbose) cat(length(unique(from(hits))), "overlapping events.\n")
     id_evt = setdiff(id_evt, event1$event_id[from(hits)])
   }
-  
+
   if (!length(id_evt)) stop("No usable SURF instance!")
   included = event$event_id %in% id_evt
-  
+
   ## new columns
   ds = DataFrame(adjMean, group, included)
   mcols(ds)$type = c("RNA-seq", "faseq", "faseq")
@@ -420,10 +420,10 @@ drseqFilter = function(event,
     "adjusted base mean of each event",
     "direction of differential regulation (upon knock-down)",
     "indicator of usable event")
-  
+
   ## wrap into faseqData object
   res <- new(
-    "surf", 
+    "surf",
     cbind(as(event, "DataFrame"), ds),
     genePartsList = event@genePartsList,
     drseqData = event@drseqData,
@@ -438,13 +438,13 @@ drseqFilter = function(event,
   metadata(res)$RNAseq.read.length = read.length
   metadata(res)$min.adjMean = min.adjMean
   metadata(res)$filter.overlap.event = filter.overlap.event
-  
+
   if (verbose) {
     cat(length(id_evt), "events included for SURF analysis.\n",
         "The distribution of AS/ATI/APA events identified:\n")
     print(table(data.frame(res[res$included, c("event_name", "group")])))
   }
-  
+
   return(res)
 }
 
@@ -452,7 +452,7 @@ drseqFilter = function(event,
 #'
 #' Perform the differential REU (DrSeq) test in a single command.
 #' This function is a wrapper that calls the necessary functions in order for DrSeq.
-#' 
+#'
 #' @inheritParams drseqCount
 #' @param ... parameters for [Rsubread::featureCounts].
 #' @inheritParams drseqFit
@@ -461,7 +461,7 @@ drseqFilter = function(event,
 #' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
 #' @export
 drseq <- function(event,
-                  
+
                   ## data
                   sampleData,
                   design = ~ sample + exon + condition:exon,
@@ -471,18 +471,18 @@ drseq <- function(event,
                   minMQS = 10,
                   isPairedEnd = T,
                   ...,
-                  
+
                   ## fit
                   fullModel = design,
                   reducedModel = ~ sample + exon,
                   fitExpToVar = "condition",
-                  
+
                   ## filter
                   drseq.fdr = .05,
                   read.length = 100,
                   min.adjMean = .05,
                   filter.overlap.event = T,
-                  
+
                   cores = max(1, detectCores()-2),
                   verbose = F) {
   if (verbose)
@@ -501,7 +501,7 @@ drseq <- function(event,
     )
   })
   if (verbose) cat("Run time (RNA-seq read counting):", timer[3], "sec.\n")
-  
+
   # if (verbose) cat("Fitting DrSeq models...\n")
   timer <- system.time({
     event <- drseqFit(
@@ -514,7 +514,7 @@ drseq <- function(event,
     )
   })
   if (verbose) cat("Run time (model fitting):", timer[3], "sec.\n")
-  
+
   if (verbose) cat("Annotating/referencing DrSeq results...\n")
   event <- drseqFilter(
     event,
@@ -524,7 +524,7 @@ drseq <- function(event,
     filter.overlap.event = filter.overlap.event,
     verbose = verbose
   )
-  
+
   return(event)
 }
 
@@ -541,29 +541,29 @@ drseq <- function(event,
 #' We will take care of the rest.
 #'
 #' @param event a `surf` object.
-#' @param sampleData `data.frame`, must contain two columns -- 
-#'   "bam" and "condition" (for "IP" and "input", where "IP" should come first), 
-#'   whose `row.names` represent the sample names. "bam" is the file name of 
-#'   CLIP-seq bam. "condition" will be coerced to factor, whose first level will 
+#' @param sampleData `data.frame`, must contain two columns --
+#'   "bam" and "condition" (for "IP" and "input", where "IP" should come first),
+#'   whose `row.names` represent the sample names. "bam" is the file name of
+#'   CLIP-seq bam. "condition" will be coerced to factor, whose first level will
 #'   be treated as IP, and the second level as input.
-#' @param signal.type `character`, indicate the type of feature signal wanted, 
-#'   support "TPM" for Transcripts Per Kilobase Million, 
-#'   "FPKM" for Fragments Per Kilobase Million (for paired-end reads) and 
-#'   Reads Per Kilobase Million (for single-end reads), and 
+#' @param signal.type `character`, indicate the type of feature signal wanted,
+#'   support "TPM" for Transcripts Per Kilobase Million,
+#'   "FPKM" for Fragments Per Kilobase Million (for paired-end reads) and
+#'   Reads Per Kilobase Million (for single-end reads), and
 #'   "raw.count" for raw read counts
-#' @param FUN.aggregate `function`, used for aggregating signals within `condition`, 
+#' @param FUN.aggregate `function`, used for aggregating signals within `condition`,
 #'   default to [mean()].
-#' @param cores `integer`, number of available workers, 
+#' @param cores `integer`, number of available workers,
 #'   sent to `nthreads` of [featureCounts]
 #' @param verbose `logical`, whether (default to `TRUE`) to echo progress
-#' @param minMQS,minOverlap,isPairedEnd,... parameters for [featureCounts]. 
-#'   `minMQS` is default to 10, and `minOverlap` is default to 12 (25% of the 
+#' @param minMQS,minOverlap,isPairedEnd,... parameters for [featureCounts].
+#'   `minMQS` is default to 10, and `minOverlap` is default to 12 (25% of the
 #'   typical read length of CLIP-seq (~50bp)), and `isPairedEnd` is default to `TRUE`.
-#' @return a `surf` object, with 
-#'   (1) one column `featureSignal` added, 
-#'   (2) `faseqData` slot updated, and 
+#' @return a `surf` object, with
+#'   (1) one column `featureSignal` added,
+#'   (2) `faseqData` slot updated, and
 #'   (3) `sampleData` slot updated.
-#' @details 
+#' @details
 #'   If your sequencing platform is Illumina HiSeq 2000, set `strandSpecific = 2`.
 #' @keywords feature signal, CLIP-seq
 #' @references \url{https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/}
@@ -595,12 +595,12 @@ faseqCount <- function(event, sampleData,
       as.character(sampleData$condition),
       unlist(lapply(rle(as.character(sampleData$condition))$lengths, seq_len)))
   }
-  
-  
+
+
   if (any("featureSignal" %in% colnames(event))) {
     event$featureSignal = NULL
   }
-  
+
   ## featureCounts
   count.feature = featureCounts(
     bam.files,
@@ -616,7 +616,7 @@ faseqCount <- function(event, sampleData,
   colnames(count.feature$counts) =
     colnames(count.feature$stat)[-1] =
     rownames(sampleData)
-  
+
   ## prepare @sampleData
   CLIPseqSampleData = DataFrame(
     sample = rownames(sampleData),
@@ -625,7 +625,7 @@ faseqCount <- function(event, sampleData,
   )
   mcols(CLIPseqSampleData)$type = "input"
   mcols(CLIPseqSampleData)$description = ""
-  
+
   ## construct "faseqData", CLIP-seq read count
   if (verbose) cat("Generating signals from individual samples...\n")
   featureCount <- count.feature$counts
@@ -642,7 +642,7 @@ faseqCount <- function(event, sampleData,
     rowData = rd,
     colData = CLIPseqSampleData,
   )
-  
+
   ## transform count into signal
   if (signal.type == "raw.count") {
     signal <- count.feature$counts
@@ -661,7 +661,7 @@ faseqCount <- function(event, sampleData,
     }
   }
   rownames(signal) <- names(unlist(event$feature))
-  
+
   ## aggregate by condition -- mean, then take the difference: IP - input
   if (verbose) cat("Contrasting IP from SMInput...\n")
   # colnames(signal) = sampleData$condition
@@ -686,19 +686,19 @@ faseqCount <- function(event, sampleData,
   signal.contrast <- signal.IP - signal.input
   names(signal.contrast) <- names(unlist(event$feature, use.names = F))
   featureSignal = relist(signal.contrast, event$feature)
-  
+
   ## annotate new column's attribute
   ds = DataFrame(featureSignal)
   mcols(ds)$type <- "CLIP-seq"
   mcols(ds)$description <- "normalized CLIP-seq feature signals (contrasted)"
-  
+
   ## add scaling factor to sampleData
   CLIPseqSampleData <- cbind(CLIPseqSampleData, sizeFactor = f)
   mcols(CLIPseqSampleData)["sizeFactor", "type"] = "intermediate"
   mcols(CLIPseqSampleData)["sizeFactor", "description"] = "\"per million\" scaling factor"
-  
+
   res <- new(
-    "surf", 
+    "surf",
     cbind(as(event, "DataFrame"), ds),
     genePartsList = event@genePartsList,
     drseqData = event@drseqData,
@@ -722,7 +722,7 @@ faseqCount <- function(event, sampleData,
 #'
 #' @param data `data.frame`, contains training data for one RBP and one event type
 #' @param min.size `integer`, the minimum size of "reliable" training set, default to 60.
-#' @param trim `numeric`, the percentile used to trim the training data. 
+#' @param trim `numeric`, the percentile used to trim the training data.
 #'   This is useful in producing a more robust estimation of functional association.
 #' @return a `data.frame` that summarizes the FAT.
 fat = function(data, min.size = 60, trim = 0.025) {
@@ -744,7 +744,7 @@ fat = function(data, min.size = 60, trim = 0.025) {
     size = sum(data$group == "increase"),
     as.data.frame(coef.inc),
     functional = "exclusion"))
-  
+
   # dec vs ctrl
   coef.dec = t(sapply(feature, function(f) {
     sub = data[data$group != "increase", c("group", f)]
@@ -761,7 +761,7 @@ fat = function(data, min.size = 60, trim = 0.025) {
     size = sum(data$group == "decrease"),
     as.data.frame(coef.dec),
     functional = "inclusion"))
-  
+
   res = dplyr::filter(res, .data$size >= min.size)
   return(res)
 }
@@ -769,7 +769,7 @@ fat = function(data, min.size = 60, trim = 0.025) {
 #' Functional Association using Sequencing data
 #'
 #' This function performs functional association test (FAT).
-#' The null hypothesis of FAT is that there is no association between 
+#' The null hypothesis of FAT is that there is no association between
 #' feature signals and differential ATR.
 #'
 #' @param event a `surf` object output by [faseqCount].
@@ -783,7 +783,7 @@ faseqFit <- function(event,
                      verbose = F) {
   ## check
   stopifnot(all(c("group", "included", "featureSignal") %in% colnames(event)))
-  
+
   ## format data for SURF, group by event_name
   dat = event[event$included, c("group","featureSignal")]
   event_name = event[event$included, "event_name"]
@@ -791,18 +791,18 @@ faseqFit <- function(event,
   dat <- dat[!sapply(dat, is.null) & !!sapply(dat, nrow)]
   if (verbose) cat("Testing location features for", length(dat), "events:",
                    paste(names(dat), collapse = " "), "\n")
-  
+
   ## after slipt, ncol() becomes the same within each event type,
   ## thus can coerce into data.frame
   dat <- lapply(dat, function(x) {
     x$featureSignal <- list_rbind(x$featureSignal)
     data.frame(group = x$group, x$featureSignal)
   })
-  
+
   testing <- lapply(dat, fat,
                     min.size = min.size,
                     trim = trim)
-  
+
   res <- list_rbind(testing, save.names = "event")
   res$event <- factor(res$event, surf.events)
   res$padj = p.adjust(res$p.value, method = "fdr")
@@ -822,15 +822,15 @@ faseqFit <- function(event,
   if (nrow(res)) {
     rownames(res) <- paste0(res$event, "-", res$feature, ":", res$functional)
   }
-  
+
   metadata(res) <- list(min.size = min.size,
                         trim = trim)
   faseqResults <- new("faseqResults", res)
-  
+
   event@faseqResults <- faseqResults
   metadata(event)$min.size = min.size
   metadata(event)$trim = trim
-  
+
   return(event)
 }
 
@@ -845,10 +845,10 @@ faseqFit <- function(event,
 #'
 #' @param event a `surf` object from [faseq] or [faseqFit].
 #' @param fdr.cutoff `numeric`, significance cutoff for the adjusted p-values.
-#' @param signal.cutoff `numeric`, threshold cut-off for the eCLIP signals, 
-#'   default to 20. Set this to 0 if don't want to filter those location with 
+#' @param signal.cutoff `numeric`, threshold cut-off for the eCLIP signals,
+#'   default to 20. Set this to 0 if don't want to filter those location with
 #'   low eCLIP signals of the RBP.
-#' @return a `surf` object, with one added `inferredFeature` column 
+#' @return a `surf` object, with one added `inferredFeature` column
 #'   (inclusion/exclusion/none).
 #' @export
 faseqInfer = function(event,
@@ -857,7 +857,7 @@ faseqInfer = function(event,
   if (any("inferredFeature" %in% colnames(event))) {
     event$inferredFeature = NULL
   }
-  
+
   far <- event@faseqResults
   signal <- unlist(event$featureSignal, use.names = F)
   event_name <- rep(event$event_name, elementNROWS(event$feature))
@@ -865,7 +865,7 @@ faseqInfer = function(event,
   included <- rep(event$included, elementNROWS(event$feature))
   testFeature <- paste0(event_name, "-", names(signal))
   inferred <- rep("none", length(signal))
-  
+
   ## infer inclusion features
   subfar <- far[far$padj < fdr.cutoff &
                   far$functional == "inclusion",]
@@ -874,7 +874,7 @@ faseqInfer = function(event,
              signal > signal.cutoff &
              group == "decrease" &
              included] <- "inclusion"
-  
+
   ## infer exclusion features
   subfar <- far[far$padj < fdr.cutoff &
                   far$functional == "exclusion",]
@@ -883,18 +883,18 @@ faseqInfer = function(event,
              signal > signal.cutoff &
              group == "increase" &
              included] <- "exclusion"
-  
+
   ## recode into factor & relist
   inferred <- factor(inferred,
                      c("inclusion", "exclusion", "none"))
   inferred <- FactorList(relist(inferred, event$featureSignal))
-  
+
   ds <- DataFrame(inferredFeature = inferred)
   mcols(ds)$type <- "faseq"
   mcols(ds)$description <- "inferred functionality of location features"
-  
+
   res <- new(
-    "surf", 
+    "surf",
     cbind(as(event, "DataFrame"), ds),
     genePartsList = event@genePartsList,
     drseqData = event@drseqData,
@@ -932,17 +932,17 @@ faseq <- function(event,
                   isPairedEnd = T,
                   cores = max(1, detectCores()-2),
                   ...,
-                  
+
                   ## fit
                   min.size = 100,
                   trim = 0.025,
-                  
+
                   ## inference
                   fdr.cutoff = 0.05,
                   signal.cutoff = 20,
-                  
+
                   verbose = F) {
-  
+
   if (verbose)
     cat("Counting CLIP-seq reads (FASeq data)...\n")
   event <- faseqCount(
@@ -955,7 +955,7 @@ faseq <- function(event,
     cores = cores,
     verbose = verbose, ...
   )
-  
+
   if (verbose)
     cat("Performing functional association test (FAT)...\n")
   event <- faseqFit(
@@ -964,7 +964,7 @@ faseq <- function(event,
     trim = trim,
     verbose = verbose
   )
-  
+
   if (verbose)
     cat("Inferencing functional association...\n")
   event <- faseqInfer(
@@ -972,7 +972,7 @@ faseq <- function(event,
     fdr.cutoff = fdr.cutoff,
     signal.cutoff = signal.cutoff
   )
-  
+
   return(event)
 }
 
@@ -999,7 +999,7 @@ getTargetSet <- function(event,
 
 #' Get control sets
 #' @param event a `surf` object from [faseqInfer] or [faseq].
-#' @param targetSets a named `list` of `character`, the target IDs. 
+#' @param targetSets a named `list` of `character`, the target IDs.
 #' @param id_column `character`, the name of the column that contains target IDs.
 #' @param verbose `logical`, whether (`TRUE`) to echo progress.
 #' @return a `list` of `character`, containing the control set for each target set.
@@ -1016,11 +1016,11 @@ getControlSet <- function(event, targetSets,
 
 #' Build gene/transcript rankings for each sample
 #'
-#' Builds the "rankings" for each sample: expression-based ranking for all the 
+#' Builds the "rankings" for each sample: expression-based ranking for all the
 #' genes/transcripts in each sample
-#' The genes/transcripts with same expression value are shuffled. 
+#' The genes/transcripts with same expression value are shuffled.
 #' Therefore, genes/transcripts with expression '0' are randomly sorted at the end of the ranking.
-#' These "rankings" can be seen as a new representation of the original dataset. 
+#' These "rankings" can be seen as a new representation of the original dataset.
 #' Once they are calculated, they can be saved for future analyses.
 #'
 #' @param exprMat Expression matrix (genes/transcripts as rows, samples as columns)
@@ -1044,8 +1044,8 @@ getRankings <- function(exprMat,
                         plotStats = F,
                         cores = max(1, detectCores() - 2),
                         verbose = F) {
-  
-  
+
+
   ## rank exprMat
   rankings <- AUCell::AUCell_buildRankings(
     as.matrix(exprMat),
@@ -1059,7 +1059,7 @@ getRankings <- function(exprMat,
 }
 
 #' Calculate AUC
-#' @param set a `list` of sets (or signatures) to test. 
+#' @param set a `list` of sets (or signatures) to test.
 #'   The sets should be provided as `GeneSet`, `GeneSetCollection` or `character` list.
 #' @param cores integer, number of computing cores to use.
 #' @param ... additional parameters for [AUCell::AUCell_calcAUC].
@@ -1085,7 +1085,7 @@ calculateAUC <- function(set, rankings,
 #' Aggregate AUC by sample condition
 #'
 #' @param object a `SummarizedExperiment` output from [calculateAUC].
-#' @param sampleData `data.frame` of sample data, which contains a `condition` column, 
+#' @param sampleData `data.frame` of sample data, which contains a `condition` column,
 #' @param FUN.aggregate function, used for aggregating AUC within `condition`, default to `mean`.
 #' @return a `data.frame` with 4 columns: `set`, `condition.1`, `condition.2`, and `diff`.
 aggregateAUCbyCondition <- function(object, sampleData,
@@ -1104,7 +1104,7 @@ aggregateAUCbyCondition <- function(object, sampleData,
                 values_from = "AUC") %>%
     # dplyr::select(set, conditions[1], conditions[2]) %>%
     dplyr::mutate(diff = .data[[2]] - .data[[3]])
-  
+
   # AUC <- getAUC(object)
   # set <- rownames(AUC)
   # condition <- sampleData(object)[set, "condition"]
@@ -1123,10 +1123,10 @@ aggregateAUCbyCondition <- function(object, sampleData,
 #' This unit is a helper of [daseq].
 #'
 #' @param targetSet `character` vector, set of targeted units.
-#' @param controlSet `character` vector, control set for contrast. 
+#' @param controlSet `character` vector, control set for contrast.
 #'   If `NULL` (default), the full set of elements in `rankings` will be used.
-#' @param rankings a `SummarizedExperiment` object, with row corresponding to 
-#'   transcript or gene and column corresponding to samples. 
+#' @param rankings a `SummarizedExperiment` object, with row corresponding to
+#'   transcript or gene and column corresponding to samples.
 #'   Each element is a expression measure (e.g., TPM).
 #' @param n.sample `integer`, number of times of controlSet sampling, default to 1000.
 #' @param cores `integer`, number of computing cores.
@@ -1142,29 +1142,29 @@ diffAUC <- function(targetSet,
                     cores = 1,
                     verbose = F, ...) {
   conditions = levels(sampleData$condition)
-  
+
   ## calculate targetSet AUC
   auc <- calculateAUC(list("NONAME" = targetSet),
                       rankings,
                       cores = 1,
                       verbose = F, ...)
   auc.obs <- aggregateAUCbyCondition(auc, sampleData)
-  
+
   ## sample control sets
   if (is.null(controlSet)) controlSet = rownames(rankings)
   controlSetSamples = lapply(seq_len(n.sample), sample,
                              x = controlSet,
                              size = length(targetSet))
   names(controlSetSamples) = seq_len(n.sample)
-  
+
   ## calculate control AUC dist'n
   auc <- calculateAUC(controlSetSamples,
                       rankings,
                       cores = cores,
                       verbose = F, ...)
   auc.null <- aggregateAUCbyCondition(auc, sampleData)
-  
-  
+
+
   res <- data.frame(
     base = weighted.mean(auc.obs[2:3], table(sampleData$condition)),
     auc.obs[2:3],
@@ -1189,21 +1189,21 @@ diffAUC <- function(targetSet,
 #' For the latter, input `targetSets` and optionally `controlSets`.
 #'
 #' @param rankings a `SummarizedExperiment` object from [getRankings].
-#' @param sampleData `data.frame`, external samples, which contain `condition` column, 
+#' @param sampleData `data.frame`, external samples, which contain `condition` column,
 #'   whose row names must match the column names of `rankings`.
 #' @param event a `surf` object from [faseqInfer] or [faseq].
 #' @param target.type `character(1)`, either "transcript" or "gene".
-#' @param controlSets a named `list` of `character`, the control IDs. 
+#' @param controlSets a named `list` of `character`, the control IDs.
 #' @param verbose `logical`, whether (`TRUE`) to echo progress.
 #' @inheritParams getControlSet
 #' @inheritParams diffAUC
 ## @example inst/examples/example_AUCell_buildRankings.R
-#' @return 
-#'   a `daseqResults` object if `targetSets` was given, 
+#' @return
+#'   a `daseqResults` object if `targetSets` was given,
 #'   or a `surf` object if `event` was give.
 #' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
 #' @export
-daseq <- function(event = NULL, 
+daseq <- function(event = NULL,
                   rankings, sampleData,
                   target.type = "transcript",
                   targetSets = NULL,
@@ -1223,17 +1223,17 @@ daseq <- function(event = NULL,
   if (nlevels(sampleData$condition) != 2) {
     stop("The condition must have two levels.")
   }
-  
+
   ## standardize sampleData
   externalSampleData = DataFrame(
     sample = rownames(sampleData),
     sampleData[setdiff(names(sampleData), "sample")]
   )
-  
+
   if (is.null(event) && is.null(targetSets)) {
     stop("Either event or targetSets is required.")
   }
-  
+
   ## auto generate target sets
   if (is.null(targetSets)) {
     stopifnot(target.type %in% c("transcript", "gene"))
@@ -1252,7 +1252,7 @@ daseq <- function(event = NULL,
                                  verbose = verbose)
     controlSets <- lapply(controlSets, intersect, rownames(rankings))
   }
-  
+
   ## check targetSets and controlSets
   if (is.null(names(targetSets))) {
     stop("All target sets should be named.")
@@ -1264,7 +1264,7 @@ daseq <- function(event = NULL,
       any(names(targetSets) != names(controlSets))) {
     stop("Names of target and control sets must match.")
   }
-  
+
   ## @AUC
   if (verbose) cat("Calculating AUC for target sets...\n")
   AUC <- calculateAUC(targetSets,
@@ -1273,7 +1273,7 @@ daseq <- function(event = NULL,
                       verbose = F, ...)
   # externalSampleData <- cbind(colData(AUC), externalSampleData)
   colData(AUC) <- externalSampleData
-  
+
   ## non-parametric differential activity test
   if (verbose) cat("Testing for differential activity...\n")
   test.res <- mapply(
@@ -1285,7 +1285,7 @@ daseq <- function(event = NULL,
                     verbose = verbose, ...),
     SIMPLIFY = F
   ) %>% bind_rows()
-  
+
   ## collect results
   res = DataFrame(id = names(targetSets),
                   size = sapply(targetSets, length),
@@ -1294,7 +1294,7 @@ daseq <- function(event = NULL,
                   test.res,
                   row.names = names(targetSets))
   res$padj <- p.adjust(res$p.value, method = "fdr")
-  
+
   ## annotate attributes in mcols()
   mcols(res)$type = "daseq"
   conditions = levels(colData(rankings)$condition)
@@ -1315,9 +1315,9 @@ daseq <- function(event = NULL,
   )
   metadata(res) = list(target.type = target.type,
                        n.resample = n.sample)
-  
+
   daseqResults <- new("daseqResults", res, AUC = AUC)
-  
+
   if (!is.null(event)) {
     event@daseqResults <- daseqResults
     event@sampleData$"External" <- externalSampleData

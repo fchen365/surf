@@ -7,7 +7,6 @@
 \alias{drseqResults,surf-method}
 \alias{faseqResults,surf-method}
 \alias{daseqResults,surf-method}
-\alias{sampleData,surf-method}
 \title{SURF class}
 \usage{
 \S4method{genePartsList}{surf}(object)
@@ -17,13 +16,9 @@
 \S4method{faseqResults}{surf}(object)
 
 \S4method{daseqResults}{surf}(object)
-
-\S4method{sampleData}{surf}(object, type = NULL)
 }
 \arguments{
 \item{object}{a \code{surf} object output by \link{daseq}.}
-
-\item{type}{\code{character}, any subset of "RNA-seq", "CLIP-seq", and "External".}
 }
 \description{
 The \code{surf} class is an all-in-one analytic object used in SURF framework.
