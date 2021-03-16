@@ -7,7 +7,9 @@
 
 <!-- badges: start -->
 
-[![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+<!-- [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental) -->
+
+[![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
 <!-- badges: end -->
 
 The **S**tatistical **U**tility for **R**BP **F**unctions (SURF) is an
@@ -16,14 +18,11 @@ alternative transcription initiation (ATI), and alternative
 polyadenylation (APA) events regulated by individual RBPs and elucidate
 protein-RNA interactions governing these events. We used SURF to
 analyzed 104 RBP data (K562 cells, available from
-[ENCODE](https://www.encodeproject.org)). Check out the results from
-this [shiny](http://www.statlab.wisc.edu/shiny/surf/) app\!
+[ENCODE](https://www.encodeproject.org)).
+<!-- Check out the results from this [shiny](http://www.statlab.wisc.edu/shiny/surf/) app! -->
 
-We have a detailed vignette
-[here](https://github.com/fchen365/surf/blob/master/vignettes/surf.R).
-
-*A detailed vignette is in preparation, which we expect to put out by
-**Winter 2020**\!*
+***A detailed vignette is available
+[here](http://pages.stat.wisc.edu/~fanchen/surf_vignette.pdf).***
 
 ## Installation
 

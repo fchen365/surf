@@ -77,8 +77,8 @@ export(genes, "data/gencode.v32.primary.regSURFon.bed")
 ```
 
 # Overview
-This document provides an example of using *SURF**SURF** (Version `r packageVersion("surf")`) to integrate CLIP-seq and RNA-seq data for predicting RNA-binding protein (RBP) functions in alternative transcriptional regulation (ATR). 
-SURF is versatile in and can handle four different tasks centering ATR events:
+This document provides an example of using **SURF** (Version `r packageVersion("surf")`) to integrate CLIP-seq and RNA-seq data for predicting RNA-binding protein (RBP) functions in alternative transcriptional regulation (ATR). 
+**SURF** is versatile in and can handle four different tasks centering ATR events:
 
 |  | Data | Format | Task |
 | :---: | ------------- | :-------------: | ------------- |
@@ -101,8 +101,8 @@ To reproduce the results in this vignette, download the demo data from XXX and p
 
 ## One task at a call
 
-The four tasks in the SURF pipeline should be streamlined. 
-Once you have the data in hand (see the next subsection for how to tell SURF about your data), each step can be performed with a single function call:
+The four tasks in the **SURF** pipeline should be streamlined. 
+Once you have the data in hand (see the next subsection for how to tell **SURF** about your data), each step can be performed with a single function call:
 
 ```{r, eval=F}
 library(surf)
@@ -115,7 +115,7 @@ event <- daseq(event, getRankings(exprMat), ext_sample)         # step 4
 
 Here, `anno_file` (a `charactor(1)`), `rna_seq_sample` (a `data.frame`), `clip_seq_sample` (a `data.frame`), and `ext_sample` (a `data.frame`) describe your data files, and `exprMat` (a `data.frame`) is a summary table of some external transcriptome quantification (e.g., TCGA, GTEx, etc).
 
-## Tell **SURF** about your data
+## Tell SURF about your data
 
 Describing your data is straightforward.
 
@@ -176,7 +176,7 @@ The function allows several options. For example,
 * `cores` specifies the number of computing processors. Since the parsing step is done for individual genes separately, we recommend parallel computing whenever possible. By default, the function will detect the available cores in the current environment (`parallel::detectCores()`), say $n$, and uses $\max (n-2, 1)$ cores. The entire **SURF** workflow uses the same default whenever parallel computing is applicable.
 * `min.event.length` allows you to filter the widths (in bp) of ATR events with a lower limit. The default is 6.
 * `location.feature` determines whether location features should also be extracted. Location features are the potential locations of protein-RNA interactions within/nearby the specific ATR event. Specifically, they are defined within and flanking the event body and the constitutive (upstream/downstream) exons (Figure \@ref(fig:feature)). The location features is used in Step 3 (to quantify CLIP-seq signals for functional inference) and will not be used by the second step, DrSeq. This may take a considerable amount of computing time. Hence, you could set this option to `FALSE` if you are *only* interested in performing differential regulation of ATR events using RNA-seq (DrSeq). The default is `TRUE`. 
-* `depth.exon` and `depth.intron` are relevant only if `location.feature=TRUE`. These options configure the sizes of location features. Specifically, SURF uses a fixed length for exonic location features^[In some special cases of short ATR events, the exonic location feature will be shorten so that they do not overlap.] and a fixed length for all intronic location features respectively (Figure \@ref(fig:feature)). The default is `depth.exon=100` and `depth.intron=300`.
+* `depth.exon` and `depth.intron` are relevant only if `location.feature=TRUE`. These options configure the sizes of location features. Specifically, **SURF** uses a fixed length for exonic location features^[In some special cases of short ATR events, the exonic location feature will be shorten so that they do not overlap.] and a fixed length for all intronic location features respectively (Figure \@ref(fig:feature)). The default is `depth.exon=100` and `depth.intron=300`.
 * `remove.duplicate` defines whether identical events should be removed. If `remove.duplica=TRUE`, the one event with the highest RNA-seq read coverage will be kept, and the other duplicated events will be removed.
 * `verbose` controls whether or not the progress should be printed.  
 
@@ -189,7 +189,7 @@ This step outputs a universal `surf` object, which is an extension of `DataFrame
 event
 ```
 
-Using the `mcols()` function, we can inspect the description of each column. In particular, the 4th column contains the genomic data of the ATR event (`GenomicRangesList`). The reason that SURF uses `GenomicRangesList` instead of `GenomicRanges` is because some ATR events, namely AFE, IAP, and SE if consecutive, may consist of multiple exons. If `location.feature=TRUE`, then `parseEvent()` also outputs the 5th column (also a `GenomicRangesList`) containing the location features. 
+Using the `mcols()` function, we can inspect the description of each column. In particular, the 4th column contains the genomic data of the ATR event (`GenomicRangesList`). The reason that **SURF** uses `GenomicRangesList` instead of `GenomicRanges` is because some ATR events, namely AFE, IAP, and SE if consecutive, may consist of multiple exons. If `location.feature=TRUE`, then `parseEvent()` also outputs the 5th column (also a `GenomicRangesList`) containing the location features. 
 ```{r}
 mcols(event)
 ```
