@@ -31,6 +31,7 @@ vignettes/results/*
 .httr-oauth
 
 # knitr and R markdown default cache directories
+*.Rmd
 /*_cache/
 /cache/
 
