@@ -22,7 +22,7 @@ analyzed 104 RBP data (K562 cells, available from
 <!-- Check out the results from this [shiny](http://www.statlab.wisc.edu/shiny/surf/) app! -->
 
 ***A detailed vignette is available
-[here](http://pages.stat.wisc.edu/~fanchen/surf_vignette.pdf).***
+[here](http://pages.stat.wisc.edu/~fanchen/surf_vignette.html).***
 
 ## Installation
 
