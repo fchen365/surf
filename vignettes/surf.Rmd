@@ -94,7 +94,7 @@ knitr::include_graphics("figures/0_pipeline.jpg")
 ```
 
 # Preparations
-To reproduce the results in this vignette, download the demo data from XXX and put them into a "data" folder under the working directory. 
+To reproduce the results in this vignette, download the demo data from [Zenodo](http://doi.org/10.5281/zenodo.4628573) and put them into a "data" folder under the working directory. 
 
 # Quick start
 

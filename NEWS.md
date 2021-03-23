@@ -1,4 +1,7 @@
-# News: `surf` 0.0.0.9000
+# News: `surf` 1.0.0
+
+## Mar 22, 2021 
+* Ready for Bioconductor submission.
 
 ## Sep 7, 2020
 * Added a `NEWS.md` file to track changes to the package.

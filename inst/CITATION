@@ -1,0 +1,22 @@
+citHeader("To cite surf in publications use:")
+
+citEntry(
+  entry        = "Article",
+  title        = "SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins.",
+  author       = personList(as.person("Fan Chen"),
+                   as.person("Sunduz Keles")),
+  journal      = "Genome Biology",
+  year         = "2020",
+  volume       = "21",
+  number       = "139",
+  pages        = "1--23",
+  url          = "https://doi.org/10.1186/s13059-020-02039-7",
+
+  textVersion  =
+  paste("Chen, F., Keles, S.",
+        "SURF: integrative analysis of a compendium of RNA-seq and",
+        "CLIP-seq datasets highlights complex governing of",
+        "alternative transcriptional regulation by RNA-binding proteins.",
+        "Genome Biol 21, 139 (2020).",
+        "URL https://doi.org/10.1186/s13059-020-02039-7.")
+)
