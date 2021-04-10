@@ -27,5 +27,6 @@ association test.}
 a \code{ggplot} object.
 }
 \description{
-This function provides a ggplot implementation for functional association (FA) plot.
+This function provides a ggplot implementation for functional association
+(FA) plot.
 }

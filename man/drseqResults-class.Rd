@@ -5,5 +5,6 @@
 \alias{drseqResults-class}
 \title{DrSeq class}
 \description{
-\code{drseqResults} is a  stand-alone object of DrSeq (the analysis module 1 of SURF) results.
+\code{drseqResults} is a  stand-alone object of DrSeq (the analysis module 1 of
+SURF) results.
 }

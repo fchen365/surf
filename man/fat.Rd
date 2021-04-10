@@ -7,17 +7,21 @@
 fat(data, min.size = 60, trim = 0.025)
 }
 \arguments{
-\item{data}{\code{data.frame}, contains training data for one RBP and one event type}
+\item{data}{\code{data.frame}, contains training data for one RBP and one event
+type}
 
-\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to 60.}
+\item{min.size}{\code{integer}, the minimum size of "reliable" training set,
+default to 60.}
 
 \item{trim}{\code{numeric}, the percentile used to trim the training data.
-This is useful in producing a more robust estimation of functional association.}
+This is useful in producing a more robust estimation of functional
+association.}
 }
 \value{
 a \code{data.frame} that summarizes the FAT.
 }
 \description{
 This is a learning one unit of SURF.
-It trains a GLM model for the functional association of one RBP with one ATR event.
+It trains a GLM model for the functional association of one RBP with one ATR
+event.
 }

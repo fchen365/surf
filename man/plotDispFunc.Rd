@@ -24,9 +24,10 @@ a \code{ggplot} object.
 }
 \description{
 Plot the fitted mean-dispersion functions of DrSeq models.
-DrSeq fits up to eight mean-dispersion functions; each corresponds to one ATR event type.
-This allows DrSeq to better account for the nuance in the over-dispersion presented by different ATR event types.
-For more details, please refer to SURF paper.
+DrSeq fits up to eight mean-dispersion functions; each corresponds to one ATR
+event type. This allows DrSeq to better account for the nuance in the
+over-dispersion presented by different ATR event types. For more details,
+please refer to SURF paper.
 }
 \details{
 By SURF default, ATR type are colored with the \code{Paired} palette.

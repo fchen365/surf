@@ -10,7 +10,7 @@ drseqResults(object)
 \item{object}{a \code{surf} object output by \link{drseq} or \link{drseqFit} or \link{drseqFilter}.}
 }
 \value{
-a \code{drseqResults} object
+a \code{drseqResults} object.
 }
 \description{
 DrSeq Results

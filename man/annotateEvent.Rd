@@ -9,7 +9,7 @@ annotateEvent(
   cores = max(1, detectCores() - 2),
   min.event.length = 6,
   anno_ss = NULL,
-  remove.duplicate = F
+  remove.duplicate = FALSE
 )
 }
 \arguments{
@@ -19,9 +19,11 @@ annotateEvent(
 
 \item{min.event.length}{\code{numeric} (positive), minimum length of a valid event.}
 
-\item{anno_ss}{a \code{GRanges} of start/stop codon, UTR, Selenocysteine, etc; used to exclude some interior events (i.e., SE/RI/A3SS/A5SS)}
+\item{anno_ss}{a \code{GRanges} of start/stop codon, UTR, Selenocysteine, etc;
+used to exclude some interior events (i.e., SE/RI/A3SS/A5SS)}
 
-\item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).}
+\item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove
+identical event duplicates (by keeping one).}
 }
 \value{
 a \code{surf} object.

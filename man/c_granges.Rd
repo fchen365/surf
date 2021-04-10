@@ -4,7 +4,7 @@
 \alias{c_granges}
 \title{Concatenate a list of GRanges}
 \usage{
-c_granges(grl, use.names = T, sep = ".", save.names = F)
+c_granges(grl, use.names = TRUE, sep = ".", save.names = FALSE)
 }
 \arguments{
 \item{grl}{a \code{list} of \code{GRanges}.}
@@ -13,7 +13,8 @@ c_granges(grl, use.names = T, sep = ".", save.names = F)
 
 \item{sep}{\code{character}, separator between list names and GRanges names.}
 
-\item{save.names}{\code{logical} or \code{character}, if not \code{FALSE}, save list names as an attribute (i.e., \code{mcols()}).}
+\item{save.names}{\code{logical} or \code{character}, if not \code{FALSE}, save list names
+as an attribute (i.e., \code{mcols()}).}
 }
 \value{
 a \code{GRanges} object

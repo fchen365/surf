@@ -34,9 +34,11 @@ suppressPackageStartupMessages({
 #' @importFrom S4Vectors Hits queryHits from to
 #' @importFrom BiocParallel MulticoreParam multicoreWorkers bplapply bpparam
 #' @importFrom IRanges IRanges DataFrameList FactorList
+#' @import doRNG
+#' @import scales
+#' @import DEXSeq
 #' @import BiocGenerics
 #' @import GenomicRanges
-#' @import DEXSeq
 #' @import SummarizedExperiment
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,7 +58,8 @@ globalVariables(c("g", "label", "pl", "plas", "segment"))
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #' DrSeq class
 #' 
-#' `drseqResults` is a  stand-alone object of DrSeq (the analysis module 1 of SURF) results.  
+#' `drseqResults` is a  stand-alone object of DrSeq (the analysis module 1 of 
+#'     SURF) results.  
 setClass(
   "drseqResults",
   contains = "DataFrame",
@@ -68,14 +71,16 @@ setClass(
 
 setValidity(
   "drseqResults", function(object) {
-    stopifnot(all(names(object@modelFrameBM) == names(object@dispersionFunction)))
+    stopifnot(all(names(object@modelFrameBM) == 
+                    names(object@dispersionFunction)))
     TRUE
   }
 )
 
 #' FASeq class
 #' 
-#' `faseqResults` is a stand-alone object of FASeq (the analysis module 2 of SURF) results.  
+#' `faseqResults` is a stand-alone object of FASeq (the analysis module 2 of 
+#'     SURF) results.  
 setClass(
   Class = "faseqResults",
   contains = "DataFrame"
@@ -92,7 +97,8 @@ setValidity("faseqResults", function(object) {
 
 #' DASeq class
 #' 
-#' `daseqResults` is a stand-alone object of DASeq (the discovery module of SURF) results.  
+#' `daseqResults` is a stand-alone object of DASeq (the discovery module of 
+#'     SURF) results.  
 setClass(
   "daseqResults",
   contains = "DataFrame",
@@ -111,14 +117,21 @@ setValidity("daseqResults", function(object) {
 #' SURF class
 #' 
 #' The `surf` class is an all-in-one analytic object used in SURF framework. 
-#' A `surf` object contains results of DrSeq (analysis module 1), FASeq (analysis module 2), and DASeq (discovery module 1).
-#' In addition, it also contain gene (isoform) parts list, parsing from genome annotation. 
-#' The gene parts list is essential for ATR event construction. 
-#' If the any analysis module or discovery module is performed, the sample metadata will also be recorded. 
-#' Each of the components mentioned above can be accessed through a function listed below.
+#' A `surf` object contains results of DrSeq (analysis module 1), FASeq 
+#' (analysis module 2), and DASeq (discovery module 1). In addition, it also 
+#' contain gene (isoform) parts list, parsing from genome annotation. The gene 
+#' parts list is essential for ATR event construction. If the any analysis 
+#' module or discovery module is performed, the sample metadata will also be 
+#' recorded. Each of the components mentioned above can be accessed through a 
+#' function listed below.
 #' 
-#' @seealso [genePartsList], [drseqResults], [faseqResults], [daseqResults], [sampleData].
-#' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. *Genome Biology*, 21(1), 1-23.
+#' @return a `surf` object.
+#' @seealso [genePartsList], [drseqResults], [faseqResults], [daseqResults], 
+#'     [sampleData].
+#' @references Chen, F., & Keles, S. (2020). SURF: integrative analysis of a 
+#'     compendium of RNA-seq and CLIP-seq datasets highlights complex governing 
+#'     of alternative transcriptional regulation by RNA-binding proteins. 
+#'     *Genome Biology*, 21(1), 1-23.
 setClass(
   "surf",
   contains = "DataFrame",
@@ -137,7 +150,8 @@ setValidity("surf", function(object) {
   ## main columns and @genePartsList
   stopifnot(all(object$event_name %in% surf.events))
   stopifnot(all(object$gene_id %in% object@genePartsList$gene_id)) 
-  stopifnot(all(object$transcript_id %in% unlist(object@genePartsList$transcript_id))) 
+  stopifnot(all(object$transcript_id %in% 
+                  unlist(object@genePartsList$transcript_id))) 
   
   ## @sampleData colnames
   for (nm in lapply(object@sampleData, colnames)) {
@@ -184,7 +198,7 @@ setMethod(
 
 #' DrSeq Results
 #' @param object a `surf` object output by [drseq] or [drseqFit] or [drseqFilter].
-#' @return a `drseqResults` object
+#' @return a `drseqResults` object.
 setGeneric(
   name = "drseqResults",
   def = function(object)
@@ -351,9 +365,10 @@ setMethod(
 #' Plot Dispersion Functions
 #' 
 #' Plot the fitted mean-dispersion functions of DrSeq models. 
-#' DrSeq fits up to eight mean-dispersion functions; each corresponds to one ATR event type.
-#' This allows DrSeq to better account for the nuance in the over-dispersion presented by different ATR event types.
-#' For more details, please refer to SURF paper.
+#' DrSeq fits up to eight mean-dispersion functions; each corresponds to one ATR 
+#' event type. This allows DrSeq to better account for the nuance in the 
+#' over-dispersion presented by different ATR event types. For more details, 
+#' please refer to SURF paper.
 #' 
 #' @param object a `drseqResults` object.
 #' @param ... various parameters. 
@@ -401,8 +416,10 @@ setMethod("plotDispFunc", "surf",
 ## ------ _ Volcano plot ------
 #' Volcano plot
 #' 
-#' Create a volcano plot for the DrSeq results, stratified by alternative transcriptional regulation (ATR) event types.
-#' A volcano plot is a scatter plot of tested units, where log2 fold change is in x-axis, and -log10(p.value) is in y-axis.
+#' Create a volcano plot for the DrSeq results, stratified by alternative 
+#' transcriptional regulation (ATR) event types. A volcano plot is a scatter 
+#' plot of tested units, where log2 fold change is in x-axis, and 
+#' -log10(p.value) is in y-axis.
 #' 
 #' @param object a `drseqResults` object.
 #' @return a `ggplot` object.
@@ -504,7 +521,8 @@ setMethod("volcano.plot", "surf",
 
 #' Functional association plot
 #' 
-#' This function provides a ggplot implementation for functional association (FA) plot.
+#' This function provides a ggplot implementation for functional association 
+#' (FA) plot.
 #' 
 #' @param object a `surf` object from [faseq] or [faseqFit] or [faseqInfer].
 #' @param plot.event `character` vector, event type wanted. 
@@ -531,9 +549,9 @@ fa.plot <- function(object,
   featureSignal <- trainData$featureSignal
   dat1 = data.frame(
     event = rep(trainData$event_name, elementNROWS(featureSignal)),
-    feature = unlist(lapply(featureSignal, names), use.names = F),
+    feature = unlist(lapply(featureSignal, names), use.names = FALSE),
     group = rep(trainData$group, elementNROWS(featureSignal)),
-    signal = unlist(featureSignal, use.names = F)) %>% 
+    signal = unlist(featureSignal, use.names = FALSE)) %>% 
     group_by(.data$event, .data$feature) %>%
     mutate(lower = quantile(.data$signal, trim * 2), 
            upper = quantile(.data$signal, 1 - trim * 2),
@@ -576,7 +594,7 @@ fa.plot <- function(object,
   })
   g2 <- ggplot(dat2, aes(.data$x, .data$logp, color = .data$functional)) +
     geom_hline(yintercept = -log10(fdr.cutoff), color = "grey40", 
-               alpha = .9, linetype = 2, show.legend = T) + 
+               alpha = .9, linetype = 2, show.legend = TRUE) + 
     geom_point(alpha = .9) +
     stat_summary(aes(group = .data$functional), alpha = .8, 
                  fun = sum, geom = "line") +
@@ -615,8 +633,9 @@ inferredFeature = function(object) {
   feature$event_name <- rep(object$event_name, n_feature)
   feature$gene_id <- rep(object$gene_id, n_feature)
   feature$transcript_id <- rep(object$transcript_id, n_feature)
-  feature$feature_name <- factor(names(unlist(object$feature, use.names = F)), surf.features)
-  feature$functional <- unlist(object$inferredFeature, use.names = F)
+  feature$feature_name <- factor(
+    names(unlist(object$feature, use.names = FALSE)), surf.features)
+  feature$functional <- unlist(object$inferredFeature, use.names = FALSE)
   feature <- feature[feature$functional != "none"]
   return(feature)
 }
@@ -632,7 +651,8 @@ inferredFeature = function(object) {
 #' 
 #' Get AUC measure for each target set (row) in every sample (column).
 #' @param object a `SummarizedExperiment`, or `surf`, or `daseqResults` object.
-#' @return a `matrix` of AUC, whose rows correspond to target sets and columns correspond to samples.
+#' @return a `matrix` of AUC, whose rows correspond to target sets and columns 
+#'     correspond to samples.
 setGeneric(
   name = "getAUC",
   def = function(object)
@@ -709,7 +729,8 @@ setMethod(
     
     ## cluster rows and columns
     set_cluster = clusterByGroup(mat, group)
-    sample_cluster <- clusterByGroup(t(mat), sampleData[colnames(mat), "condition"])
+    sample_cluster <- clusterByGroup(
+      t(mat), sampleData[colnames(mat), "condition"])
     
     dat <- aggregateAUCbyCondition(object)
     dat$group = group[dat$set]
@@ -753,17 +774,20 @@ setMethod(
 #' 
 #' Bind by row a `list` of `data.frame` with the same `ncol` into `data.frame`. 
 #' In particular, if the input is a list of vector-like objects 
-#' (e.g. numeric, atomic, double, etc), each unit of list will be coerced into row vector.
-#' In addition, the function allows to save list names if needed.
+#' (e.g. numeric, atomic, double, etc), each unit of list will be coerced into 
+#' row vector. In addition, the function allows to save list names if needed.
 #' 
-#' @param x `list`, all elements are vectors of the same length or array of the same column size
-#' @param save.names `logical` or `character`, if not `FALSE`, save list names into an new column
-list_rbind = function(x, save.names = F) {
+#' @param x `list`, all elements are vectors of the same length or array of the 
+#'     same column size
+#' @param save.names `logical` or `character`, if not `FALSE`, save list names 
+#'     into an new column
+#' @return a `data.frame`.
+list_rbind = function(x, save.names = FALSE) {
   x = as.list(x)
-  x = x[!sapply(x, is.null)]
+  x = x[!vapply(x, is.null, FUN.VALUE = logical(1))]
   if (!length(x)) return(data.frame())
   if (!is.null(dim(x[[1]]))) 
-    x = lapply(x, as.data.frame, stringsAsFactors = F)
+    x = lapply(x, as.data.frame, stringsAsFactors = FALSE)
   res = suppressWarnings(dplyr::bind_rows(x)) 
   # if (is.null(dim(x[[1]])) || length(dim(x[[1]])) == 1) {
   #   res = t(res)
@@ -775,8 +799,8 @@ list_rbind = function(x, save.names = F) {
   if (save.names != FALSE) {
     if (is.null(names(x))) 
       stop("The input list is unnamed. Either set save.names to FALSE or set names for x.")
-    list.names <- rep(names(x), sapply(x, nrow)) 
-    res = cbind(list.names, res, stringsAsFactors = F)
+    list.names <- rep(names(x), vapply(x, nrow, FUN.VALUE = integer(1))) 
+    res = cbind(list.names, res, stringsAsFactors = FALSE)
     names(res)[1] <- ifelse(save.names == TRUE, "list.names", save.names) 
   }
   
@@ -834,14 +858,15 @@ clusterByGroup = function(x, group) {
 #' @param grl a `list` of `GRanges`.
 #' @param use.names `logical`, whether (`TRUE`) to inherit list names.
 #' @param sep `character`, separator between list names and GRanges names.
-#' @param save.names `logical` or `character`, if not `FALSE`, save list names as an attribute (i.e., `mcols()`).
+#' @param save.names `logical` or `character`, if not `FALSE`, save list names 
+#'     as an attribute (i.e., `mcols()`).
 #' @return a `GRanges` object
 c_granges <- function(grl, 
-                      use.names = T, 
+                      use.names = TRUE, 
                       sep = ".", 
-                      save.names = F) {
+                      save.names = FALSE) {
   grl <- as(grl, "CompressedGRangesList")
-  gr <- unlist(grl, use.names = F)
+  gr <- unlist(grl, use.names = FALSE)
   list.names <- rep(names(grl), elementNROWS(grl)) 
   if (use.names) {
     names(gr) <- paste(list.names, names(gr), sep = sep) 
@@ -868,7 +893,8 @@ addGeneTx <- function(anno) {
     tx = unlist(tx)
     tx$type = "transcript" 
     tx$transcript_id = names(tx)
-    tx$gene_id <- sapply(split(anno$gene_id, anno$transcript_id), head, n = 1)
+    tx$gene_id <- vapply(split(anno$gene_id, anno$transcript_id), 
+                         head, n = 1, FUN.VALUE = character(1))
     tx <- unname(tx)
     anno = c(tx,anno)
   }
@@ -885,8 +911,9 @@ addGeneTx <- function(anno) {
 
 #' Import annotation files
 #' 
-#' This is a wrapper of [rtracklayer::import] with specialty in genome annotation.
-#' Specifically, it checks whether "gene" or "transcript" exist in the annotation and fill them in if possible.
+#' This is a wrapper of [rtracklayer::import] with specialty in genome 
+#' annotation. Specifically, it checks whether "gene" or "transcript" exist in 
+#' the annotation and fill them in if possible.
 #' 
 #' @param ... whatever input to [rtracklayer::import].
 #' @return a `GRanges` object.
@@ -926,7 +953,7 @@ getMultiTxGene = function(anno, min = 2, max = Inf) {
 #' @param verbose `logical`, whether to print out the progress information.
 #' @param ... parameters for `featureCounts`.
 #' @return See [Rsubread::featureCounts] documentation.
-featureCounts <- function(..., verbose = F) {
+featureCounts <- function(..., verbose = FALSE) {
   if (verbose) {
     Rsubread::featureCounts(...)
   } else {
@@ -951,7 +978,7 @@ featureCounts <- function(..., verbose = F) {
 #                       tx2gene = NULL, reader = read.delim,
 #                       geneIdCol, txIdCol, abundanceCol, countsCol, lengthCol, importer,
 #                       collatedFiles, ignoreTxVersion = FALSE,
-#                       quiet = F)
+#                       quiet = FALSE)
 # {
 #   type <- match.arg(type, c("none", "kallisto", "salmon", "sailfish",
 #                             "rsem"))

@@ -9,8 +9,8 @@ drseqFilter(
   drseq.fdr = 0.05,
   read.length = 100,
   min.adjMean = 0.05,
-  filter.overlap.event = T,
-  verbose = F
+  filter.overlap.event = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -18,19 +18,26 @@ drseqFilter(
 
 \item{drseq.fdr}{\code{numeric}, FDR (BH procedure) adjusted p-value cut-off.}
 
-\item{read.length}{\code{numeric}, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.}
+\item{read.length}{\code{numeric}, RNA-seq read length. Default is 100 bp (e.g.,
+Illumina TruSeq). This is used to adjust event base count, which is then
+used to select the representative events if replicated.}
 
 \item{min.adjMean}{\code{numeric}, adjusted event base mean threshold.}
 
-\item{filter.overlap.event}{\code{logical}, whether (default to \code{TRUE}) to select one representitive event from overlapping ones and remove the others.}
+\item{filter.overlap.event}{\code{logical}, whether (default to \code{TRUE}) to select
+one representitive event from overlapping ones and remove the others.}
 
-\item{verbose}{\code{logical}, whether (default to \code{FALSE}) to print out basic summary statistics.}
+\item{verbose}{\code{logical}, whether (default to \code{FALSE}) to print out basic
+summary statistics.}
 }
 \value{
 a \code{surf} object, with three columns added:
 \item{adjMean}{adjusted base mean of the event from RNA-seq data.}
-\item{group}{group labels of ATR events, \code{increase} for increased REU upon RBP knock-down, and \code{decrease} for decreased, and \verb{no change} for no-changed.}
-\item{included}{logical, indicating whether the event is included into SURF analysis module 2.}
+\item{group}{group labels of ATR events, \code{increase} for increased REU upon
+RBP knock-down, and \code{decrease} for decreased, and \verb{no change} for
+no-changed.}
+\item{included}{logical, indicating whether the event is included into SURF
+analysis module 2.}
 }
 \description{
 Filter DrSeq results for the analysis module 2 of SURF (DASeq).

@@ -1,4 +1,4 @@
-# News: `surf` 1.0.0
+# News: `surf` 0.99.0
 
 ## Mar 22, 2021 
 * Ready for Bioconductor submission.

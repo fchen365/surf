@@ -9,12 +9,15 @@ aggregateAUCbyCondition(object, sampleData, FUN.aggregate = "median")
 \arguments{
 \item{object}{a \code{SummarizedExperiment} output from \link{calculateAUC}.}
 
-\item{sampleData}{\code{data.frame} of sample data, which contains a \code{condition} column,}
+\item{sampleData}{\code{data.frame} of sample data, which contains a \code{condition}
+column.}
 
-\item{FUN.aggregate}{function, used for aggregating AUC within \code{condition}, default to \code{mean}.}
+\item{FUN.aggregate}{function, used for aggregating AUC within \code{condition},
+default to \code{mean}.}
 }
 \value{
-a \code{data.frame} with 4 columns: \code{set}, \code{condition.1}, \code{condition.2}, and \code{diff}.
+a \code{data.frame} with 4 columns: \code{set}, \code{condition.1}, \code{condition.2},
+and \code{diff}.
 }
 \description{
 Aggregate AUC by sample condition

@@ -10,14 +10,14 @@ getFeature(
   depth.exon = 100,
   depth.intron = 300,
   cores = max(1, detectCores() - 2),
-  remove.duplicate = T,
+  remove.duplicate = TRUE,
   verbose = FALSE
 )
 }
 \arguments{
 \item{isoPLas}{isoform parts list with AS events.}
 
-\item{anno_event}{\code{DataFrame}, event annotation w/o features}
+\item{anno_event}{\code{DataFrame}, event annotation w/o features.}
 
 \item{depth.exon}{\code{integer}, extended depth into exon, default 50 nt.}
 
@@ -25,12 +25,14 @@ getFeature(
 
 \item{cores}{\code{integer}, number of computing cores to use.}
 
-\item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove identical event duplicates (by keeping one).}
+\item{remove.duplicate}{\code{logical}, whether (default to \code{TRUE}) to remove
+identical event duplicates (by keeping one).}
 
 \item{verbose}{\code{logical}, whether (default to \code{TRUE}) to echo progress}
 }
 \value{
-a \code{surf} object with one added column called \code{feature}, which contains a \code{GRangesList} of extracted location features.
+a \code{surf} object with one added column called \code{feature}, which
+contains a \code{GRangesList} of extracted location features.
 }
 \description{
 Generate location features for each ATR event.

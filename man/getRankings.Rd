@@ -6,14 +6,15 @@
 \usage{
 getRankings(
   exprMat,
-  plotStats = F,
+  plotStats = FALSE,
   cores = max(1, detectCores() - 2),
-  verbose = F
+  verbose = FALSE
 )
 }
 \arguments{
-\item{exprMat}{Expression matrix (genes/transcripts as rows, samples as columns)
-The expression matrix can also be provided as one of the Bioconductor classes:
+\item{exprMat}{Expression matrix (genes/transcripts as rows, samples as
+columns). The expression matrix can also be provided as one of the
+Bioconductor classes:
 \itemize{
 \item \link{RangedSummarizedExperiment} and derived classes:
 The matrix will be obtained through \code{assay(exprMat)},
@@ -38,9 +39,9 @@ a \code{SummarizedExperiment} object.
 }
 \description{
 Builds the "rankings" for each sample: expression-based ranking for all the
-genes/transcripts in each sample
-The genes/transcripts with same expression value are shuffled.
-Therefore, genes/transcripts with expression '0' are randomly sorted at the end of the ranking.
-These "rankings" can be seen as a new representation of the original dataset.
-Once they are calculated, they can be saved for future analyses.
+genes/transcripts in each sample. The genes/transcripts with same expression
+value are shuffled. Therefore, genes/transcripts with expression '0' are
+randomly sorted at the end of the ranking. These "rankings" can be seen as a
+new representation of the original dataset. Once they are calculated, they
+can be saved for future analyses.
 }

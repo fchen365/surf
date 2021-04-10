@@ -11,6 +11,10 @@ getIsoAS(li, gm)
 
 \item{gm}{gene model.}
 }
+\value{
+a \code{factor} vector of the same length as \code{li}, indicating the ATR
+events (e.g., "SE", "A5SS", etc) or "." for no event.
+}
 \description{
 Get AS events for one isoform (decision tree)
 }

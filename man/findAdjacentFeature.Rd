@@ -15,17 +15,19 @@ findAdjacentFeature(
 \arguments{
 \item{plas}{one isoform element in \code{isoPLas}.}
 
-\item{body}{\code{list}, $id_tx, $event_id = body bins indices}
+\item{body}{\code{list}, $id_tx, $event_id = body bins indices.}
 
-\item{type}{\code{character}, either"lead" for upstream, or "lag" for downstream}
+\item{type}{\code{character}, either"lead" for upstream, or "lag" for downstream.}
 
-\item{depth.exon}{\code{integer}, extended depth into exon, default 100 nt}
+\item{depth.exon}{\code{integer}, extended depth into exon, default 100 nt.}
 
-\item{depth.intron}{\code{integer}, extended depth into intron, default 300 nt}
+\item{depth.intron}{\code{integer}, extended depth into intron, default 300 nt.}
 }
 \value{
-a \code{GRangesList}
+a \code{GRangesList}.
 }
 \description{
-Locate the adjacent bins at the desired direction and extract the genomic bins, given some location features of AS events. This is a helper function to \code{getFeature()}
+Locate the adjacent bins at the desired direction and extract the genomic
+bins, given some location features of AS events. This is a helper function to
+\code{getFeature()}.
 }

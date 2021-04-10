@@ -10,7 +10,7 @@ drseqFit(
   reducedModel = ~sample + exon,
   fitExpToVar = "condition",
   cores = max(1, detectCores() - 2),
-  verbose = F
+  verbose = FALSE
 )
 }
 \arguments{
@@ -35,14 +35,17 @@ drseqFit(
 \item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
 \value{
-a \code{surf} object with (1) \code{drseqResults} and \code{sampleData} slot updated and (2) three added columns:
+a \code{surf} object with (1) \code{drseqResults} and \code{sampleData} slot updated
+and (2) three added columns:
 \item{eventBaseMean}{base read coverage of the event from RNA-seq data.}
 \item{padj}{adjusted p-value for differential REU.}
-\item{logFoldChange}{estimated log2 fold change of REU: log2(condition of the 1st sample / another condition)}
+\item{logFoldChange}{estimated log2 fold change of REU: log2(condition of the
+1st sample / another condition)}
 }
 \description{
 Fit DrSeq models using the DEXSeq as the estimation engine.
 }
 \details{
-the \code{drseqResults} slot contains extensive DrSeq results. To access the object, use \link{drseqResults} function.
+the \code{drseqResults} slot contains extensive DrSeq results. To access
+the object, use \link{drseqResults} function.
 }

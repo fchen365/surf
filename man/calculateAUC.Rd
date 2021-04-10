@@ -4,11 +4,12 @@
 \alias{calculateAUC}
 \title{Calculate AUC}
 \usage{
-calculateAUC(set, rankings, cores = 1, verbose = F, ...)
+calculateAUC(set, rankings, cores = 1, verbose = FALSE, ...)
 }
 \arguments{
 \item{set}{a \code{list} of sets (or signatures) to test.
-The sets should be provided as \code{GeneSet}, \code{GeneSetCollection} or \code{character} list.}
+The sets should be provided as \code{GeneSet}, \code{GeneSetCollection} or
+\code{character} list.}
 
 \item{rankings}{'Rankings' created for this dataset with
 \code{\link[AUCell]{AUCell_buildRankings}}.}

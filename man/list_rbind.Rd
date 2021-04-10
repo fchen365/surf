@@ -4,16 +4,21 @@
 \alias{list_rbind}
 \title{Bind list by row into data.frame}
 \usage{
-list_rbind(x, save.names = F)
+list_rbind(x, save.names = FALSE)
 }
 \arguments{
-\item{x}{\code{list}, all elements are vectors of the same length or array of the same column size}
+\item{x}{\code{list}, all elements are vectors of the same length or array of the
+same column size}
 
-\item{save.names}{\code{logical} or \code{character}, if not \code{FALSE}, save list names into an new column}
+\item{save.names}{\code{logical} or \code{character}, if not \code{FALSE}, save list names
+into an new column}
+}
+\value{
+a \code{data.frame}.
 }
 \description{
 Bind by row a \code{list} of \code{data.frame} with the same \code{ncol} into \code{data.frame}.
 In particular, if the input is a list of vector-like objects
-(e.g. numeric, atomic, double, etc), each unit of list will be coerced into row vector.
-In addition, the function allows to save list names if needed.
+(e.g. numeric, atomic, double, etc), each unit of list will be coerced into
+row vector. In addition, the function allows to save list names if needed.
 }

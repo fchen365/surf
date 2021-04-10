@@ -9,23 +9,26 @@ findNeighborFeature(
   body,
   type = c("lead", "lag"),
   depth.exon = 100,
-  constitutive = T
+  constitutive = TRUE
 )
 }
 \arguments{
 \item{plas}{one isoform element in \code{isoPLas}.}
 
-\item{body}{\code{list}, $id_tx$event_id = body bins indices}
+\item{body}{\code{list}, $id_tx$event_id = body bins indices.}
 
-\item{type}{\code{character}, either "lead" for upstream, or "lag" for downstream}
+\item{type}{\code{character}, either "lead" for upstream, or "lag" for downstream.}
 
-\item{depth.exon}{\code{integer}, extended depth into exon}
+\item{depth.exon}{\code{integer}, extended depth into exon.}
 
-\item{constitutive}{\code{logical}, whether to use consecutive or adjacent neighbor exon. The default is \code{TRUE}.}
+\item{constitutive}{\code{logical}, whether to use consecutive or adjacent
+neighbor exon. The default is \code{TRUE}.}
 }
 \value{
 a \code{GRangesList}.
 }
 \description{
-Locate the feature on the (upstream or downstream) constitutive exons and extract the genomic bins, given some body features of AS events. This is a helper function to \code{getFeature()}
+Locate the feature on the (upstream or downstream) constitutive exons and
+extract the genomic bins, given some body features of AS events. This is a
+helper function to \code{getFeature()}.
 }

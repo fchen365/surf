@@ -5,5 +5,6 @@
 \alias{faseqResults-class}
 \title{FASeq class}
 \description{
-\code{faseqResults} is a stand-alone object of FASeq (the analysis module 2 of SURF) results.
+\code{faseqResults} is a stand-alone object of FASeq (the analysis module 2 of
+SURF) results.
 }

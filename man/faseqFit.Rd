@@ -4,15 +4,17 @@
 \alias{faseqFit}
 \title{Functional Association using Sequencing data}
 \usage{
-faseqFit(event, min.size = 60, trim = 0.025, verbose = F)
+faseqFit(event, min.size = 60, trim = 0.025, verbose = FALSE)
 }
 \arguments{
 \item{event}{a \code{surf} object output by \link{faseqCount}.}
 
-\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to 60.}
+\item{min.size}{\code{integer}, the minimum size of "reliable" training set,
+default to 60.}
 
 \item{trim}{\code{numeric}, the percentile used to trim the training data.
-This is useful in producing a more robust estimation of functional association.}
+This is useful in producing a more robust estimation of functional
+association.}
 
 \item{verbose}{\code{logical}, whether to print out progress information.}
 }

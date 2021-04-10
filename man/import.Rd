@@ -13,6 +13,7 @@ import(...)
 a \code{GRanges} object.
 }
 \description{
-This is a wrapper of \link[rtracklayer:export]{rtracklayer::import} with specialty in genome annotation.
-Specifically, it checks whether "gene" or "transcript" exist in the annotation and fill them in if possible.
+This is a wrapper of \link[rtracklayer:export]{rtracklayer::import} with specialty in genome
+annotation. Specifically, it checks whether "gene" or "transcript" exist in
+the annotation and fill them in if possible.
 }

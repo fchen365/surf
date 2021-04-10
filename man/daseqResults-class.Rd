@@ -5,5 +5,6 @@
 \alias{daseqResults-class}
 \title{DASeq class}
 \description{
-\code{daseqResults} is a stand-alone object of DASeq (the discovery module of SURF) results.
+\code{daseqResults} is a stand-alone object of DASeq (the discovery module of
+SURF) results.
 }

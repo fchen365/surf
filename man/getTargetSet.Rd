@@ -4,7 +4,7 @@
 \alias{getTargetSet}
 \title{Get target set based on \code{inferredFeature}}
 \usage{
-getTargetSet(event, id_column = "transcript_id", verbose = F)
+getTargetSet(event, id_column = "transcript_id", verbose = FALSE)
 }
 \arguments{
 \item{event}{a \code{surf} object from \link{faseqInfer} or \link{faseq}.}

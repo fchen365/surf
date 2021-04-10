@@ -11,9 +11,9 @@ faseqCount(
   FUN.aggregate = "mean",
   minMQS = 10,
   minOverlap = 12,
-  isPairedEnd = T,
+  isPairedEnd = TRUE,
   cores = max(1, detectCores() - 2),
-  verbose = F,
+  verbose = FALSE,
   ...
 )
 }
@@ -32,12 +32,13 @@ support "TPM" for Transcripts Per Kilobase Million,
 Reads Per Kilobase Million (for single-end reads), and
 "raw.count" for raw read counts}
 
-\item{FUN.aggregate}{\code{function}, used for aggregating signals within \code{condition},
-default to \code{\link[=mean]{mean()}}.}
+\item{FUN.aggregate}{\code{function}, used for aggregating signals within
+\code{condition}, default to \code{\link[=mean]{mean()}}.}
 
 \item{minMQS, minOverlap, isPairedEnd, ...}{parameters for \link{featureCounts}.
 \code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25\% of the
-typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.}
+typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to
+\code{TRUE}.}
 
 \item{cores}{\code{integer}, number of available workers,
 sent to \code{nthreads} of \link{featureCounts}}
@@ -51,12 +52,13 @@ a \code{surf} object, with
 (3) \code{sampleData} slot updated.
 }
 \description{
-This function quantifies feature signals for location features using CLIP-seq data.
-You align CLIP-seq reads to the genome and provide FASeq with the resulting bam files.
-We will take care of the rest.
+This function quantifies feature signals for location features using CLIP-seq
+data. You align CLIP-seq reads to the genome and provide FASeq with the
+resulting bam files. We will take care of the rest.
 }
 \details{
-If your sequencing platform is Illumina HiSeq 2000, set \code{strandSpecific = 2}.
+If your sequencing platform is Illumina HiSeq 2000, set
+\code{strandSpecific = 2}.
 }
 \references{
 \url{https://www.rna-seqblog.com/rpkm-fpkm-and-tpm-clearly-explained/}

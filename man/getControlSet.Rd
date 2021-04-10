@@ -4,7 +4,7 @@
 \alias{getControlSet}
 \title{Get control sets}
 \usage{
-getControlSet(event, targetSets, id_column = "transcript_id", verbose = F)
+getControlSet(event, targetSets, id_column = "transcript_id", verbose = FALSE)
 }
 \arguments{
 \item{event}{a \code{surf} object from \link{faseqInfer} or \link{faseq}.}
@@ -16,7 +16,8 @@ getControlSet(event, targetSets, id_column = "transcript_id", verbose = F)
 \item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
 \value{
-a \code{list} of \code{character}, containing the control set for each target set.
+a \code{list} of \code{character}, containing the control set for each target
+set.
 }
 \description{
 Get control sets

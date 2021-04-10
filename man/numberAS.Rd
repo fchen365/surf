@@ -7,9 +7,13 @@
 numberAS(as, gm)
 }
 \arguments{
-\item{as}{factor of AS events /isoform.}
+\item{as}{a \code{factor} vector of AS events /isoform.}
 
 \item{gm}{gene model.}
+}
+\value{
+a \code{integer} vector of the same length as \code{as}, indexing the order of
+ATR events.
 }
 \description{
 Enumerate AS events

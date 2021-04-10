@@ -8,11 +8,11 @@ drseq(
   event,
   sampleData,
   design = ~sample + exon + condition:exon,
-  remove.overlap.exon = F,
+  remove.overlap.exon = FALSE,
   anno.prefix = "drseq.annotation",
   anno.format = "gff2",
   minMQS = 10,
-  isPairedEnd = T,
+  isPairedEnd = TRUE,
   ...,
   fullModel = design,
   reducedModel = ~sample + exon,
@@ -20,9 +20,9 @@ drseq(
   drseq.fdr = 0.05,
   read.length = 100,
   min.adjMean = 0.05,
-  filter.overlap.event = T,
+  filter.overlap.event = TRUE,
   cores = max(1, detectCores() - 2),
-  verbose = F
+  verbose = FALSE
 )
 }
 \arguments{
@@ -42,18 +42,23 @@ whose \code{row.names} represent sample names.}
     for more examples of other designs.
   }
 
-\item{remove.overlap.exon}{\code{logical}, remove overlapping exons across genes (default to \code{FALSE}).}
+\item{remove.overlap.exon}{\code{logical}, remove overlapping exons across genes
+(default to \code{FALSE}).}
 
 \item{anno.prefix}{\code{character}, file names for outputting annotation files.
-If prefix is absent, hidden file will be output to the current working directory.}
+If prefix is absent, hidden file will be output to the current working
+directory.}
 
-\item{anno.format}{\code{character}, e.g. "gtf", as accepted by \link[rtracklayer:export]{rtracklayer::export}.}
+\item{anno.format}{\code{character}, e.g. "gtf", as accepted by
+\link[rtracklayer:export]{rtracklayer::export}.}
 
 \item{minMQS}{as defined in \link[Rsubread:featureCounts]{Rsubread::featureCounts}.
-Note that the default is customized for SURF (see details for more information).}
+Note that the default is customized for SURF (see details for more
+information).}
 
 \item{isPairedEnd}{as defined in \link[Rsubread:featureCounts]{Rsubread::featureCounts}.
-Note that the default is customized for SURF (see details for more information).}
+Note that the default is customized for SURF (see details for more
+information).}
 
 \item{...}{parameters for \link[Rsubread:featureCounts]{Rsubread::featureCounts}.}
 
@@ -73,23 +78,31 @@ Note that the default is customized for SURF (see details for more information).
 
 \item{drseq.fdr}{\code{numeric}, FDR (BH procedure) adjusted p-value cut-off.}
 
-\item{read.length}{\code{numeric}, RNA-seq read length. Default is 100 bp (e.g., Illumina TruSeq). This is used to adjust event base count, which is then used to select the representative events if replicated.}
+\item{read.length}{\code{numeric}, RNA-seq read length. Default is 100 bp (e.g.,
+Illumina TruSeq). This is used to adjust event base count, which is then
+used to select the representative events if replicated.}
 
 \item{min.adjMean}{\code{numeric}, adjusted event base mean threshold.}
 
-\item{filter.overlap.event}{\code{logical}, whether (default to \code{TRUE}) to select one representitive event from overlapping ones and remove the others.}
+\item{filter.overlap.event}{\code{logical}, whether (default to \code{TRUE}) to select
+one representitive event from overlapping ones and remove the others.}
 
-\item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of \code{featureCounts}.}
+\item{cores}{\code{integer}, number of available workers, sent to \code{nthreads} of
+\code{featureCounts}.}
 
 \item{verbose}{\code{logical}, whether (\code{TRUE}) to echo progress.}
 }
 \value{
-a \code{surf} object containing the DrSeq result in the \code{drseqResults} slot.
+a \code{surf} object containing the DrSeq result in the \code{drseqResults}
+slot.
 }
 \description{
-Perform the differential REU (DrSeq) test in a single command.
-This function is a wrapper that calls the necessary functions in order for DrSeq.
+Perform the differential REU (DrSeq) test in a single command. This function
+is a wrapper that calls the necessary functions in order for DrSeq.
 }
 \references{
-Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. \emph{Genome Biology}, 21(1), 1-23.
+Chen, F., & Keles, S. (2020). SURF: integrative analysis of a
+compendium of RNA-seq and CLIP-seq datasets highlights complex governing
+of alternative transcriptional regulation by RNA-binding proteins.
+\emph{Genome Biology}, 21(1), 1-23.
 }

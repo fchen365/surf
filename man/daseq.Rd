@@ -13,7 +13,7 @@ daseq(
   controlSets = NULL,
   n.sample = 1000,
   cores = max(1, detectCores() - 2),
-  verbose = F,
+  verbose = FALSE,
   ...
 )
 }
@@ -22,8 +22,8 @@ daseq(
 
 \item{rankings}{a \code{SummarizedExperiment} object from \link{getRankings}.}
 
-\item{sampleData}{\code{data.frame}, external samples, which contain \code{condition} column,
-whose row names must match the column names of \code{rankings}.}
+\item{sampleData}{\code{data.frame}, external samples, which contain \code{condition}
+column, whose row names must match the column names of \code{rankings}.}
 
 \item{target.type}{\code{character(1)}, either "transcript" or "gene".}
 
@@ -31,7 +31,8 @@ whose row names must match the column names of \code{rankings}.}
 
 \item{controlSets}{a named \code{list} of \code{character}, the control IDs.}
 
-\item{n.sample}{\code{integer}, number of times of controlSet sampling, default to 1000.}
+\item{n.sample}{\code{integer}, number of times of controlSet sampling, default to
+1000.}
 
 \item{cores}{\code{integer}, number of computing cores.}
 
@@ -44,12 +45,15 @@ a \code{daseqResults} object if \code{targetSets} was given,
 or a \code{surf} object if \code{event} was give.
 }
 \description{
-Detect differential activity using the AUC measure and RNA-seq quantification.
-For more details about methodology, see Details.
+Detect differential activity using the AUC measure and RNA-seq
+quantification. For more details about methodology, see Details.
 This function can be used as part of SURF or as well a stand-along analysis.
 For the former, input a \code{surf} object to \code{event}.
 For the latter, input \code{targetSets} and optionally \code{controlSets}.
 }
 \references{
-Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. \emph{Genome Biology}, 21(1), 1-23.
+Chen, F., & Keles, S. (2020). SURF: integrative analysis of a
+compendium of RNA-seq and CLIP-seq datasets highlights complex governing
+of alternative transcriptional regulation by RNA-binding proteins.
+\emph{Genome Biology}, 21(1), 1-23.
 }

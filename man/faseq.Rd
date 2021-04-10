@@ -11,14 +11,14 @@ faseq(
   FUN.aggregate = "mean",
   minMQS = 10,
   minOverlap = 12,
-  isPairedEnd = T,
+  isPairedEnd = TRUE,
   cores = max(1, detectCores() - 2),
   ...,
   min.size = 100,
   trim = 0.025,
   fdr.cutoff = 0.05,
   signal.cutoff = 20,
-  verbose = F
+  verbose = FALSE
 )
 }
 \arguments{
@@ -36,30 +36,35 @@ support "TPM" for Transcripts Per Kilobase Million,
 Reads Per Kilobase Million (for single-end reads), and
 "raw.count" for raw read counts}
 
-\item{FUN.aggregate}{\code{function}, used for aggregating signals within \code{condition},
-default to \code{\link[=mean]{mean()}}.}
+\item{FUN.aggregate}{\code{function}, used for aggregating signals within
+\code{condition}, default to \code{\link[=mean]{mean()}}.}
 
 \item{minMQS}{parameters for \link{featureCounts}.
 \code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25\% of the
-typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.}
+typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to
+\code{TRUE}.}
 
 \item{minOverlap}{parameters for \link{featureCounts}.
 \code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25\% of the
-typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.}
+typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to
+\code{TRUE}.}
 
 \item{isPairedEnd}{parameters for \link{featureCounts}.
 \code{minMQS} is default to 10, and \code{minOverlap} is default to 12 (25\% of the
-typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to \code{TRUE}.}
+typical read length of CLIP-seq (~50bp)), and \code{isPairedEnd} is default to
+\code{TRUE}.}
 
 \item{cores}{\code{integer}, number of available workers,
 sent to \code{nthreads} of \link{featureCounts}}
 
 \item{...}{parameters for \link[Rsubread:featureCounts]{Rsubread::featureCounts}.}
 
-\item{min.size}{\code{integer}, the minimum size of "reliable" training set, default to 60.}
+\item{min.size}{\code{integer}, the minimum size of "reliable" training set,
+default to 60.}
 
 \item{trim}{\code{numeric}, the percentile used to trim the training data.
-This is useful in producing a more robust estimation of functional association.}
+This is useful in producing a more robust estimation of functional
+association.}
 
 \item{fdr.cutoff}{\code{numeric}, significance cutoff for the adjusted p-values.}
 
@@ -74,8 +79,12 @@ a \code{surf} object DASeq results updated.
 }
 \description{
 Perform the functional association analysis (DASeq) in a single command.
-This function is a wrapper that calls the necessary functions in order for DASeq.
+This function is a wrapper that calls the necessary functions in order for
+DASeq.
 }
 \references{
-Chen, F., & Keles, S. (2020). SURF: integrative analysis of a compendium of RNA-seq and CLIP-seq datasets highlights complex governing of alternative transcriptional regulation by RNA-binding proteins. \emph{Genome Biology}, 21(1), 1-23.
+Chen, F., & Keles, S. (2020). SURF: integrative analysis of a
+compendium of RNA-seq and CLIP-seq datasets highlights complex governing
+of alternative transcriptional regulation by RNA-binding proteins.
+\emph{Genome Biology}, 21(1), 1-23.
 }

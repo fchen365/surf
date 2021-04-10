@@ -7,7 +7,11 @@
 getESS(x)
 }
 \arguments{
-\item{x}{an element of isoform part list.}
+\item{x}{an element of the isoform part list.}
+}
+\value{
+a \code{logical} vector of the same length as \code{x}, indicating the exon
+start sites in the isoform part list.
 }
 \description{
 This is a helper function of \link{getEvent}.

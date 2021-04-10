@@ -19,7 +19,8 @@ getAUC(object)
 \item{object}{a \code{surf} object output by \link{daseq}.}
 }
 \value{
-a \code{matrix} of AUC, whose rows correspond to target sets and columns correspond to samples.
+a \code{matrix} of AUC, whose rows correspond to target sets and columns
+correspond to samples.
 }
 \description{
 Get AUC measure for each target set (row) in every sample (column).

@@ -1,7 +1,7 @@
 Package: surf
 Type: Package
 Title: Statistical Utility for RBP (RNA binding protein) Functions
-Version: 1.0.0
+Version: 0.99.0
 Date: 2021-03-22
 Authors@R: 
     person(given = "Fan",
@@ -15,35 +15,38 @@ Authors@R:
            email = "keles@stat.wisc.edu",
            comment = c(ORCID = "0000-0001-9048-0922"))
 Description: 
-    The marriage of RNA-seq and CLIP-seq for data-supported hypothesis for RBP functions.
+    Advances in high-throughput profiling of RNA-binding proteins (RBPs) have 
+    resulted in CLIP-seq datasets coupled with transcriptome profiling by 
+    RNA-seq. However, analysis methods that integrate both types of data are 
+    lacking. We describe SURF, Statistical Utility for RBP Functions, for 
+    integrative analysis of large collections of CLIP-seq and RNA-seq data to 
+    identify alternative splicing (AS), alternative transcription 
+    initiation (ATI), and alternative polyadenylation (APA) events regulated by 
+    individual RBPs and elucidate protein-RNA interactions governing these 
+    events. 
 URL: https:github.com/fchen365/surf
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Depends:
-    R (>= 3.5),
+    R (>= 4.0),
     doParallel,
     DEXSeq
 Imports:
     arm,
-    doMC,
-    MASS,
+    stats,
     withr,
     rlang,
     dplyr,
     tidyr,
-    readr,
-    purrr,
     doRNG,
     scales,
-    tibble,
     ggpubr,
     Matrix,
     AUCell,
     IRanges,
     methods,
     stringr,
-    forcats,
     ggplot2,
     foreach,
     parallel,
@@ -52,7 +55,6 @@ Imports:
     Rsubread,
     S4Vectors,
     ensembldb,
-    tidyverse,
     data.table,
     rtracklayer,
     BiocGenerics,
@@ -68,6 +70,6 @@ Suggests:
 Roxygen: 
     list(markdown = TRUE)
 VignetteBuilder: knitr
-biocViews: RNASeq, DNASeq, CLIPSeq, Sequencing, Transcription,
+biocViews: AlternativeSplicing, RNASeq, DNASeq, Sequencing, Transcription, 
    Visualization, Coverage, Alignment, DataImport
 RoxygenNote: 7.1.1

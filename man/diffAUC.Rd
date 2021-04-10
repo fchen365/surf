@@ -11,7 +11,7 @@ diffAUC(
   sampleData,
   n.sample = 1000,
   cores = 1,
-  verbose = F,
+  verbose = FALSE,
   ...
 )
 }
@@ -25,9 +25,11 @@ If \code{NULL} (default), the full set of elements in \code{rankings} will be us
 transcript or gene and column corresponding to samples.
 Each element is a expression measure (e.g., TPM).}
 
-\item{sampleData}{\code{data.frame} of sample data, which contains a \code{condition} column,}
+\item{sampleData}{\code{data.frame} of sample data, which contains a \code{condition}
+column.}
 
-\item{n.sample}{\code{integer}, number of times of controlSet sampling, default to 1000.}
+\item{n.sample}{\code{integer}, number of times of controlSet sampling, default to
+1000.}
 
 \item{cores}{\code{integer}, number of computing cores.}
 

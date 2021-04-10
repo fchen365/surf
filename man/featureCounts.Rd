@@ -4,7 +4,7 @@
 \alias{featureCounts}
 \title{Customized \code{featureCounts}}
 \usage{
-featureCounts(..., verbose = F)
+featureCounts(..., verbose = FALSE)
 }
 \arguments{
 \item{...}{parameters for \code{featureCounts}.}

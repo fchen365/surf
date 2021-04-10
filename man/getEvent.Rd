@@ -15,8 +15,11 @@ getEvent(isoPL, cores = max(1, detectCores() - 2))
 }
 \value{
 a \code{list} as input with added two components:
-\item{asNum}{integer \code{matrix}, dim = dim of segment 0 means no event, and other integers indicate event number.}
-\item{asName}{a \code{list} of named \code{character} vector, with each element corresponding to one isoform. name is event number, character is event name}
+\item{asNum}{integer \code{matrix}, dim = dim of segment 0 means no event, and
+other integers indicate event number.}
+\item{asName}{a \code{list} of named \code{character} vector, with each element
+corresponding to one isoform. name is event number, character is event
+name}
 }
 \description{
 Enumerate AS events

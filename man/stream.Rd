@@ -11,6 +11,10 @@ stream(ex, gm)
 
 \item{gm}{gene model.}
 }
+\value{
+a \code{logical} vector of the same length of \code{gm}, indicating exonic
+(\code{1}) or intronic (\code{0}) segments.
+}
 \description{
 This is a helper function of \link{getEvent}.
 }

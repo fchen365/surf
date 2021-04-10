@@ -52,8 +52,10 @@ are the corresponding color codes.}
 a \code{ggplot} object.
 }
 \description{
-Create a volcano plot for the DrSeq results, stratified by alternative transcriptional regulation (ATR) event types.
-A volcano plot is a scatter plot of tested units, where log2 fold change is in x-axis, and -log10(p.value) is in y-axis.
+Create a volcano plot for the DrSeq results, stratified by alternative
+transcriptional regulation (ATR) event types. A volcano plot is a scatter
+plot of tested units, where log2 fold change is in x-axis, and
+-log10(p.value) is in y-axis.
 }
 \details{
 By default, ATR type are colored with the \code{Paired} palette.

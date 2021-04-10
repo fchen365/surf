@@ -18,7 +18,8 @@ getMultiTxGene(anno, min = 2, max = Inf)
 \value{
 a \code{character} vector of gene_id's
 
-a \code{character} vector of gene identifiers that possess multiple transcripts.
+a \code{character} vector of gene identifiers that possess multiple
+transcripts.
 }
 \description{
 Find genes that contain multiple transcripts.
