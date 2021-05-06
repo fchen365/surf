@@ -6,7 +6,6 @@
 # SURF
 
 <!-- badges: start -->
-
 <!-- [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental) -->
 
 [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://www.tidyverse.org/lifecycle/#maturing)
@@ -27,11 +26,8 @@ analyzed 104 RBP data (K562 cells, available from
 ## Installation
 
 <!-- You can install the released version of `surf` from [CRAN](https://CRAN.R-project.org) with: -->
-
 <!-- ``` r -->
-
 <!-- install.packages("surf") -->
-
 <!-- ``` -->
 
 You can install the development version of `surf` from
@@ -47,12 +43,12 @@ devtools::install_github("fchen365/surf")
 SURF is versatile in handling ATR event-centric analysis. Provided the
 data, here are four different things you could do with SURF.
 
-|   | Data                |      Format       | Task                                  |
-| :-: | ------------------- | :---------------: | ------------------------------------- |
-| 1 | genome annotation   | any (gtf, gff, …) | parse ATR events                      |
-| 2 | \+ RNA-seq          |  alignment (bam)  | detect differential ATR events        |
-| 3 | \+ CLIP-seq         |  alignment (bam)  | detect functional association         |
-| 4 | \+ external RNA-seq | summarized table  | differential transcriptional activity |
+|     | Data                |      Format       | Task                                  |
+|:---:|---------------------|:-----------------:|---------------------------------------|
+|  1  | genome annotation   | any (gtf, gff, …) | parse ATR events                      |
+|  2  | \+ RNA-seq          |  alignment (bam)  | detect differential ATR events        |
+|  3  | \+ CLIP-seq         |  alignment (bam)  | detect functional association         |
+|  4  | \+ external RNA-seq | summarized table  | differential transcriptional activity |
 
 ## SURF Pipeline
 
